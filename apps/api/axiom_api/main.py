@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from axiom_anthropic import AnthropicBackend, build_anthropic_client
+from axiom_core.agents import AgentBackendRegistry, AxiomNativeBackend
 from axiom_core.config import get_settings
 from axiom_core.knowledge import KnowledgeGatewayRegistry
 from axiom_core.logging import configure_logging, get_logger
@@ -11,6 +12,7 @@ from axiom_core.models import ModelGatewayRegistry
 from axiom_db.engine import DatabaseNotConfiguredError, check_database_health
 from axiom_graphify import GraphifyBackend
 
+from axiom_api.routers.agents import router as agents_router
 from axiom_api.routers.knowledge import router as knowledge_router
 from axiom_api.routers.models import router as models_router
 
@@ -39,6 +41,16 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         logger.warning("axiom.knowledge_gateway.graphify_not_configured")
     app.state.knowledge_gateway = knowledge_registry
 
+    agent_backend_registry = AgentBackendRegistry()
+    if settings.anthropic_api_key:
+        agent_backend_registry.register(
+            AxiomNativeBackend(registry.get("anthropic"), settings.anthropic_default_model)
+        )
+        logger.info("axiom.agent_backend.registered", backend="axiom_native")
+    else:
+        logger.warning("axiom.agent_backend.axiom_native_not_configured")
+    app.state.agent_backend_gateway = agent_backend_registry
+
     yield
     logger.info("axiom.shutdown")
 
@@ -46,6 +58,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 app = FastAPI(title="Axiom OS API", version="0.1.0", lifespan=lifespan)
 app.include_router(models_router)
 app.include_router(knowledge_router)
+app.include_router(agents_router)
 
 
 @app.get("/health")

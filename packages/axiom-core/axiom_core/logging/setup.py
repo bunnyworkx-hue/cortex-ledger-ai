@@ -66,3 +66,11 @@ def bind_execution_context(**fields: object) -> None:
     carries context instead of retrofitting it in later.
     """
     structlog.contextvars.bind_contextvars(**fields)
+
+
+def clear_execution_context() -> None:
+    """Pair with bind_execution_context() — clears bound fields so they
+    don't leak into unrelated log lines on a reused task/thread (e.g. a
+    connection-pool worker).
+    """
+    structlog.contextvars.clear_contextvars()

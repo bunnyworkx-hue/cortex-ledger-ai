@@ -1,3 +1,8 @@
-from axiom_core.logging.setup import bind_execution_context, configure_logging, get_logger
+from axiom_core.logging.setup import (
+    bind_execution_context,
+    clear_execution_context,
+    configure_logging,
+    get_logger,
+)
 
-__all__ = ["configure_logging", "get_logger", "bind_execution_context"]
+__all__ = ["configure_logging", "get_logger", "bind_execution_context", "clear_execution_context"]

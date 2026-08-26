@@ -1,5 +1,6 @@
 from fastapi import Request
 
+from axiom_core.agents import AgentBackendRegistry
 from axiom_core.knowledge import KnowledgeGatewayRegistry
 from axiom_core.models import ModelGatewayRegistry
 
@@ -10,3 +11,7 @@ def get_model_gateway(request: Request) -> ModelGatewayRegistry:
 
 def get_knowledge_gateway(request: Request) -> KnowledgeGatewayRegistry:
     return request.app.state.knowledge_gateway
+
+
+def get_agent_backend_gateway(request: Request) -> AgentBackendRegistry:
+    return request.app.state.agent_backend_gateway

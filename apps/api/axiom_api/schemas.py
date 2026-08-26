@@ -30,3 +30,20 @@ class CompletionResponse(BaseModel):
 
 class KnowledgeAnswerOut(BaseModel):
     text: str
+
+
+class ExecuteAgentRequest(BaseModel):
+    agent_id: str
+    agent_name: str
+    instructions: str
+    input: str
+    context: str | None = None
+    backend: str | None = None
+
+
+class ExecutionOut(BaseModel):
+    execution_id: str
+    agent_id: str
+    backend_name: str
+    status: str
+    content: str | None
