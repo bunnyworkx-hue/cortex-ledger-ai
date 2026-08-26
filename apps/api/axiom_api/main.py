@@ -12,7 +12,8 @@ from axiom_core.knowledge import KnowledgeGatewayRegistry
 from axiom_core.logging import configure_logging, get_logger
 from axiom_core.models import ModelGatewayRegistry
 from axiom_core.tools import ToolRegistry
-from axiom_db.engine import DatabaseNotConfiguredError, check_database_health
+from axiom_db.engine import DatabaseNotConfiguredError, check_database_health, get_sessionmaker
+from axiom_db.memory import PostgresMemoryStore
 from axiom_graphify import GraphifyBackend
 from axiom_hermes import HermesBackend
 from axiom_mcp import register_mcp_server
@@ -20,6 +21,7 @@ from axiom_mcp import register_mcp_server
 from axiom_api.routers.agent_fabric import router as agent_fabric_router
 from axiom_api.routers.agents import router as agents_router
 from axiom_api.routers.knowledge import router as knowledge_router
+from axiom_api.routers.memory import router as memory_router
 from axiom_api.routers.models import router as models_router
 from axiom_api.routers.tools import router as tools_router
 
@@ -94,6 +96,13 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         logger.warning("axiom.tools.graphify_mcp_not_configured")
     app.state.tool_registry = tool_registry
 
+    app.state.memory_store = None
+    if settings.database_url:
+        app.state.memory_store = PostgresMemoryStore(get_sessionmaker())
+        logger.info("axiom.memory_store.registered", backend="postgres")
+    else:
+        logger.warning("axiom.memory_store.not_configured")
+
     yield
     logger.info("axiom.shutdown")
 
@@ -104,6 +113,7 @@ app.include_router(knowledge_router)
 app.include_router(agents_router)
 app.include_router(agent_fabric_router)
 app.include_router(tools_router)
+app.include_router(memory_router)
 
 
 @app.get("/health")

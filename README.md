@@ -7,25 +7,20 @@ decision here.
 
 ## Status
 
-Milestones 6–12 done: Foundation (config, logging, Postgres/Supabase),
-Model Gateway (real Anthropic adapter), Knowledge Gateway (real Graphify
-MCP adapter, graph built from `agency-agents`: 1,121 nodes / 1,594 edges),
-Agent Runtime (Agent/Task/Execution/Result primitives + a real
-`AxiomNativeBackend`), Agent Fabric (a real registry loaded from
-`agency-agents` — 254/255 agents, one malformed file skipped and logged —
-plus a 12-agent curated cohort, search/inspect/load/delegate via
-`/v1/agent-fabric/*`, proven end-to-end with a real in-character
-completion from the Application Security Engineer agent), Tool
-Registry + MCP (`/v1/tools`: generic MCP server consumption — all 10 real
-Graphify tools auto-discovered and callable, including 6 never exposed by
-the Knowledge Gateway, each call audit-logged), Hermes Integration (a real
-installed `hermes` CLI as a second `AgentBackend` alongside
-`AxiomNativeBackend` — delegate to any curated agent through either
-backend via `/v1/agent-fabric/agents/{id}/delegate`, proven live with a
-real in-character completion from the SEO Specialist agent routed
-through Hermes). See `docs/IMPLEMENTATION_PLAN.md` for what's next
-(Memory, Policy, Human Approval, Observability, Dashboard, Evaluation,
-Security).
+Milestones 6–14 done: Foundation, Model Gateway (real Anthropic adapter),
+Knowledge Gateway (real Graphify MCP adapter, graph built from
+`agency-agents`: 1,121 nodes / 1,594 edges), Agent Runtime, Agent Fabric
+(a real registry loaded from `agency-agents` — 254/255 agents, one
+malformed file skipped and logged — plus a 12-agent curated cohort,
+search/inspect/load/delegate via `/v1/agent-fabric/*`), Tool Registry +
+MCP (`/v1/tools`: all 10 real Graphify tools auto-discovered, 6 never
+exposed by the Knowledge Gateway, each call audit-logged), Hermes
+Integration (a real installed `hermes` CLI as a second `AgentBackend`
+alongside `AxiomNativeBackend`, selectable per delegate call), Memory
+(`/v1/memory`, a real `memories` Postgres table — the Alembic scaffold's
+first real migration — with every successful delegation auto-persisting
+a task-memory record). See `docs/IMPLEMENTATION_PLAN.md` for what's next
+(Policy, Human Approval, Observability, Dashboard, Evaluation, Security).
 
 ## Layout
 

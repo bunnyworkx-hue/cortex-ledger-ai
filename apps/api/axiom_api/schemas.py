@@ -91,3 +91,25 @@ class ToolCallRequest(BaseModel):
 class ToolCallResultOut(BaseModel):
     content: dict
     is_error: bool
+
+
+class SaveMemoryRequest(BaseModel):
+    scope: str = Field(pattern="^(task|working|long_term|business_knowledge)$")
+    owner_id: str
+    content: str
+    source: str
+    tenant_id: str | None = None
+    permissions: list[str] = []
+    retention_days: int | None = None
+
+
+class MemoryRecordOut(BaseModel):
+    id: str
+    scope: str
+    owner_id: str
+    tenant_id: str | None
+    content: str
+    source: str
+    permissions: list[str]
+    retention_days: int | None
+    created_at: str

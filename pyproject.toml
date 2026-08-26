@@ -28,6 +28,16 @@ dev = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+# One shared event loop for the whole test session, matching the real
+# app (one uvicorn event loop for its entire life). Without this,
+# pytest-asyncio's default per-function loop breaks axiom_db.engine's
+# cached async connection pool the moment a second test touches the
+# database in the same session — the pool's connections stay bound to
+# the first test's (now-closed) loop. Real bug, found via
+# tests/integration/test_memory_store.py (Milestone 14), not a
+# hypothetical.
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
 
 [tool.ruff]
 line-length = 100

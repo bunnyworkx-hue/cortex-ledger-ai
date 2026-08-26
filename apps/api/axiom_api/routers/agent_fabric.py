@@ -2,11 +2,14 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from axiom_agent_fabric import AgentInvocationGateway, AgentNotFoundError
 from axiom_core.agents import AgentBackendNotFoundError, AgentBackendRegistry
+from axiom_core.logging import get_logger
+from axiom_core.memory import MemoryRecord, MemoryScope, MemoryStore
 
-from axiom_api.dependencies import get_agent_backend_gateway, get_agent_fabric
+from axiom_api.dependencies import get_agent_backend_gateway, get_agent_fabric, get_memory_store
 from axiom_api.schemas import AgentRecordDetailOut, AgentRecordOut, DelegateRequest, ExecutionOut
 
 router = APIRouter(prefix="/v1/agent-fabric", tags=["agent-fabric"])
+logger = get_logger(__name__)
 
 
 def _require_gateway(gateway: AgentInvocationGateway | None) -> AgentInvocationGateway:
@@ -83,6 +86,7 @@ async def delegate(
     body: DelegateRequest,
     gateway: AgentInvocationGateway | None = Depends(get_agent_fabric),
     backend_registry: AgentBackendRegistry = Depends(get_agent_backend_gateway),
+    memory_store: MemoryStore | None = Depends(get_memory_store),
 ) -> ExecutionOut:
     gateway = _require_gateway(gateway)
     try:
@@ -97,6 +101,23 @@ async def delegate(
 
     if execution.status.value == "failed":
         raise HTTPException(status_code=502, detail=execution.error)
+
+    if memory_store is not None and execution.result is not None:
+        # CLAUDE.md §38: task memory, deliberately written — not every
+        # execution auto-becomes long-term memory, just this run's
+        # record. Best-effort: a memory write failure must not fail a
+        # successful delegation.
+        try:
+            await memory_store.save(
+                MemoryRecord.new(
+                    scope=MemoryScope.TASK,
+                    owner_id=agent_id,
+                    content=f"Task: {body.input}\n\nResult: {execution.result.content}",
+                    source=f"execution:{execution.execution_id}",
+                )
+            )
+        except Exception as exc:  # noqa: BLE001 — memory is supplementary, not critical path
+            logger.warning("axiom.memory.save_failed", execution_id=execution.execution_id, error=str(exc))
 
     return ExecutionOut(
         execution_id=execution.execution_id,

@@ -3,6 +3,7 @@ from fastapi import Request
 from axiom_agent_fabric import AgentInvocationGateway
 from axiom_core.agents import AgentBackendRegistry
 from axiom_core.knowledge import KnowledgeGatewayRegistry
+from axiom_core.memory import MemoryStore
 from axiom_core.models import ModelGatewayRegistry
 from axiom_core.tools import ToolRegistry
 
@@ -25,3 +26,7 @@ def get_agent_fabric(request: Request) -> AgentInvocationGateway | None:
 
 def get_tool_registry(request: Request) -> ToolRegistry:
     return request.app.state.tool_registry
+
+
+def get_memory_store(request: Request) -> MemoryStore | None:
+    return request.app.state.memory_store

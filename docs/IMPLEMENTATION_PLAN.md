@@ -176,8 +176,26 @@ external integrations landing simultaneously.
    Live-verified: a real in-character completion from the SEO Specialist
    agent, routed Registry → `HermesBackend` → real `hermes` subprocess →
    real Anthropic call → `Execution`.
-8. **Memory, Policy, Human Approval, Observability, Dashboard, Evaluation,
-   Security** — as originally sequenced in `CLAUDE.md` §90–96, no changes
+8. **Memory** — done. `memories` table (Postgres), the Alembic scaffold's
+   first real migration. Real findings along the way: autogenerate's raw
+   output would have **dropped the pre-existing shared-core tables**
+   (`organizations`/`profiles`/`subscriptions`/`org_product_access`) since
+   they're not declared in Axiom's own models — hand-edited the migration
+   to touch only `memories` before ever running it. Supabase's own
+   advisor flagged RLS as disabled on the new table; not auto-fixed
+   (enabling RLS with no policies would lock out all access) — surfaced
+   to the user instead. Also found and fixed a real pytest-asyncio bug:
+   `axiom_db.engine`'s cached async connection pool binds to whichever
+   event loop first created it, which broke the moment a second
+   DB-touching test ran in the same session under pytest-asyncio's
+   default per-function loop scope — fixed by giving the test session one
+   shared loop (`asyncio_default_fixture_loop_scope` /
+   `asyncio_default_test_loop_scope = "session"`), matching how the real
+   app (one uvicorn loop for its whole life) actually behaves. Every
+   successful `/v1/agent-fabric/.../delegate` call now auto-persists a
+   `task`-scoped memory record.
+9. **Policy, Human Approval, Observability, Dashboard, Evaluation,
+   Security** — as originally sequenced in `CLAUDE.md` §91–96, no changes
    proposed here.
 
 ## 7. Decisions (confirmed with user, 2026-08-25)
