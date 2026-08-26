@@ -10,6 +10,7 @@ dependencies = [
     "axiom-graphify",
     "axiom-agent-fabric",
     "axiom-mcp",
+    "axiom-hermes",
     "fastapi>=0.115",
     "uvicorn[standard]>=0.30",
 ]
@@ -21,6 +22,7 @@ axiom-anthropic = { workspace = true }
 axiom-graphify = { workspace = true }
 axiom-agent-fabric = { workspace = true }
 axiom-mcp = { workspace = true }
+axiom-hermes = { workspace = true }
 
 [build-system]
 requires = ["hatchling"]

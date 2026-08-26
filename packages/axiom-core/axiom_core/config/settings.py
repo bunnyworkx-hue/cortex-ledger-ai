@@ -46,6 +46,12 @@ class AxiomSettings(BaseSettings):
     # Agent Fabric registry is empty.
     agency_agents_path: str | None = None
 
+    # Milestone 13 (Hermes Integration). Path/name of the real installed
+    # `hermes` CLI (github.com/NousResearch/hermes-agent) — see
+    # docs/hermes/HERMES_INTEGRATION.md. Defaults to relying on PATH.
+    hermes_bin: str = "hermes"
+    hermes_default_model: str = "anthropic/claude-sonnet-5"
+
     def model_post_init(self, __context: object) -> None:
         # Prod should never fall back to human-readable console logging.
         if self.environment == "prod" and self.log_format == "console":

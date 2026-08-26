@@ -16,6 +16,7 @@ members = [
     "axiom-core",
     "axiom-db",
     "axiom-graphify",
+    "axiom-hermes",
     "axiom-mcp",
     "axiom-os",
 ]
@@ -180,6 +181,7 @@ dependencies = [
     { name = "axiom-core" },
     { name = "axiom-db" },
     { name = "axiom-graphify" },
+    { name = "axiom-hermes" },
     { name = "axiom-mcp" },
     { name = "fastapi" },
     { name = "uvicorn", extra = ["standard"] },
@@ -192,6 +194,7 @@ requires-dist = [
     { name = "axiom-core", editable = "packages/axiom-core" },
     { name = "axiom-db", editable = "packages/axiom-db" },
     { name = "axiom-graphify", editable = "packages/axiom-graphify" },
+    { name = "axiom-hermes", editable = "packages/axiom-hermes" },
     { name = "axiom-mcp", editable = "packages/axiom-mcp" },
     { name = "fastapi", specifier = ">=0.115" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.30" },
@@ -247,6 +250,17 @@ requires-dist = [
     { name = "axiom-core", editable = "packages/axiom-core" },
     { name = "mcp", specifier = ">=1.0" },
 ]
+
+[[package]]
+name = "axiom-hermes"
+version = "0.1.0"
+source = { editable = "packages/axiom-hermes" }
+dependencies = [
+    { name = "axiom-core" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "axiom-core", editable = "packages/axiom-core" }]
 
 [[package]]
 name = "axiom-mcp"

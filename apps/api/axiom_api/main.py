@@ -14,6 +14,7 @@ from axiom_core.models import ModelGatewayRegistry
 from axiom_core.tools import ToolRegistry
 from axiom_db.engine import DatabaseNotConfiguredError, check_database_health
 from axiom_graphify import GraphifyBackend
+from axiom_hermes import HermesBackend
 from axiom_mcp import register_mcp_server
 
 from axiom_api.routers.agent_fabric import router as agent_fabric_router
@@ -55,6 +56,18 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         logger.info("axiom.agent_backend.registered", backend="axiom_native")
     else:
         logger.warning("axiom.agent_backend.axiom_native_not_configured")
+
+    if settings.anthropic_api_key:
+        hermes_backend = HermesBackend(
+            settings.anthropic_api_key,
+            hermes_bin=settings.hermes_bin,
+            default_model=settings.hermes_default_model,
+        )
+        if await hermes_backend.is_configured():
+            agent_backend_registry.register(hermes_backend)
+            logger.info("axiom.agent_backend.registered", backend="hermes")
+        else:
+            logger.warning("axiom.agent_backend.hermes_binary_not_found", hermes_bin=settings.hermes_bin)
     app.state.agent_backend_gateway = agent_backend_registry
 
     app.state.agent_fabric = None

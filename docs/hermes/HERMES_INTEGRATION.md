@@ -127,13 +127,76 @@ doc's own instruction; Axiom should not attempt to read/write Hermes's
 internal state files directly, only interact with Hermes through its CLI/
 API/plugin surface.
 
-## 9. What was not verified
+## 9. What was not verified (as of the original audit)
 
-This audit read the README, top-level file/directory layout, `SECURITY.md`
-section headers, and grepped for `delegate_task`/MCP keywords across the
-source. It did **not** install Hermes, start a session, actually invoke
-`delegate_task`, start `mcp_serve.py` and inspect its live tool schema, or
-read `hermes_state_schema.py`/`toolsets.py` in full. Before Milestone 13
-(Hermes Integration) claims this works, it must be installed, run, and the
-Axiom Agent Gateway → Hermes → Agent Fabric round trip exercised for real
-against a live `hermes` process — per `CLAUDE.md` §56/§57.
+The original pass (Milestone 2) read the README, file layout, and grepped
+source for keywords. It did not install Hermes or run it. That gap is
+closed — see §10.
+
+## 10. Milestone 13 — real install and live integration
+
+Installed for real via `curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash`,
+not simulated. Two real problems hit and fixed along the way, neither
+anticipated by the original audit:
+
+1. **The installer hung indefinitely on `--skip-setup` alone.** Root
+   cause, found by reading the installer script after 17+ minutes of
+   zero CPU / zero child processes: `--skip-setup` only skips the
+   *setup wizard* stage. A separate `prompt_yes_no()` confirmation
+   (unrelated to setup, e.g. optional package choices) falls through to
+   reading `/dev/tty` directly — bypassing stdin redirection entirely —
+   whenever a real controlling terminal is attached but no `NON_INTERACTIVE`
+   flag was set, hanging forever with no one to answer it. Fixed by
+   passing both `--skip-setup --non-interactive` (a separate flag,
+   confirmed in the script's own `--help`). A `kill -9` on the parent
+   bash process during the first hung attempt did **not** kill its
+   detached Homebrew grandchild (a `cmake`-from-source compile, needed
+   because this test machine's macOS 12 has no prebuilt Homebrew bottle
+   for ripgrep's dependency chain) — it kept running independently and
+   later collided with the second install attempt's own `brew install
+   ripgrep` via a stale lock. The installer's own retry logic handled
+   that collision gracefully (logged a warning, moved on) — real,
+   working resilience on Hermes's side, not something Axiom had to work
+   around.
+2. **`auto` provider detection did not pick Anthropic even with
+   `ANTHROPIC_API_KEY` set** — a first live one-shot call
+   (`hermes -z "..." -m anthropic/claude-sonnet-5`) failed with
+   `No usable credentials found for provider 'gmi'. Set GMI_API_KEY.`
+   despite `"anthropic"` being an explicitly documented provider in
+   `~/.hermes/config.yaml` requiring only `ANTHROPIC_API_KEY`. Fixed by
+   passing `--provider anthropic` explicitly — `axiom_hermes.HermesBackend`
+   always passes it, never relies on `auto`.
+
+Once both were fixed, the real one-shot invocation is:
+
+```bash
+hermes -z "<prompt>" -m anthropic/claude-sonnet-5 --provider anthropic --usage-file <path>
+```
+
+`-z`/`--oneshot` (found live in `hermes --help`, not in the earlier
+source read — the installed CLI's flag surface differs from what
+`cli.py`'s `fire`-based signature suggested) prints only the final
+response text to stdout: no banner, no spinner, no session-id line —
+exactly the clean, scriptable surface `axiom_hermes.client.run_oneshot`
+needed. `--usage-file` writes a real JSON report (cost, token counts,
+model, provider, `completed`/`failed`/`failure`) **even on failure**,
+which is how `axiom_hermes` distinguishes a real failure from a
+successful empty response, rather than trusting the exit code alone.
+
+Verified live end-to-end through the full Axiom stack: `POST
+/v1/agent-fabric/agents/marketing/marketing-seo-specialist/delegate`
+with `"backend": "hermes"` returned a real, in-character completion from
+the SEO Specialist agent, routed through Registry → `HermesBackend` →
+real `hermes` subprocess → real Anthropic API call → `Execution`. First
+call cost $0.06 / 23,941 tokens (a real usage report), dominated by
+Hermes's own tool-definition cache write on cold start — subsequent
+calls would hit that cache.
+
+**What Milestone 13 did *not* build**: Hermes's own subagent delegation
+(`delegate_task`, confirmed real in §4) is Hermes deciding internally to
+spawn its own subagents — it is not the same thing as Axiom calling
+Hermes. `HermesBackend` is one full one-shot Hermes run per Axiom
+`Execution` (CLAUDE.md §30's `HermesBackend`); it does not yet reach into
+Hermes's internal delegation, MCP server mode (`mcp_serve.py`), or
+gateway/messaging surfaces — those remain real, unexplored surface for a
+future milestone, not fabricated capabilities being claimed here.

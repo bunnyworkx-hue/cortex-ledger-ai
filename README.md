@@ -18,8 +18,14 @@ plus a 12-agent curated cohort, search/inspect/load/delegate via
 completion from the Application Security Engineer agent), Tool
 Registry + MCP (`/v1/tools`: generic MCP server consumption — all 10 real
 Graphify tools auto-discovered and callable, including 6 never exposed by
-the Knowledge Gateway, each call audit-logged). No Hermes integration
-yet — see `docs/IMPLEMENTATION_PLAN.md`.
+the Knowledge Gateway, each call audit-logged), Hermes Integration (a real
+installed `hermes` CLI as a second `AgentBackend` alongside
+`AxiomNativeBackend` — delegate to any curated agent through either
+backend via `/v1/agent-fabric/agents/{id}/delegate`, proven live with a
+real in-character completion from the SEO Specialist agent routed
+through Hermes). See `docs/IMPLEMENTATION_PLAN.md` for what's next
+(Memory, Policy, Human Approval, Observability, Dashboard, Evaluation,
+Security).
 
 ## Layout
 
@@ -31,6 +37,7 @@ packages/axiom-anthropic/ real Anthropic adapter (Model Gateway)
 packages/axiom-graphify/  real Graphify MCP adapter (Knowledge Gateway)
 packages/axiom-agent-fabric/ real agent registry + invocation gateway over agency-agents
 packages/axiom-mcp/       generic MCP client + Tool Registry integration
+packages/axiom-hermes/    real Hermes Agent CLI adapter (AgentBackend)
 tests/                    unit + integration tests
 docs/                     audits (Graphify, Hermes, agent library) + architecture plan
 var/                      generated artifacts (graphify-out/graph.json, ...) — gitignored
@@ -58,3 +65,15 @@ graphify extract ~/Desktop/agency-agents --backend claude --out var   # rebuild 
 
 `AXIOM_GRAPHIFY_MCP_URL` must point at that running server for
 `/v1/knowledge/*` to report `"configured"`.
+
+### Hermes Integration
+
+```bash
+curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --skip-setup --non-interactive
+```
+
+Both flags matter: `--skip-setup` alone leaves a separate confirmation
+prompt that reads `/dev/tty` directly and hangs forever in a non-interactive
+shell (see `docs/hermes/HERMES_INTEGRATION.md` §10). `AXIOM_HERMES_BIN`
+should point at the installed binary (`~/.local/bin/hermes` by default) if
+it isn't already on the API process's PATH.

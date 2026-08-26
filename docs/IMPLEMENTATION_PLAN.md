@@ -164,8 +164,18 @@ external integrations landing simultaneously.
    `granted_permissions`) and audit-logs every call (tool, risk_level,
    permission_check outcome, duration_ms) — real today; full Policy
    Engine enforcement is still Milestone 15.
-7. **Hermes Integration** — only after Hermes is actually installed
-   locally and `delegate_task` has been called for real once.
+7. **Hermes Integration** — done. Installed for real (hit and fixed a
+   genuine installer hang — see `docs/hermes/HERMES_INTEGRATION.md` §10)
+   and wired as a second `AgentBackend` (`packages/axiom-hermes/`),
+   alongside `AxiomNativeBackend`, both selectable per-call via
+   `/v1/agent-fabric/agents/{id}/delegate`'s `backend` field. Uses
+   Hermes's real `-z`/`--oneshot` mode over a subprocess — one full
+   Hermes run per Axiom `Execution`, not Hermes's own internal
+   `delegate_task`/subagent spawning (which is Hermes deciding to
+   delegate internally, a different thing from Axiom calling Hermes).
+   Live-verified: a real in-character completion from the SEO Specialist
+   agent, routed Registry → `HermesBackend` → real `hermes` subprocess →
+   real Anthropic call → `Execution`.
 8. **Memory, Policy, Human Approval, Observability, Dashboard, Evaluation,
    Security** — as originally sequenced in `CLAUDE.md` §90–96, no changes
    proposed here.
