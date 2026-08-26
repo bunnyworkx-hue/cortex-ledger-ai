@@ -8,6 +8,7 @@ import type { GraphSnapshot } from "@/lib/graphData.server";
 import { CameraRig } from "./CameraRig";
 import { ScrollBridgeSync } from "./ScrollBridgeSync";
 import { ZoneOverlay } from "./ZoneOverlay";
+import { ZoneOverlaySync } from "./ZoneOverlaySync";
 import { EntryZone } from "./EntryZone";
 import { AgentFabricZone } from "./AgentFabricZone";
 import { GraphifyZone } from "./GraphifyZone";
@@ -65,6 +66,7 @@ export function World({ graph }: { graph: GraphSnapshot }) {
         <ScrollControls pages={PAGES} damping={0.25}>
           <ScrollBridgeSync />
           <CameraRig />
+          <ZoneOverlaySync />
 
           <Suspense fallback={null}>
             <EntryZone />
@@ -77,11 +79,10 @@ export function World({ graph }: { graph: GraphSnapshot }) {
             />
             <ExecutionPulse active={executing} />
           </Suspense>
-
-          <ZoneOverlay pages={PAGES} />
         </ScrollControls>
       </Canvas>
 
+      <ZoneOverlay />
       <TalkBack
         onActiveAgentsChange={setActiveAgentIds}
         onMatchedAgentsChange={setMatchedAgentIds}

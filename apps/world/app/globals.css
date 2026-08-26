@@ -528,6 +528,36 @@ body {
   color: #e3aa4c;
 }
 
+/* ---------- zone overlay (plain HTML, opacity driven by ZoneOverlaySync — see zoneOverlayBridge.ts) ---------- */
+.zone-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  display: flex;
+  align-items: flex-end;
+  padding: 0 0 14vh 6vw;
+}
+.zone-overlay-label {
+  position: absolute;
+  left: 6vw;
+  bottom: 14vh;
+  max-width: 520px;
+}
+.zone-overlay-index {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+.zone-overlay-eyebrow {
+  font-family: "IBM Plex Sans", sans-serif;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;

@@ -586,6 +586,52 @@ the high-risk call (`modify_business_record` → a real pending
 the Approval panel polls). Clean `tsc`/`build`/`lint`; 106/106 backend
 tests unaffected (no backend changes this pass).
 
+## 6h. Axiom World — a real crash, finally diagnosed and fixed (2026-08-26)
+
+For the first time in this whole debugging saga, the user sent real
+screenshots of the actual browser errors instead of "still the error
+message" — and they showed two genuinely different, previously
+undiagnosable bugs, not the CORS/extension mystery assumed from the
+dashboard's earlier symptom.
+
+**Axiom World (localhost:3001)**: a real, unambiguous React crash —
+Next.js's own dev error overlay, not a network failure: `"You are
+calling ReactDOMClient.createRoot() on a container that has already
+been passed to createRoot() before"`, thrown from `ZoneOverlay.tsx`'s
+use of `@react-three/drei`'s `<Scroll html>`. Root cause: `<Scroll
+html>` calls `ReactDOM.createRoot()` internally to portal HTML content
+outside the R3F canvas tree, and that doesn't survive React 19 Strict
+Mode's deliberate double-invoke of effects in Next.js dev — the second
+mount pass calls `createRoot` again on the same container. This had
+been silently breaking the zone-label overlay (and possibly more) since
+Milestone 6a first introduced it, undetectable without literally seeing
+the browser's error overlay.
+
+Fixed at the root, not papered over with `reactStrictMode: false` (which
+would have silenced Strict Mode's legitimate bug-catching everywhere
+else too): removed `<Scroll html>` entirely. `ZoneOverlay.tsx` now
+renders as a plain HTML sibling outside the `<Canvas>` (same pattern as
+Talk-Back), and a new `ZoneOverlaySync.tsx` (mounted inside
+`<ScrollControls>`) drives each label's opacity imperatively via
+`useFrame` + a small ref bridge (`lib/zoneOverlayBridge.ts`) — matching
+`CameraRig.tsx`'s own existing pattern of never routing high-frequency
+scroll-driven updates through React state. `activeZone`/`zoneProgress`
+helpers already existed in `lib/zones.ts` (written earlier, unused until
+now) and slotted in directly.
+
+**Dashboard (localhost:3000)**: a real, still-open, narrower mystery —
+the page itself loads correctly (nav renders, no crash), but `/api/*`
+fetch calls still fail in the user's browser despite being same-origin
+now and despite an identical `curl` to the exact same path succeeding.
+Not yet root-caused; needs the browser's Network tab detail (status
+code / error type for the specific failing request) to go further, not
+guessed at.
+
+Verified after the World fix: clean `tsc`/`build`/`lint`, confirmed
+`<Scroll` is no longer imported anywhere in the app, clean server logs
+across multiple real page loads. Backend suite unaffected: 106/106
+passing.
+
 ## 7. Decisions (confirmed with user, 2026-08-25)
 
 1. **Database**: new, independent Supabase project for Axiom OS — not
