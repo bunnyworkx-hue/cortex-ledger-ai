@@ -1,3 +1,5 @@
+import asyncio
+
 import pytest
 
 from axiom_core.agents import Agent, AgentBackendError, AgentTask, AxiomNativeBackend
@@ -7,9 +9,15 @@ from axiom_core.models import ModelBackendError, ModelResponse, TokenUsage
 class _FakeModelBackend:
     provider_name = "fake"
 
-    def __init__(self, response: ModelResponse | None = None, error: Exception | None = None) -> None:
+    def __init__(
+        self,
+        response: ModelResponse | None = None,
+        error: Exception | None = None,
+        delay: float = 0,
+    ) -> None:
         self._response = response
         self._error = error
+        self._delay = delay
         self.last_request = None
 
     async def is_configured(self) -> bool:
@@ -17,6 +25,8 @@ class _FakeModelBackend:
 
     async def generate(self, request):
         self.last_request = request
+        if self._delay:
+            await asyncio.sleep(self._delay)
         if self._error is not None:
             raise self._error
         return self._response
@@ -55,4 +65,77 @@ async def test_execute_translates_model_backend_error():
     agent = Agent(agent_id="a1", name="Test Agent", instructions="You are a test agent.")
 
     with pytest.raises(AgentBackendError, match="rate limited"):
+        await backend.execute(agent, AgentTask(input="say hi"))
+
+
+@pytest.mark.asyncio
+async def test_execute_caps_max_tokens_from_agent_budget():
+    model_backend = _FakeModelBackend(
+        response=ModelResponse(
+            content="ok",
+            model="claude-sonnet-5",
+            provider="fake",
+            usage=TokenUsage(input_tokens=1, output_tokens=1),
+        )
+    )
+    backend = AxiomNativeBackend(model_backend, default_model="claude-sonnet-5")
+    agent = Agent(
+        agent_id="a1", name="Test Agent", instructions="You are a test agent.", budget={"max_tokens": 500}
+    )
+
+    await backend.execute(agent, AgentTask(input="say hi"))
+
+    assert model_backend.last_request.max_tokens == 500
+
+
+@pytest.mark.asyncio
+async def test_execute_without_budget_uses_default_max_tokens():
+    model_backend = _FakeModelBackend(
+        response=ModelResponse(
+            content="ok", model="claude-sonnet-5", provider="fake", usage=TokenUsage(input_tokens=1, output_tokens=1)
+        )
+    )
+    backend = AxiomNativeBackend(model_backend, default_model="claude-sonnet-5")
+    agent = Agent(agent_id="a1", name="Test Agent", instructions="You are a test agent.")
+
+    await backend.execute(agent, AgentTask(input="say hi"))
+
+    assert model_backend.last_request.max_tokens == 1024
+
+
+@pytest.mark.asyncio
+async def test_execute_clamps_max_tokens_to_the_nonstreaming_ceiling():
+    # Real regression case: every curated agent's budget.max_tokens
+    # (25,000-50,000) exceeds the anthropic SDK's real non-streaming
+    # limit (21,333) and would raise ValueError from the SDK itself if
+    # passed through uncapped — caught live in Milestone 21.
+    model_backend = _FakeModelBackend(
+        response=ModelResponse(
+            content="ok", model="claude-sonnet-5", provider="fake", usage=TokenUsage(input_tokens=1, output_tokens=1)
+        )
+    )
+    backend = AxiomNativeBackend(model_backend, default_model="claude-sonnet-5")
+    agent = Agent(
+        agent_id="a1", name="Test Agent", instructions="You are a test agent.", budget={"max_tokens": 40000}
+    )
+
+    await backend.execute(agent, AgentTask(input="say hi"))
+
+    assert model_backend.last_request.max_tokens == 20_000
+
+
+@pytest.mark.asyncio
+async def test_execute_raises_when_max_seconds_budget_is_exceeded():
+    model_backend = _FakeModelBackend(
+        response=ModelResponse(
+            content="too slow", model="claude-sonnet-5", provider="fake", usage=TokenUsage(input_tokens=1, output_tokens=1)
+        ),
+        delay=0.2,
+    )
+    backend = AxiomNativeBackend(model_backend, default_model="claude-sonnet-5")
+    agent = Agent(
+        agent_id="a1", name="Test Agent", instructions="You are a test agent.", budget={"max_seconds": 0.01}
+    )
+
+    with pytest.raises(AgentBackendError, match="exceeded its budget"):
         await backend.execute(agent, AgentTask(input="say hi"))

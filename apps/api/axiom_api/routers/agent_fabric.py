@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from axiom_agent_fabric import AgentInvocationGateway, AgentNotFoundError
 from axiom_core.agents import AgentBackendNotFoundError, AgentBackendRegistry
-from axiom_core.logging import get_logger
-from axiom_core.memory import MemoryRecord, MemoryScope, MemoryStore
+from axiom_core.memory import MemoryStore
 
+from axiom_api.delegation import run_delegation
 from axiom_api.dependencies import (
     get_agent_backend_gateway,
     get_agent_fabric,
@@ -14,7 +14,6 @@ from axiom_api.dependencies import (
 from axiom_api.schemas import AgentRecordDetailOut, AgentRecordOut, DelegateRequest, ExecutionOut
 
 router = APIRouter(prefix="/v1/agent-fabric", tags=["agent-fabric"])
-logger = get_logger(__name__)
 
 
 def _require_gateway(gateway: AgentInvocationGateway | None) -> AgentInvocationGateway:
@@ -96,44 +95,23 @@ async def delegate(
 ) -> ExecutionOut:
     gateway = _require_gateway(gateway)
     try:
-        backend = backend_registry.get(body.backend or "axiom_native")
+        execution = await run_delegation(
+            gateway,
+            backend_registry,
+            memory_store,
+            execution_store,
+            agent_id=agent_id,
+            task_input=body.input,
+            backend_name=body.backend or "axiom_native",
+            context=body.context,
+        )
     except AgentBackendNotFoundError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
-
-    try:
-        execution = await gateway.delegate(agent_id, body.input, backend=backend, context=body.context)
     except AgentNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
-    if execution_store is not None:
-        # CLAUDE.md §93: every execution is traced, success or failure —
-        # unlike memory (below), which only records successful task
-        # content. Best-effort: an observability write must not fail a
-        # delegation that otherwise succeeded (or mask why one failed).
-        try:
-            await execution_store.record(execution)
-        except Exception as exc:  # noqa: BLE001 — observability is supplementary, not critical path
-            logger.warning("axiom.execution.record_failed", execution_id=execution.execution_id, error=str(exc))
-
     if execution.status.value == "failed":
         raise HTTPException(status_code=502, detail=execution.error)
-
-    if memory_store is not None and execution.result is not None:
-        # CLAUDE.md §38: task memory, deliberately written — not every
-        # execution auto-becomes long-term memory, just this run's
-        # record. Best-effort: a memory write failure must not fail a
-        # successful delegation.
-        try:
-            await memory_store.save(
-                MemoryRecord.new(
-                    scope=MemoryScope.TASK,
-                    owner_id=agent_id,
-                    content=f"Task: {body.input}\n\nResult: {execution.result.content}",
-                    source=f"execution:{execution.execution_id}",
-                )
-            )
-        except Exception as exc:  # noqa: BLE001 — memory is supplementary, not critical path
-            logger.warning("axiom.memory.save_failed", execution_id=execution.execution_id, error=str(exc))
 
     return ExecutionOut(
         execution_id=execution.execution_id,

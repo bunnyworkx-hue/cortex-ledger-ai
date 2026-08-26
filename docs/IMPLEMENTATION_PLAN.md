@@ -293,6 +293,60 @@ external integrations landing simultaneously.
     94/94 tests passing after this milestone (88 pre-existing + 6 new
     security-focused files).
 
+## 6a. Post-Milestone-21 — closing the two real Definition of Done gaps (2026-08-26)
+
+The Security milestone (§13 above) named two CLAUDE.md §98 Definition of
+Done items as genuine, undone gaps rather than checked off by assumption:
+"Agent budgets work" and "Agent-to-agent calls are controlled." At the
+user's request to keep going, both were closed for real:
+
+**Agent budgets**: `Agent` gained a `budget: dict` field
+(`packages/axiom-core/axiom_core/agents/types.py`), threaded from
+`AgentRecord.budget` through `AgentInvocationGateway.delegate()`.
+`AxiomNativeBackend` enforces `max_tokens` as the literal
+`ModelRequest.max_tokens` sent to the model API and `max_seconds` via
+`asyncio.wait_for`. `HermesBackend` enforces `max_seconds` by overriding
+`run_oneshot`'s own safe (subprocess-killing) timeout; `max_tokens` is
+explicitly **not** enforced for Hermes since its usage-report JSON schema
+was never precisely verified live in this build — named, not guessed at.
+
+Enforcing this for real immediately surfaced a genuine bug: the installed
+`anthropic` SDK refuses any non-streaming call where
+`3600 * max_tokens / 128_000 > 600s`, i.e. `max_tokens > 21,333`. Every
+one of the 12 curated agents' budgets (25,000-50,000, set during
+Milestone 10's curation but never actually enforced until now) exceeded
+that ceiling — every curated-agent delegation started failing with the
+SDK's own `ValueError` the moment enforcement went live. Fixed by
+clamping to a 20,000-token ceiling in `AxiomNativeBackend`, live-verified
+afterward (`engineering/engineering-frontend-developer`, `max_tokens:
+40000` in its curated budget, delegates successfully post-fix).
+
+**Agent-to-agent delegation control**: a new native tool,
+`delegate_to_agent` (`apps/api/axiom_api/native_tools.py`), lets a caller
+have one agent's task delegate a sub-task to another registered agent —
+through the exact same path a direct API delegation uses
+(`apps/api/axiom_api/delegation.py::run_delegation`, factored out of the
+router so the tool path isn't a shortcut with different tracing/memory
+behavior). A real, tested hard cap (`_MAX_DELEGATION_DEPTH = 3`) refuses
+further delegation once reached — live-verified: depth 3 returns
+`is_error: true` rather than recursing.
+
+Named honestly, not oversold: `AxiomNativeBackend` has no tool-calling
+loop, so no agent's own model output can invoke `delegate_to_agent`
+autonomously yet — only a direct `POST /v1/tools/delegate_to_agent/call`
+reaches it today. The depth cap is a forward-compatible guard, and
+`_delegation_depth` is caller-supplied rather than derived from a real
+execution context, so it's a cooperative control, not a cryptographic
+one — the same class of boundary as every unauthenticated gap already
+named in `docs/security/SECURITY_AUDIT.md`.
+
+Both changes are covered by new real tests (`tests/unit/test_native_backend.py`,
+`tests/unit/test_hermes_adapter.py`, `tests/unit/test_delegate_to_agent_depth.py`)
+and one refactor (the router's delegate endpoint now calls the same
+`run_delegation` helper, with existing integration tests confirming no
+behavior regression). 104/104 tests passing (up from 94). Full details
+and honest remaining limits in `docs/security/SECURITY_AUDIT.md` §9/§11.
+
 ## 7. Decisions (confirmed with user, 2026-08-25)
 
 1. **Database**: new, independent Supabase project for Axiom OS — not

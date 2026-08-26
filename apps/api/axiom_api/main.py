@@ -91,6 +91,20 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     else:
         logger.warning("axiom.agent_fabric.not_configured")
 
+    app.state.memory_store = None
+    if settings.database_url:
+        app.state.memory_store = PostgresMemoryStore(get_sessionmaker())
+        logger.info("axiom.memory_store.registered", backend="postgres")
+    else:
+        logger.warning("axiom.memory_store.not_configured")
+
+    app.state.execution_store = None
+    if settings.database_url:
+        app.state.execution_store = PostgresExecutionStore(get_sessionmaker())
+        logger.info("axiom.execution_store.registered", backend="postgres")
+    else:
+        logger.warning("axiom.execution_store.not_configured")
+
     tool_registry = ToolRegistry()
     if settings.graphify_mcp_url:
         try:
@@ -101,15 +115,14 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             logger.info("axiom.tools.mcp_registered", server="graphify", tool_count=count)
     else:
         logger.warning("axiom.tools.graphify_mcp_not_configured")
-    register_native_tools(tool_registry)
+    register_native_tools(
+        tool_registry,
+        agent_fabric=app.state.agent_fabric,
+        agent_backend_gateway=agent_backend_registry,
+        memory_store=app.state.memory_store,
+        execution_store=app.state.execution_store,
+    )
     app.state.tool_registry = tool_registry
-
-    app.state.memory_store = None
-    if settings.database_url:
-        app.state.memory_store = PostgresMemoryStore(get_sessionmaker())
-        logger.info("axiom.memory_store.registered", backend="postgres")
-    else:
-        logger.warning("axiom.memory_store.not_configured")
 
     app.state.policy_engine = PolicyEngine(approval_threshold="high")
 
@@ -119,13 +132,6 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         logger.info("axiom.approval_store.registered", backend="postgres")
     else:
         logger.warning("axiom.approval_store.not_configured")
-
-    app.state.execution_store = None
-    if settings.database_url:
-        app.state.execution_store = PostgresExecutionStore(get_sessionmaker())
-        logger.info("axiom.execution_store.registered", backend="postgres")
-    else:
-        logger.warning("axiom.execution_store.not_configured")
 
     yield
     logger.info("axiom.shutdown")

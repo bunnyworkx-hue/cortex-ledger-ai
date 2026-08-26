@@ -153,9 +153,15 @@ nothing else in the workspace.
 - **Docker / deployment infrastructure**: `infrastructure/docker/` exists
   as an empty placeholder directory — no Dockerfile or compose file was
   written. Local dev only (`uv run`, `npm run dev`).
-- **Auth layer, budget enforcement, agent-to-agent delegation, multi-tenant
-  knowledge partitioning**: named as real, open gaps in
-  `docs/security/SECURITY_AUDIT.md` — not silently assumed done.
+- **Auth layer, multi-tenant knowledge partitioning**: named as real, open
+  gaps in `docs/security/SECURITY_AUDIT.md` — not silently assumed done.
+  (Budget enforcement and bounded agent-to-agent delegation *are* built —
+  see `SECURITY.md`.)
+- **Model-initiated agent-to-agent delegation**: the `delegate_to_agent`
+  native tool lets a caller have one agent delegate to another with a
+  real depth cap, but `AxiomNativeBackend` has no tool-calling loop, so
+  no agent's own reasoning can invoke it autonomously yet — see
+  `docs/security/SECURITY_AUDIT.md` §11.
 
 ## Where to go deeper
 

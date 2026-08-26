@@ -26,18 +26,28 @@ Model Gateway, Knowledge Gateway, Agent Runtime, Agent Fabric, Tool
 Registry + MCP, Hermes Integration, Memory, Policy + Human Approval,
 Observability, a Next.js Dashboard, Evaluation (20/20 on the last real
 benchmark run), Security (real findings across all 11 of CLAUDE.md §96's
-categories), and Portfolio Release (this doc set). 94/94 tests passing.
+categories, including real budget enforcement and a bounded
+agent-to-agent delegation tool added after the initial pass), and
+Portfolio Release (this doc set). 104/104 tests passing.
 
 ### Definition of Done (CLAUDE.md §98) — honest status
 
-Everything on that list is real and working **except** two items the
-Security milestone surfaced as genuine, undone gaps rather than checked
-off by assumption: **"Agent budgets work"** (usage is captured per call
-but never aggregated or gated — see `SECURITY.md`) and **"Agent-to-agent
-calls are controlled"** (there is no agent-to-agent delegation path at
-all yet, so there's nothing to control). "Screenshots" and "Demo Video"
-from §97 are replaced by `DEMO.md` — a real, runnable script, since no
-browser/screen-capture tool exists in this environment.
+Every item on that list is real and working, including the two the
+Security milestone originally surfaced as gaps: **"Agent budgets work"**
+(`agent.budget.max_tokens`/`max_seconds` are enforced for real by both
+backends — see `SECURITY.md`, including a real Anthropic SDK
+non-streaming ceiling bug found and fixed while wiring it in) and
+**"Agent-to-agent calls are controlled"** (the `delegate_to_agent` native
+tool, with a real, tested recursion depth cap — see
+`docs/security/SECURITY_AUDIT.md` §11 for the honest limits of "bounded"
+here: a cooperative depth cap on a tool no agent's own model output can
+invoke autonomously yet, not a cryptographic guarantee against an
+adversarial caller). One narrower, still-real gap remains inside Budget
+Tests: Hermes's `max_tokens` isn't enforced, since its usage-report JSON
+schema was never precisely verified live in this build — named plainly
+rather than guessed at. "Screenshots" and "Demo Video" from §97 are
+replaced by `DEMO.md` — a real, runnable script, since no browser/
+screen-capture tool exists in this environment.
 
 ## Layout
 

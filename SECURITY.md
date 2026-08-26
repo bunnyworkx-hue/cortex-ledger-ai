@@ -26,6 +26,20 @@ evidence; this one is the executive view.
   not unit-tested (a deterministic pass/fail assertion for a
   non-deterministic model property would be fabricated coverage). Result
   was mixed and is reported honestly below, not smoothed over.
+- **Budget enforcement**: `agent.budget.max_tokens` caps the real
+  `ModelRequest.max_tokens` sent to the model API (the model physically
+  can't generate more); `agent.budget.max_seconds` is a real timeout on
+  both backends (Hermes kills the subprocess, not just the await).
+  Enforcing this for real surfaced a genuine bug: the installed Anthropic
+  SDK refuses any non-streaming call above `max_tokens=21,333`, and every
+  one of the 12 curated agents' budgets (25,000-50,000) exceeded it —
+  fixed by clamping to a 20,000-token ceiling, not by weakening the
+  enforcement.
+- **Bounded agent-to-agent delegation**: `delegate_to_agent` (a native
+  tool) lets one agent's task delegate to another through the same
+  persisted path a direct API call uses, with a real, tested depth cap —
+  see `docs/security/SECURITY_AUDIT.md` §11 for the honest limits of what
+  "bounded" means here (a cooperative control, not a cryptographic one).
 
 ## What's a real, named gap (not fixed, not hidden)
 
@@ -36,13 +50,12 @@ evidence; this one is the executive view.
 - **Agent Authorization**: no authN/authZ system exists in this build at
   all. Anyone who can reach the API can delegate to any of the 254 loaded
   agents.
-- **Budget enforcement**: token/cost usage is captured per call
-  (`TokenUsage`, `HermesRunResult.usage`) but never aggregated or gated
-  against a limit.
 - **Knowledge isolation**: Graphify is one shared graph — no per-tenant
   partitioning.
-- **Recursive delegation controls**: not applicable yet — no code path
-  has one agent invoke another, so there's no recursion to guard against.
+- **Hermes budget (max_tokens)**: `max_seconds` is enforced for Hermes,
+  but `max_tokens` isn't — its usage-report JSON schema was never
+  precisely verified in this build, so gating on specific keys would be
+  guessing at an unverified schema.
 
 ## Prompt injection — the real live result
 

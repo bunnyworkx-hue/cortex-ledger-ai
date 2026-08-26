@@ -20,11 +20,12 @@ async def test_list_tools_reflects_real_mcp_discovery(api_client: httpx.AsyncCli
     # hand-picked subset the Knowledge Gateway adapter cherry-picked.
     assert "graph_stats" in names
     assert "god_nodes" in names
-    graphify_tools = [t for t in tools if t["name"] != "modify_business_record"]
-    assert all(t["source"] == "mcp:graphify" for t in graphify_tools)
-    # The one native demo tool (Milestone 15/16) must be distinguishable
-    # by source from the auto-discovered MCP tools.
+    graphify_tools = [t for t in tools if t["source"] == "mcp:graphify"]
+    assert all(t["name"] not in ("modify_business_record", "delegate_to_agent") for t in graphify_tools)
+    # The native demo/orchestration tools (Milestone 15/16, Milestone 21)
+    # must be distinguishable by source from the auto-discovered MCP tools.
     assert any(t["name"] == "modify_business_record" and t["source"] == "native" for t in tools)
+    assert any(t["name"] == "delegate_to_agent" and t["source"] == "native" for t in tools)
 
 
 @pytest.mark.asyncio

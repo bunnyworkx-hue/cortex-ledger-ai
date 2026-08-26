@@ -4,7 +4,7 @@ import shutil
 from axiom_core.agents.backend import AgentBackendError
 from axiom_core.agents.types import Agent, AgentResult, AgentTask
 
-from axiom_hermes.client import HermesCliError, run_oneshot
+from axiom_hermes.client import HermesCliError, HermesTimeoutError, run_oneshot
 
 
 class HermesBackend:
@@ -15,6 +15,17 @@ class HermesBackend:
     live in Milestone 13, including the real gotcha that Hermes's `auto`
     provider detection did not pick Anthropic even with
     ANTHROPIC_API_KEY set, requiring an explicit ``--provider anthropic``.
+
+    ``agent.budget["max_seconds"]`` is enforced for real, overriding the
+    instance default via ``run_oneshot``'s own safe timeout (which kills
+    the subprocess, not just cancels the await). ``max_tokens`` is
+    **not** enforced here — Hermes's ``--usage-file`` JSON schema was
+    never precisely verified against a live run in this build (only
+    "cost, token counts, model, provider, completed/failed" was
+    confirmed at a glance), so parsing specific keys to gate on would be
+    guessing at an unverified schema (CLAUDE.md §56). Real token-based
+    enforcement for Hermes is a named gap, not silently claimed here —
+    see docs/security/SECURITY_AUDIT.md.
     """
 
     backend_name = "hermes"
@@ -43,6 +54,12 @@ class HermesBackend:
     async def execute(self, agent: Agent, task: AgentTask) -> AgentResult:
         prompt = self._build_prompt(agent, task)
         env = {**os.environ, "ANTHROPIC_API_KEY": self._anthropic_api_key}
+        # agent.budget["max_seconds"], when set, overrides the instance
+        # default — enforced by run_oneshot's own wait_for/process.kill()
+        # (the safe mechanism it already has for its own timeout), not a
+        # generic outer wrapper here that could leave the subprocess
+        # running after an outer cancellation.
+        timeout = agent.budget.get("max_seconds", self._timeout)
 
         try:
             result = await run_oneshot(
@@ -51,8 +68,12 @@ class HermesBackend:
                 model=self._default_model,
                 provider=self._provider,
                 env=env,
-                timeout=self._timeout,
+                timeout=timeout,
             )
+        except HermesTimeoutError as exc:
+            raise AgentBackendError(
+                f"Agent {agent.agent_id!r} exceeded its budget: max_seconds={timeout}"
+            ) from exc
         except HermesCliError as exc:
             raise AgentBackendError(f"Agent {agent.agent_id!r} Hermes execution failed: {exc}") from exc
 

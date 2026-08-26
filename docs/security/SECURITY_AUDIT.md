@@ -1,8 +1,8 @@
-# Security Audit — Milestone 20 (CLAUDE.md §96)
+# Security Audit — Milestones 20-21 (CLAUDE.md §96, §98)
 
-Real findings against the live system as of 2026-08-26, organized by the
-eleven categories CLAUDE.md §96 names. Per CLAUDE.md §45/§56/§57: this
-document states what is actually enforced today and names real gaps
+Real findings against the live system, last updated 2026-08-26, organized
+by the eleven categories CLAUDE.md §96 names. Per CLAUDE.md §45/§56/§57:
+this document states what is actually enforced today and names real gaps
 plainly — it does not claim protection that doesn't exist.
 
 ## Summary
@@ -17,9 +17,9 @@ plainly — it does not claim protection that doesn't exist.
 | Memory Isolation | **Gap — not enforced** | `tests/integration/test_memory_isolation_security.py` |
 | Tenant Isolation | **Gap — not enforced** (same root cause as Memory) | see below |
 | Agent Authorization | **Gap — no authN/authZ layer at all** | see below |
-| Budget Tests | **Gap — not enforced** | see below |
+| Budget Tests | **Enforced, real, since Milestone 21** (max_tokens/max_seconds; one documented exception) | `tests/unit/test_native_backend.py`, `tests/unit/test_hermes_adapter.py` |
 | Knowledge Isolation | **Gap — single shared graph, no partitioning** | see below |
-| Recursive Delegation | Not applicable — capability doesn't exist yet | see below |
+| Recursive Delegation | **Real, bounded control added in Milestone 21** (cooperative depth cap, not cryptographic) | `tests/unit/test_delegate_to_agent_depth.py` |
 
 ## 1. Tool Authorization
 
@@ -144,13 +144,41 @@ policy-gated, not agent *invocation*).
 
 ## 9. Budget Tests
 
-`AgentRecord` carries curated `risk_level`/capability metadata but no
-enforced budget (`max_tokens`, `max_seconds`, or spend cap) — neither
-`AxiomNativeBackend` nor `HermesBackend` tracks or limits cumulative
-usage per agent, per caller, or per time window. `HermesRunResult.usage`
-and `TokenUsage` (from the Model Gateway) are captured and returned per
-call, so the raw data needed to build budget enforcement already exists
-end-to-end — it's just not aggregated or gated anywhere yet.
+**Closed in Milestone 21 — real, per-call enforcement, not just
+descriptive metadata.** `Agent.budget` (`{"max_tokens": int,
+"max_seconds": float}`, threaded from `AgentRecord.budget` through
+`AgentInvocationGateway.delegate()`) is now consulted by both backends:
+
+- **`AxiomNativeBackend`**: `max_tokens` becomes the literal
+  `ModelRequest.max_tokens` sent to the Anthropic API — the model
+  physically cannot generate more than that. `max_seconds` wraps the
+  call in `asyncio.wait_for`; a timeout raises `AgentBackendError`
+  ("exceeded its budget"), which surfaces as a real `FAILED` execution
+  in `/v1/observability/executions`, not a silent truncation.
+- **`HermesBackend`**: `max_seconds` overrides the instance default and
+  is enforced through `run_oneshot`'s own safe timeout (which kills the
+  subprocess, confirmed by `tests/unit/test_hermes_client.py`'s existing
+  `test_run_oneshot_raises_timeout_and_kills_process`) — not a generic
+  outer wrapper that could leak the process. `max_tokens` is **not**
+  enforced for Hermes — its `--usage-file` JSON schema was never
+  precisely verified against a live run in this build, so gating on
+  specific keys would be guessing at an unverified schema (CLAUDE.md
+  §56). Named explicitly in `HermesBackend`'s docstring, not silently
+  assumed.
+
+**Real bug found and fixed while wiring this in:** the installed
+`anthropic` SDK refuses any non-streaming call whose
+`3600 * max_tokens / 128_000 > 600s` — i.e. `max_tokens > 21,333`.
+Every one of the 12 curated agents' `budget.max_tokens` (25,000-50,000)
+exceeded that ceiling, so the moment enforcement went live, every
+curated-agent delegation started failing with the SDK's own `ValueError`.
+Fixed by clamping to `_NONSTREAMING_MAX_TOKENS_CEILING = 20_000` in
+`AxiomNativeBackend` (`packages/axiom-core/axiom_core/agents/native_backend.py`)
+— real streaming support would lift this ceiling but isn't built.
+Live-verified after the fix:
+`POST /v1/agent-fabric/agents/engineering/engineering-frontend-developer/delegate`
+(a curated agent with `max_tokens: 40000`) succeeds and returns a real
+completion.
 
 ## 10. Knowledge Isolation
 
@@ -163,24 +191,44 @@ sensitive content.
 
 ## 11. Recursive Delegation
 
-Not testable because the capability doesn't exist: no code path in this
-build has one agent invoke another agent (`AgentInvocationGateway.delegate()`
-calls a Model/Hermes backend directly, never another agent). There is
-therefore no recursion to guard against yet — this should be revisited
-if/when agent-to-agent delegation is built, not assumed safe by default
-at that point.
+**A real, bounded control was added in Milestone 21** — `delegate_to_agent`,
+a native tool (`apps/api/axiom_api/native_tools.py`) that lets one agent's
+task delegate a sub-task to another registered agent through the exact
+same `AgentInvocationGateway` + persistence path a direct API delegation
+uses (`apps/api/axiom_api/delegation.py::run_delegation`, shared by both
+callers so the tool path isn't a shortcut). A hard depth cap
+(`_MAX_DELEGATION_DEPTH = 3`) refuses further delegation once
+`_delegation_depth` reaches it — live-verified: depth 3 returns
+`{"error": "delegation depth limit (3) reached", ...}` with `is_error: true`
+rather than recursing.
 
-## What changed in this milestone
+**Honest boundary, stated in the tool's own docstring:** `AxiomNativeBackend`
+has no tool-calling loop (a single `generate()` call, no function-calling)
+— no agent's own model output can invoke `delegate_to_agent`
+autonomously yet, only a direct `POST /v1/tools/delegate_to_agent/call`.
+The depth cap is a forward-compatible guard against future automatic
+chaining, not a live exploitable recursion path today. It's also
+caller-supplied (`_delegation_depth` in the request body), not derived
+from a real server-side execution context — a cooperative control, the
+same class of boundary as every other unauthenticated gap named in this
+document, not a cryptographic one. True model-initiated agent-to-agent
+recursion would first require building a tool-calling loop in
+`AxiomNativeBackend` — a real, separate, unbuilt feature, not silently
+assumed to exist because this tool does.
+
+## What changed across Milestones 20-21
 
 - Fixed `_READ_ONLY_PREFIXES` in `packages/axiom-mcp/axiom_mcp/client.py`
   (real misclassification of `shortest_path`, caught by
   `tests/integration/test_graphify_access_security.py`).
-- Added 6 new security-focused test files (unit + integration) and one
-  live qualitative probe script — see the Summary table above for exact
-  paths.
-- No other behavior changed. The gaps named above (Memory/Tenant
-  isolation, Agent authorization, Budget enforcement, Knowledge isolation,
-  Recursive delegation) are documented, not fixed — each would require
-  new infrastructure (an auth layer, a budget tracker, multi-graph
-  support) beyond this milestone's scope, and CLAUDE.md §56/§57 forbid
-  claiming enforcement that isn't real.
+- Added 6 security-focused test files (unit + integration) and one live
+  qualitative probe script in Milestone 20 — see the Summary table above.
+- Milestone 21 closed two of CLAUDE.md §98's Definition of Done gaps for
+  real: **Budget Tests** (§9 above — `max_tokens`/`max_seconds`
+  enforcement, plus a real Anthropic SDK non-streaming ceiling bug found
+  and fixed along the way) and **Recursive Delegation** (§11 above — the
+  `delegate_to_agent` tool with a real, tested depth cap).
+- Still real, named gaps, not fixed: Memory/Tenant isolation, Agent
+  authorization, Knowledge isolation — each needs new infrastructure (an
+  auth layer, multi-graph support) beyond what's been built, and
+  CLAUDE.md §56/§57 forbid claiming enforcement that isn't real.

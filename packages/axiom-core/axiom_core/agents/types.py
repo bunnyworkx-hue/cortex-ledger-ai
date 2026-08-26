@@ -9,16 +9,23 @@ class Agent:
     """Minimal runtime identity for something executable.
 
     The full Agent Fabric registry (capabilities, tools, permissions,
-    budget, imported from the agency-agents library) is Milestone 10 —
-    this is deliberately just enough for the Agent Runtime to execute a
-    task against a backend. Milestone 10 populates real Agent records
-    from the registry instead of callers constructing them ad hoc.
+    imported from the agency-agents library) is Milestone 10 — this is
+    deliberately just enough for the Agent Runtime to execute a task
+    against a backend. Milestone 10 populates real Agent records from the
+    registry instead of callers constructing them ad hoc.
+
+    ``budget`` (``{"max_tokens": int, "max_seconds": float}``, both
+    optional) is enforced by each ``AgentBackend`` — see
+    ``AxiomNativeBackend``/``HermesBackend`` docstrings for exactly what
+    each backend can and can't actually enforce (CLAUDE.md §56: never
+    claim enforcement that isn't real).
     """
 
     agent_id: str
     name: str
     instructions: str
     backend_name: str = "axiom_native"
+    budget: dict = field(default_factory=dict)
 
 
 @dataclass(frozen=True, slots=True)

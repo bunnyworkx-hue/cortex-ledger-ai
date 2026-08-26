@@ -56,6 +56,7 @@ class AgentInvocationGateway:
             name=record.name,
             instructions=record.instructions,
             backend_name=backend.backend_name,
+            budget=record.budget,
         )
         task = AgentTask(input=task_input, context=context)
         return await ExecutionRunner(backend).run(agent, task)
