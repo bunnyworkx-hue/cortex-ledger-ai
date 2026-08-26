@@ -1,7 +1,8 @@
 "use client";
 
 import { Instance, Instances, Text } from "@react-three/drei";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import type { ThreeEvent } from "@react-three/fiber";
 import { agentPositions } from "@/lib/layout";
 import { ZONES } from "@/lib/zones";
 import type { AgentRecord } from "@/lib/api";
@@ -17,17 +18,22 @@ const DIVISION_COLOR = [
 ];
 
 const ACTIVE_COLOR = "#F5C24B";
+const HOVER_COLOR = "#FFFFFF";
 const DIM_COLOR = "#33364a";
 
 export function AgentFabricZone({
   agents,
   activeAgentIds,
   matchedAgentIds,
+  onSelectAgent,
 }: {
   agents: AgentRecord[];
   activeAgentIds: Set<string>;
   matchedAgentIds: Set<string>;
+  onSelectAgent: (agent: AgentRecord) => void;
 }) {
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+
   const divisions = useMemo(() => {
     const counts = new Map<string, number>();
     for (const agent of agents) counts.set(agent.division, (counts.get(agent.division) ?? 0) + 1);
@@ -39,6 +45,7 @@ export function AgentFabricZone({
     return map;
   }, [divisions]);
   const positions = useMemo(() => agentPositions(agents), [agents]);
+  const byId = useMemo(() => new Map(agents.map((a) => [a.agent_id, a])), [agents]);
 
   const divisionCenters = useMemo(() => {
     const sums = new Map<string, { x: number; z: number; n: number }>();
@@ -54,13 +61,19 @@ export function AgentFabricZone({
     return sums;
   }, [agents, positions]);
 
+  const hoveredAgent = hoveredId ? byId.get(hoveredId) : null;
+
   return (
     <group position={CENTER}>
       <Text position={[0, 3, 0]} fontSize={0.34} color="#eef0fb" anchorX="center" letterSpacing={0.03}>
         AGENT FABRIC
       </Text>
       <Text position={[0, 2.5, 0]} fontSize={0.13} color="#8f95bd" anchorX="center">
-        {agents.length ? `${agents.length} real agents · ${divisions.length} divisions` : "loading live registry…"}
+        {agents.length
+          ? hoveredAgent
+            ? `${hoveredAgent.name} · ${hoveredAgent.division} — click to inspect & delegate`
+            : `${agents.length} real agents · ${divisions.length} divisions — hover to inspect, click to run`
+          : "loading live registry…"}
       </Text>
 
       <Instances limit={Math.max(agents.length, 1)}>
@@ -68,6 +81,7 @@ export function AgentFabricZone({
         <meshStandardMaterial roughness={0.4} />
         {agents.map((agent) => {
           const active = activeAgentIds.has(agent.agent_id);
+          const hovered = hoveredId === agent.agent_id;
           const searching = matchedAgentIds.size > 0;
           const matched = matchedAgentIds.has(agent.agent_id);
           const baseColor = divisionColor.get(agent.division) ?? "#8f97ea";
@@ -77,19 +91,41 @@ export function AgentFabricZone({
           // irrelevant agents fade back, selected agents become
           // highlighted" behavior from the original spec's Agent
           // Discovery section, tied to a real search result set rather
-          // than simulated.
+          // than simulated. Hover/active take precedence over both.
           let color = baseColor;
           let scale = 1;
           if (active) {
             color = ACTIVE_COLOR;
             scale = 2.6;
+          } else if (hovered) {
+            color = HOVER_COLOR;
+            scale = 2.1;
           } else if (searching) {
             color = matched ? baseColor : DIM_COLOR;
             scale = matched ? 1.35 : 0.55;
           }
 
           return (
-            <Instance key={agent.agent_id} position={positions.get(agent.agent_id) ?? [0, 0, 0]} color={color} scale={scale} />
+            <Instance
+              key={agent.agent_id}
+              position={positions.get(agent.agent_id) ?? [0, 0, 0]}
+              color={color}
+              scale={scale}
+              onPointerOver={(e: ThreeEvent<PointerEvent>) => {
+                e.stopPropagation();
+                setHoveredId(agent.agent_id);
+                document.body.style.cursor = "pointer";
+              }}
+              onPointerOut={(e: ThreeEvent<PointerEvent>) => {
+                e.stopPropagation();
+                setHoveredId((prev) => (prev === agent.agent_id ? null : prev));
+                document.body.style.cursor = "auto";
+              }}
+              onClick={(e: ThreeEvent<MouseEvent>) => {
+                e.stopPropagation();
+                onSelectAgent(agent);
+              }}
+            />
           );
         })}
       </Instances>

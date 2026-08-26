@@ -813,6 +813,116 @@ body {
   font-weight: 400;
 }
 
+/* ---------- selected agent card ---------- */
+.selected-agent {
+  position: fixed;
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
+  z-index: 12;
+  width: min(320px, 88vw);
+  background: rgba(20, 22, 31, 0.96);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--surface-line);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 12.5px;
+  box-shadow: 0 12px 36px -12px rgba(0, 0, 0, 0.6);
+}
+
+.selected-agent-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+.selected-agent-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.selected-agent-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10.5px;
+  margin-top: 3px;
+}
+.selected-agent-risk {
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+.selected-agent-risk-low { background: rgba(79, 204, 142, 0.18); color: #4fcc8e; }
+.selected-agent-risk-medium { background: rgba(227, 170, 76, 0.18); color: #e3aa4c; }
+.selected-agent-risk-high, .selected-agent-risk-critical { background: rgba(192, 57, 43, 0.18); color: #f0796b; }
+
+.selected-agent-close {
+  background: none;
+  border: none;
+  color: var(--faint);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+.selected-agent-close:hover {
+  color: var(--ink);
+}
+
+.selected-agent-description {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.selected-agent-run {
+  display: flex;
+  gap: 8px;
+}
+.selected-agent-run input {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: 6px;
+  padding: 7px 10px;
+  color: var(--ink);
+  font-size: 12px;
+}
+.selected-agent-run button {
+  background: var(--accent);
+  color: #14161c;
+  border: none;
+  border-radius: 6px;
+  padding: 0 16px;
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+}
+.selected-agent-run button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.selected-agent-result {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  color: #7fd6a0;
+  line-height: 1.5;
+  border-top: 1px dashed var(--surface-line);
+  padding-top: 10px;
+}
+.selected-agent-result-error {
+  color: #f0796b;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;

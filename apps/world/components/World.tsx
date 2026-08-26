@@ -19,6 +19,7 @@ import { ApprovalStation } from "./ApprovalStation";
 import { ToolRegistryPanel } from "./ToolRegistryPanel";
 import { PolicyEnginePanel } from "./PolicyEnginePanel";
 import { McpAreaPanel } from "./McpAreaPanel";
+import { SelectedAgentCard } from "./SelectedAgentCard";
 
 const PAGES = 8;
 
@@ -31,6 +32,7 @@ export function World({ graph }: { graph: GraphSnapshot }) {
   const [activeAgentIds, setActiveAgentIds] = useState<Set<string>>(new Set());
   const [matchedAgentIds, setMatchedAgentIds] = useState<Set<string>>(new Set());
   const [executing, setExecuting] = useState(false);
+  const [selectedAgent, setSelectedAgent] = useState<AgentRecord | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -72,7 +74,12 @@ export function World({ graph }: { graph: GraphSnapshot }) {
 
           <Suspense fallback={null}>
             <EntryZone />
-            <AgentFabricZone agents={roster} activeAgentIds={activeAgentIds} matchedAgentIds={matchedAgentIds} />
+            <AgentFabricZone
+              agents={roster}
+              activeAgentIds={activeAgentIds}
+              matchedAgentIds={matchedAgentIds}
+              onSelectAgent={setSelectedAgent}
+            />
             <GraphifyZone graph={graph} />
             <ExecutionZone
               modelBackends={models?.backends ?? {}}
@@ -94,6 +101,7 @@ export function World({ graph }: { graph: GraphSnapshot }) {
       <ToolRegistryPanel />
       <PolicyEnginePanel />
       <McpAreaPanel />
+      {selectedAgent && <SelectedAgentCard agent={selectedAgent} onClose={() => setSelectedAgent(null)} />}
     </div>
   );
 }

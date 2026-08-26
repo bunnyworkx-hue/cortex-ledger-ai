@@ -792,6 +792,43 @@ Talk-Back (bottom-center). Clean `tsc`/`build`/`lint`, live data
 re-verified through the proxy. 106/106 backend tests unaffected (no
 backend changes this pass).
 
+## 6n. Axiom World — real pointer interactivity, not just scroll (2026-08-26)
+
+Direct user feedback: "its not reactive or interactive." Real and fair
+— every control surface built so far was an HTML overlay panel; the
+actual 3D scene (agent points, graph nodes, backend spheres) had zero
+pointer interactivity, only the scroll-driven camera moved.
+
+Closed this for the Agent Fabric zone, the highest-value target (254
+real, individually addressable points already existed from Milestone
+6h's roster work). `AgentFabricZone.tsx` now wires real `onPointerOver`/
+`onPointerOut`/`onClick` per `<Instance>` (drei's per-instance pointer
+event support on `InstancedMesh`, not custom raycasting) — hovering a
+real agent brightens it white and sets a real pointer cursor, and the
+zone's own subtitle text updates live to name the hovered agent; the
+precedence order (active execution > hover > search-match/dim > default)
+was extended without disturbing the existing search-fade behavior from
+Milestone 6f/6h.
+
+Clicking a real agent opens `SelectedAgentCard.tsx` — a new HTML panel
+(right-center, the one remaining open screen position) showing that
+agent's real `name`/`division`/`category`/`description`/`risk_level`,
+with a real task input wired to the same `api.delegate()` every other
+panel uses. Deliberately kept as its own local busy/result state rather
+than feeding into Talk-Back's `activeAgentIds`: that `Set` is owned by
+Talk-Back's own `running`-driven `useEffect` (Milestone 6k's fix), which
+*replaces* the whole `Set` on every change — a second independent writer
+racing it would silently stomp its entries rather than merge with them.
+Named as a real, current scope boundary rather than silently risking
+that bug to make the highlight universal.
+
+Verified live: the exact `POST /v1/agent-fabric/agents/{id}/delegate`
+call the card makes returned a real Anthropic completion through the
+proxy. Clean `tsc`/`build`/`lint` (including `ThreeEvent` typing on the
+new pointer handlers). 106/106 backend tests unaffected (no backend
+changes this pass). Graphify/Execution zone interactivity is the
+obvious next extension of the same pattern, not yet built.
+
 ## 7. Decisions (confirmed with user, 2026-08-25)
 
 1. **Database**: new, independent Supabase project for Axiom OS — not

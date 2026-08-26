@@ -130,6 +130,19 @@ explicit 130s timeout instead, past `HermesBackend`'s own 120s default.
   live). One real server is connected today; the panel shows an honest
   empty state if none are, rather than inventing placeholder
   connections.
+- **Real pointer interactivity in the 3D scene.** Every panel above is
+  an HTML overlay — the actual 3D content (agent points, graph nodes,
+  backend spheres) had zero pointer interactivity until direct user
+  feedback ("its not reactive or interactive") called that out, fairly.
+  Closed for the Agent Fabric zone: hovering a real agent point
+  brightens it and shows its name/division live in the zone's subtitle
+  (real per-instance `onPointerOver`/`onPointerOut`, not custom
+  raycasting — drei's built-in `<Instance>` pointer events); clicking one
+  opens `SelectedAgentCard`, a real detail panel with that agent's real
+  fields and a real "run a task on this specific agent" action through
+  the same `api.delegate()` every other panel uses. Graphify and
+  Execution zone interactivity would be the natural next extension of
+  the same pattern — not yet built.
 
 ## What's honestly not built
 
@@ -164,6 +177,10 @@ not silently assumed:
   (see above). ORVYN itself isn't a real project yet — see
   `docs/IMPLEMENTATION_PLAN.md` §7's decision to defer it entirely —
   so there's nothing real to build a destination toward.
+- **Graphify/Execution zone pointer interactivity** — the Agent Fabric
+  zone's hover/click is built (see above); the knowledge graph nodes and
+  execution backend spheres are still purely visual, not yet wired to
+  the same real pointer-event pattern.
 - **Mobile fallback, LOD/instancing tuning beyond drei's `Instances`
   defaults, formal security testing pass** (§27-28, Phase 14-15) — not
   done.
