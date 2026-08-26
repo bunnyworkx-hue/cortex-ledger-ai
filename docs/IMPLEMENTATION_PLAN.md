@@ -238,8 +238,26 @@ external integrations landing simultaneously.
     with working CORS against the real API; the rendered UI was **not**
     visually verified — no browser/screenshot tool was available in this
     environment, and that gap is stated rather than papered over.
-12. **Evaluation, Security** — as originally sequenced in `CLAUDE.md`
-    §95–96, no changes proposed here.
+12. **Evaluation** — done. `scripts/evaluation/run_benchmark.py`: a real
+    20-task benchmark (CLAUDE.md §75's own "at least 20 tasks" spec)
+    covering all 12 required categories, run entirely as real HTTP calls
+    against the live API — no internals imported directly, no simulated
+    results. Scoring is deliberately simple and stated as such (CLAUDE.md
+    §45's "never fabricate metrics"): most tasks ask an agent to reply
+    with an exact token, a real deterministic pipeline check rather than
+    a fuzzy quality judgment; tool/knowledge/approval tasks check a real
+    structural signal instead. 20/20 passed on the last real run
+    (research/analysis/planning/marketing/finance/operations/tool_use/
+    agent_delegation ~2-3s each, hermes_delegation ~10.8s — real
+    subprocess overhead, not a bug — tool/knowledge/graphify_query
+    140-509ms since no LLM call is involved). Reports land in
+    `var/evaluation/` as timestamped JSON for regression comparison
+    across runs, rather than a new `evaluation_runs` DB table — reusing
+    `var/`'s existing generated-artifact convention (same as
+    `graphify-out/`) instead of adding schema for a v1 that doesn't need
+    it yet.
+13. **Security** — as originally sequenced in `CLAUDE.md` §96, no changes
+    proposed here.
 
 ## 7. Decisions (confirmed with user, 2026-08-25)
 

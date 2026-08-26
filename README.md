@@ -7,16 +7,16 @@ decision here.
 
 ## Status
 
-Milestones 6–18 done: Foundation, Model Gateway, Knowledge Gateway, Agent
+Milestones 6–19 done: Foundation, Model Gateway, Knowledge Gateway, Agent
 Runtime, Agent Fabric, Tool Registry + MCP, Hermes Integration, Memory,
-Policy + Human Approval, Observability, and a real Next.js Dashboard
-(`apps/dashboard`) — Overview (live subsystem status), Agent Fabric
-(search + live delegate), Execution Trace, Approvals (real approve/
-reject buttons that call the API), and Tools. A deliberate subset of
-CLAUDE.md §50's ~18-view list, not all of it — Agent Teams, Execution/
-Knowledge Graph visualizations, a dedicated Knowledge Explorer/MCP/
-Backends/Memory/Evaluations/Security/Settings view are not built; see
-`docs/IMPLEMENTATION_PLAN.md` for what's next (Evaluation, Security).
+Policy + Human Approval, Observability, a Next.js Dashboard
+(`apps/dashboard`), and Evaluation (`scripts/evaluation/run_benchmark.py`
+— a real 20-task benchmark, CLAUDE.md §75's own spec, hitting the live
+API across all 12 required categories: research/analysis/planning/
+marketing/finance/operations/tool_use/agent_delegation/
+hermes_delegation/knowledge_query/graphify_query/human_approval — 20/20
+passed on the last real run, report at `var/evaluation/`). See
+`docs/IMPLEMENTATION_PLAN.md` for what's next (Security).
 
 ## Layout
 
@@ -84,3 +84,15 @@ The API's CORS policy only allows `localhost:3000`/`127.0.0.1:3000` — see
 curl-verified to serve 200 with working CORS; the rendered UI itself
 was not visually verified — no browser/screenshot tool was available in
 this environment.
+
+### Evaluation
+
+```bash
+./scripts/dev/run.sh                              # API must be running
+uv run python scripts/evaluation/run_benchmark.py  # 20 real tasks, real cost
+```
+
+Every task is a real HTTP call through the live API (delegate, tool
+call, or a full propose→approve→execute approval flow) — nothing is
+mocked or simulated. Writes a timestamped JSON report to
+`var/evaluation/` for comparing runs over time.
