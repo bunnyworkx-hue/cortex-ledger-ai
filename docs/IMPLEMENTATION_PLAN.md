@@ -347,6 +347,43 @@ and one refactor (the router's delegate endpoint now calls the same
 behavior regression). 104/104 tests passing (up from 94). Full details
 and honest remaining limits in `docs/security/SECURITY_AUDIT.md` §9/§11.
 
+## 6b. Dashboard: cross-origin fetch failing in the browser only (2026-08-26)
+
+A real user testing the dashboard hit "Failed to reach the Axiom API" on
+every page — but every server-side check came back clean: `/health` and
+every `/v1/*` route the Overview page calls returned 200 with valid
+JSON, a simulated browser request with the real `Origin: http://localhost:3000`
+header got the correct `Access-Control-Allow-Origin` response back on
+both the preflight `OPTIONS` and the actual `GET`, no 307/308 redirects
+existed on any of those paths (a known CORS-breaking gotcha in
+FastAPI/Starlette routing), and `curl` to the dashboard's own origin
+returned 200. The uvicorn access log showed clean, complete traffic
+patterns matching full page loads with zero errors. Every plausible
+server-side cause was ruled out live, one at a time, not assumed clean.
+
+Root cause was never pinned to an exact browser mechanism (no console
+error text was available to inspect) — the leading candidate is a
+browser extension or an embedded-webview context blocking a cross-origin
+`fetch()` to a non-standard local port (`:8000`) even though CORS itself
+was correctly configured, which is a real, known class of problem
+`curl`-based verification structurally cannot reproduce.
+
+Rather than keep guessing at the exact mechanism, fixed it by
+eliminating the cross-origin request entirely: `apps/dashboard/next.config.ts`
+now proxies `/api/*` through Next's own server to `AXIOM_API_ORIGIN`
+(server-side, same machine, exactly like `curl` was already doing
+successfully), and `lib/api.ts` now calls `/api` by default instead of
+`http://127.0.0.1:8000` directly — the browser's fetches are same-origin,
+so CORS (and whatever was blocking it) no longer applies. A real,
+previously-orphaned `next dev` process on port 3000 (surviving from an
+earlier restart attempt whose `pkill` pattern missed it) was also found
+and killed during this fix — a real, separate finding, not assumed to be
+the cause of the original bug but worth naming since it could have
+caused a stale-config red herring on a future debugging pass. Verified
+after the fix: clean `tsc --noEmit`, clean `next build`, clean `eslint`,
+and `curl http://localhost:3000/api/v1/tools` returning the real 12-tool
+list through the new proxy path.
+
 ## 7. Decisions (confirmed with user, 2026-08-25)
 
 1. **Database**: new, independent Supabase project for Axiom OS — not

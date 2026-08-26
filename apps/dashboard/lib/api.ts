@@ -1,4 +1,8 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
+// Same-origin by default (proxied server-side to the real API by the
+// rewrite in next.config.ts) — see that file's comment for why. Set
+// NEXT_PUBLIC_API_URL to bypass the proxy and call the API directly
+// cross-origin instead, if that's ever actually preferred.
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "/api";
 
 export class ApiError extends Error {
   status: number;

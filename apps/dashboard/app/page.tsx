@@ -76,8 +76,10 @@ export default function Overview() {
 
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-300">
-          {error} — is the API running at{" "}
-          <code>{process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000"}</code>?
+          {error} — the dashboard proxies API calls through{" "}
+          <code>{process.env.NEXT_PUBLIC_API_URL ?? "/api"}</code>; check that{" "}
+          <code>./scripts/dev/run.sh</code> is running (default{" "}
+          <code>http://127.0.0.1:8000</code>).
         </div>
       )}
 
