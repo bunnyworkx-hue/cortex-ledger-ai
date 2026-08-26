@@ -1,0 +1,21 @@
+[project]
+name = "axiom-db"
+version = "0.1.0"
+description = "Axiom OS database layer: async engine, session management, ORM base, migrations"
+requires-python = ">=3.11"
+dependencies = [
+    "axiom-core",
+    "sqlalchemy[asyncio]>=2.0",
+    "asyncpg>=0.29",
+    "alembic>=1.13",
+]
+
+[tool.uv.sources]
+axiom-core = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["axiom_db"]

@@ -1,0 +1,31 @@
+[project]
+name = "axiom-os"
+version = "0.1.0"
+description = "Axiom OS — agentic AI operating system (Agent Fabric, Knowledge Fabric, Execution Engine)"
+requires-python = ">=3.11"
+dependencies = []
+
+[tool.uv.workspace]
+members = [
+    "packages/axiom-core",
+    "packages/axiom-db",
+    "packages/axiom-anthropic",
+    "packages/axiom-graphify",
+    "apps/api",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "httpx>=0.27",
+    "ruff>=0.6",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

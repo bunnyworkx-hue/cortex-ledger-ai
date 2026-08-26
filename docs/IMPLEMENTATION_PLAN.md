@@ -1,0 +1,176 @@
+# Milestone 4 — Proposed Architecture
+
+This is the architecture proposal `CLAUDE.md` §80/§105 (Step 7) requires
+before any implementation code is written. It supersedes the doc's
+*speculative* interfaces with the *real* ones found during the audits, and
+is meant to be reviewed before Milestone 6 (Foundation) starts.
+
+## 1. How the three pillars map onto real systems
+
+```
+                         AXIOM OS (this repo)
+                            │
+       ┌────────────────────┼────────────────────┐
+       ▼                    ▼                    ▼
+ AGENT FABRIC          KNOWLEDGE FABRIC      EXECUTION ENGINE
+       │                    │                    │
+ agency-agents          Graphify              Claude (Anthropic)
+ (255 agents,           (Apache-2.0,          Hermes Agent
+  MIT, github.com/       github.com/           (MIT, github.com/
+  msitarzewski/          Graphify-Labs/        NousResearch/
+  agency-agents)         graphify)             hermes-agent)
+       │                    │                    │
+       └────────────────────┼────────────────────┘
+                            │
+                           ORVYN
+              (ORVYN-V3 already exists — retrofit
+               later, per CLAUDE.md's own sequencing)
+```
+
+Every box in this diagram is now a real, inspected system with a real
+license and a real API surface, not a placeholder — see the three audit
+docs next to this one.
+
+## 2. Agent Fabric — concrete design
+
+**Registry.** `packages/axiom-agent-fabric/registry/` reads `agency-agents`
+(pinned to a specific commit, updated deliberately) and produces normalized
+records under `agents/registry/`. Since source frontmatter has no
+capability/tool/permission fields (confirmed in
+`AGENT_LIBRARY_AUDIT.md` §2), normalization is two-phase:
+
+1. **Mechanical**: `agent_id`, `name`, `description`, `category` (from
+   `divisions.json`), `instructions` (the prose body), `version` (source
+   commit hash) — a straight, lossless transform.
+2. **Curated**: `capabilities`, `tools`, `permissions`, `risk_level`,
+   `budget` — start these as `status: DRAFT` (per the lifecycle in
+   `CLAUDE.md` §69) and populated by hand for a small first cohort (10–20
+   agents spanning a few divisions), not auto-inferred from prose for all
+   255 on day one. Auto-inference from the description field is a
+   reasonable v2, not a v1 requirement — don't let it block the MVP.
+
+**Discovery/Router v1** (`CLAUDE.md` §10 explicitly says "do not jump
+directly to Version 4"): explicit routing over the curated cohort only.
+Capability-based search comes once enough agents have real capability tags
+to search over.
+
+**Invocation Gateway.** Adapt the `agency-agents-router` plugin's four-verb
+shape (`search` / `inspect` / `load` / `delegate`, confirmed real in
+`AGENT_LIBRARY_AUDIT.md` §5) as the Gateway's own operation set, rather
+than inventing new verb names — it's a working reference implementation of
+the exact lazy-discovery workflow `CLAUDE.md` §9 wants.
+
+## 3. Knowledge Fabric — concrete design
+
+`packages/axiom-graphify/adapter/` talks to Graphify over its real MCP
+server (`graphify-mcp` entry point / `python -m graphify.serve`), using
+HTTP transport (`--transport http`) so one Graphify server can back
+multiple agents/tenants rather than spawning a process per session.
+
+Knowledge Gateway operations map onto Graphify's **real** MCP tools,
+verified live in Milestone 8 (`GRAPHIFY_AUDIT.md` §4/§9) against a real
+graph built from `agency-agents` (1,121 nodes, 1,594 edges):
+
+| Axiom Knowledge Gateway op | Backed by |
+|---|---|
+| `search` | `query_graph` |
+| `get_node` | `get_node` |
+| `get_neighbors` | `get_neighbors` |
+| `get_path` | `shortest_path` |
+| `get_impact` | `get_pr_impact` (PR-scoped only — no general-impact tool exists) |
+
+**Correction from the original (pre-verification) plan:** every one of
+these tools returns human-readable text, not structured JSON
+(`CallToolResult.structured_content` is `None` on all of them — confirmed
+live). `axiom_core.knowledge`'s original `KnowledgeNode`/`Subgraph`/
+`PathResult` design assumed a structured graph API that doesn't actually
+exist over MCP; it was corrected to a single `KnowledgeAnswer(text, raw)`
+shape once this was verified. Callers get LLM-ready context text, not a
+graph object to walk in Python — which is the right shape for CLAUDE.md
+§108's knowledge→reasoning flow anyway.
+
+`get_dependencies`/`get_dependents`/`get_architecture`/`get_documentation`
+from the original speculative list have no direct 1:1 MCP tool and remain
+unimplemented — not stubbed as fake pass-throughs.
+
+Freshness tracking (`CLAUDE.md` §70–72) rides on Graphify's own
+`graphify hook install` git-commit-triggered rebuild rather than a
+separate staleness mechanism.
+
+## 4. Execution Engine — concrete design
+
+**Model Gateway** (`packages/axiom-anthropic/`): thin, provider-neutral
+wrapper around the Anthropic API. Single-provider for the MVP per
+`CLAUDE.md` §83 — no OpenAI/Gemini gateway work until something actually
+needs it.
+
+**Agent Gateway → Hermes** (`packages/axiom-hermes/`): calls Hermes's real
+`delegate_task` mechanism (confirmed in `HERMES_INTEGRATION.md` §4) rather
+than reimplementing subagent orchestration. Tool exposure to a Hermes
+session is scoped using Hermes's own `toolsets.py` composition model
+(§5 of that audit) — Axiom grants a named toolset, not a raw tool list.
+Sandboxing (`CLAUDE.md` §47) uses Hermes's existing Docker/Singularity/
+Modal/Daytona terminal backends rather than Axiom building its own
+container isolation layer.
+
+**Backend interface**: `AxiomNativeBackend` (Claude direct) and
+`HermesBackend` both implement the same `execute()`/`capabilities()`/
+`health()` shape from `CLAUDE.md` §30 — this is the seam that lets the
+first two demos (knowledge-grounded research on native Claude, then the
+same task routed through Hermes) share one execution path.
+
+## 5. What the MVP actually proves (Demo 1, concretely)
+
+Per `CLAUDE.md` §59, adjusted to real tool calls:
+
+```
+User: "Research this repository and explain how authentication works."
+  → Axiom creates an execution record
+  → Task classified (research/knowledge)
+  → Knowledge Gateway: query_graph("authentication") against a Graphify
+    server already running over the target repo
+  → Agent Discovery: search the curated agent cohort for a matching
+    specialist (e.g. a security/backend-review agent)
+  → Backend selected: AxiomNativeBackend (Claude)
+  → Permission check passes (read-only knowledge + model call, LOW risk)
+  → Execute: Claude answers, grounded in the Graphify subgraph
+  → Execution trace written (query, agent, backend, tokens, cost, result)
+  → Result returned
+```
+
+This is achievable without Hermes at all — Demo 2 (the Hermes round trip)
+is a deliberately separate milestone so the MVP doesn't block on two
+external integrations landing simultaneously.
+
+## 6. Sequencing (Milestones 6–20, unchanged from CLAUDE.md, now with real targets)
+
+1. **Foundation** — config, logging, a **new, independent Supabase
+   project** (decided §7 — not shared with ORVYN-V3), test harness.
+2. **Model Gateway** — Anthropic only.
+3. **Knowledge Gateway** — Graphify adapter over its real MCP server,
+   installed and exercised against a real target repo (recommend using
+   `agency-agents` itself as the first indexed repo — it's real, sizeable,
+   and already on disk).
+4. **Agent Runtime** — Agent/Task/Execution/Result primitives.
+5. **Agent Fabric** — registry + curated first cohort + explicit-routing
+   discovery + gateway adapted from `agency-agents-router`.
+6. **Tool Registry / MCP client** — generic MCP consumption, reusable for
+   both Graphify and any future MCP server.
+7. **Hermes Integration** — only after Hermes is actually installed
+   locally and `delegate_task` has been called for real once.
+8. **Memory, Policy, Human Approval, Observability, Dashboard, Evaluation,
+   Security** — as originally sequenced in `CLAUDE.md` §90–96, no changes
+   proposed here.
+
+## 7. Decisions (confirmed with user, 2026-08-25)
+
+1. **Database**: new, independent Supabase project for Axiom OS — not
+   shared with ORVYN-V3. Revisit when Project 2 (ORVYN-on-Axiom) actually
+   starts.
+2. **Graphify target repo for the first real test**: `agency-agents` —
+   already on disk, real size, and it's the same repo Agent Fabric
+   normalization reads, giving one shared reference point across two
+   milestones.
+3. **Hermes install**: hold off. Get the native-Claude path (Model Gateway
+   + Knowledge Gateway + Agent Fabric, Demo 1) working first; install and
+   test against a live Hermes process only when Milestone 13 starts.
