@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { api, ApiError, type AgentRecord } from "@/lib/api";
 import { scrollToZone, zoneIdForQuery } from "@/lib/scrollBridge";
 
@@ -38,6 +38,14 @@ export function TalkBack({
     },
   ]);
 
+  // Real bug hit live: onActiveAgentsChange/onExecutingChange used to be
+  // called from inside setRunning's updater function — React's own
+  // error, caught by Strict Mode double-invoking updaters to check
+  // purity: "Cannot update a component (World) while rendering a
+  // different component (TalkBack)." A setState updater must be pure
+  // (compute and return, no side effects); notifying a *different*
+  // component of a state change belongs in an effect that reacts to the
+  // committed value, not inside the updater that produces it.
   function markRunning(ids: string[], value: boolean) {
     setRunning((prev) => {
       const next = new Set(prev);
@@ -45,15 +53,18 @@ export function TalkBack({
         if (value) next.add(id);
         else next.delete(id);
       }
-      onActiveAgentsChange(next);
-      // The real signal for "is a request actually in flight right now"
-      // — every delegate() call (the first automatic one or a follow-up
-      // chip) passes through here, so this reflects genuine execution
-      // state, not a simulated timer.
-      onExecutingChange(next.size > 0);
       return next;
     });
   }
+
+  useEffect(() => {
+    onActiveAgentsChange(running);
+    // The real signal for "is a request actually in flight right now" —
+    // every delegate() call (the first automatic one or a follow-up
+    // chip) updates `running`, which this effect reacts to, so this
+    // reflects genuine execution state, not a simulated timer.
+    onExecutingChange(running.size > 0);
+  }, [running, onActiveAgentsChange, onExecutingChange]);
 
   async function runAgent(agent: AgentRecord, task: string) {
     markRunning([agent.agent_id], true);

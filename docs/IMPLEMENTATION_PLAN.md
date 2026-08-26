@@ -709,6 +709,45 @@ real completion, `backend_name: "hermes"`), a fast call still works
 normally, and the dashboard's `/v1/tools` still returns the real
 12-tool list through its new route handler.
 
+## 6k. Axiom World — a third real crash, from the new Hermes toggle (2026-08-26)
+
+Another real screenshot, another genuine React error, immediately after
+the Hermes work landed: `"Cannot update a component (World) while
+rendering a different component (TalkBack). To locate the bad
+setState() call inside TalkBack, follow the stack trace..."`, pointing
+at `TalkBack.tsx:48` — `markRunning`'s `setRunning((prev) => {...})`
+updater called `onActiveAgentsChange(next)` and `onExecutingChange(...)`
+(the parent `World` component's setters) *from inside its own updater
+function*. A setState updater must be pure — React's Strict Mode
+double-invokes updaters specifically to catch exactly this kind of
+impure side effect, and correctly flagged notifying a different
+component's state from inside one.
+
+This bug had been present since the "operate the system, don't just
+view it" pass introduced `markRunning`, and was masked until now:
+`onActiveAgentsChange`/`onExecutingChange` are typed the same regardless
+of what's passed for them, so nothing at the type level caught it, and
+neither `tsc`, `next build`, nor ESLint has a rule for "don't call a
+prop callback inside a different state's updater function" (unlike the
+`set-state-in-effect` rule that caught `ApprovalStation`'s analogous
+mistake at build time). It only surfaces at runtime, in a real browser,
+under Strict Mode — which is exactly why the earlier build-clean
+confidence didn't catch it, and why these screenshots keep mattering
+more than `tsc`/`build`/`lint` passing.
+
+Fixed properly, not patched around: `markRunning` is now a pure updater
+(compute `next`, return it, nothing else); a new `useEffect` watches the
+committed `running` value and calls
+`onActiveAgentsChange`/`onExecutingChange` from there — the correct,
+idiomatic React pattern for "notify a parent when child state changes,"
+which reacts to the real committed state rather than duplicating the
+computation or reaching across components mid-render. Checked
+`ApprovalStation`/`ToolRegistryPanel`'s own `Set`-based busy-state
+updaters for the same pattern — neither takes parent callback props at
+all, so neither was at risk; confirmed by grep, not assumed. Clean
+`tsc`/`build`/`lint`; real data flow re-verified live through the proxy.
+Backend suite unaffected (frontend-only change).
+
 ## 7. Decisions (confirmed with user, 2026-08-25)
 
 1. **Database**: new, independent Supabase project for Axiom OS — not
