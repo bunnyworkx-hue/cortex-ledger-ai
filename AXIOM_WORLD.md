@@ -140,9 +140,18 @@ explicit 130s timeout instead, past `HermesBackend`'s own 120s default.
   raycasting — drei's built-in `<Instance>` pointer events); clicking one
   opens `SelectedAgentCard`, a real detail panel with that agent's real
   fields and a real "run a task on this specific agent" action through
-  the same `api.delegate()` every other panel uses. Graphify and
-  Execution zone interactivity would be the natural next extension of
-  the same pattern — not yet built.
+  the same `api.delegate()` every other panel uses.
+
+  Extended to the Knowledge Fabric zone too: hovering a real graph node
+  brightens it and shows its real label/community/degree; clicking opens
+  `SelectedNodeCard`, whose "Find real neighbors" button makes a genuine
+  live call to the real Graphify MCP tool (`get_neighbors`) and shows the
+  actual traversal result — not a canned response, a real query against
+  the real graph, through the same generic tool-caller Tool Registry
+  uses. Verified live: querying neighbors of the real `RecordingContext`
+  node returned its real callers/callees with real
+  `source_file:source_location`. Execution zone interactivity is the one
+  remaining un-extended target.
 
 ## What's honestly not built
 
@@ -177,10 +186,10 @@ not silently assumed:
   (see above). ORVYN itself isn't a real project yet — see
   `docs/IMPLEMENTATION_PLAN.md` §7's decision to defer it entirely —
   so there's nothing real to build a destination toward.
-- **Graphify/Execution zone pointer interactivity** — the Agent Fabric
-  zone's hover/click is built (see above); the knowledge graph nodes and
-  execution backend spheres are still purely visual, not yet wired to
-  the same real pointer-event pattern.
+- **Execution zone pointer interactivity** — Agent Fabric and Knowledge
+  Fabric zones both have real hover/click (see above); the Execution
+  zone's backend spheres are still purely visual, not yet wired to the
+  same real pointer-event pattern.
 - **Mobile fallback, LOD/instancing tuning beyond drei's `Instances`
   defaults, formal security testing pass** (§27-28, Phase 14-15) — not
   done.

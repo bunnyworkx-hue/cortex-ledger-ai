@@ -17,6 +17,9 @@ export type GraphNode = {
   label: string;
   community: number;
   file_type: string;
+  source_file: string | null;
+  source_location: string | null;
+  degree: number;
 };
 
 export type GraphLink = {
@@ -54,7 +57,14 @@ export async function loadGraphSnapshot(): Promise<GraphSnapshot> {
   }
 
   const parsed = JSON.parse(raw) as {
-    nodes: Array<{ id: string; label?: string; community?: number; file_type?: string }>;
+    nodes: Array<{
+      id: string;
+      label?: string;
+      community?: number;
+      file_type?: string;
+      source_file?: string;
+      source_location?: string;
+    }>;
     links: Array<{ source: string; target: string; relation?: string; confidence?: string }>;
   };
 
@@ -69,6 +79,9 @@ export async function loadGraphSnapshot(): Promise<GraphSnapshot> {
     label: n.label ?? n.id,
     community: n.community ?? 0,
     file_type: n.file_type ?? "unknown",
+    source_file: n.source_file ?? null,
+    source_location: n.source_location ?? null,
+    degree: degree.get(n.id) ?? 0,
   }));
 
   const sorted = [...allNodes].sort((a, b) => (degree.get(b.id) ?? 0) - (degree.get(a.id) ?? 0));

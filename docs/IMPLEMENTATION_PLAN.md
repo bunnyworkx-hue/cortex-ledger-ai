@@ -829,6 +829,38 @@ new pointer handlers). 106/106 backend tests unaffected (no backend
 changes this pass). Graphify/Execution zone interactivity is the
 obvious next extension of the same pattern, not yet built.
 
+## 6o. Axiom World — real interactivity extended to the knowledge graph (2026-08-26)
+
+Continuing "next" — extended the same real pointer-interactivity pattern
+from Milestone 6n to `GraphifyZone`. `lib/graphData.server.ts`'s
+`GraphNode` type gained real fields that were being read from the actual
+`graph.json` but discarded (`source_file`, `source_location`) plus a
+computed real `degree` (reusing the same degree map already built for
+node sampling) — all real data that existed in the pipeline, just not
+surfaced to the client before.
+
+`GraphifyZone.tsx` now wires the identical `onPointerOver`/`onPointerOut`/
+`onClick` pattern per graph-node `<Instance>`: hovering brightens a real
+node white and updates the zone's subtitle with its real label/community/
+degree; clicking opens `SelectedNodeCard.tsx`. Unlike the agent card,
+this one goes a step further than showing static fields — its "Find real
+neighbors" button makes a genuine live call to the real Graphify MCP
+tool (`api.callTool("get_neighbors", {label: node.label})`, the same
+generic caller Tool Registry uses) and shows the actual real graph
+traversal result, not a canned response. Verified live:
+`get_neighbors` on the real `RecordingContext` node returned its real
+callers/callees with real `source_file:source_location` — through the
+world's own proxy, the exact path the card uses.
+
+One inspection target at a time: selecting a node clears any selected
+agent and vice versa (`World.tsx`'s `selectAgent`/`selectNode` wrappers)
+— both cards render at the same right-center position, so without this
+they'd silently render on top of each other.
+
+Clean `tsc`/`build`/`lint`. 106/106 backend tests unaffected (no backend
+changes this pass). Execution zone interactivity remains the one
+un-extended target.
+
 ## 7. Decisions (confirmed with user, 2026-08-25)
 
 1. **Database**: new, independent Supabase project for Axiom OS — not

@@ -4,7 +4,7 @@ import { Canvas } from "@react-three/fiber";
 import { ScrollControls, Stars } from "@react-three/drei";
 import { Suspense, useEffect, useState } from "react";
 import { api, type AgentRecord, type BackendStatus } from "@/lib/api";
-import type { GraphSnapshot } from "@/lib/graphData.server";
+import type { GraphNode, GraphSnapshot } from "@/lib/graphData.server";
 import { CameraRig } from "./CameraRig";
 import { ScrollBridgeSync } from "./ScrollBridgeSync";
 import { ZoneOverlay } from "./ZoneOverlay";
@@ -20,6 +20,7 @@ import { ToolRegistryPanel } from "./ToolRegistryPanel";
 import { PolicyEnginePanel } from "./PolicyEnginePanel";
 import { McpAreaPanel } from "./McpAreaPanel";
 import { SelectedAgentCard } from "./SelectedAgentCard";
+import { SelectedNodeCard } from "./SelectedNodeCard";
 
 const PAGES = 8;
 
@@ -33,6 +34,19 @@ export function World({ graph }: { graph: GraphSnapshot }) {
   const [matchedAgentIds, setMatchedAgentIds] = useState<Set<string>>(new Set());
   const [executing, setExecuting] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState<AgentRecord | null>(null);
+  const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
+
+  // One inspection target at a time — selecting a node while an agent
+  // card is open (or vice versa) would otherwise render both in the
+  // same right-center screen position simultaneously.
+  function selectAgent(agent: AgentRecord | null) {
+    setSelectedAgent(agent);
+    if (agent) setSelectedNode(null);
+  }
+  function selectNode(node: GraphNode | null) {
+    setSelectedNode(node);
+    if (node) setSelectedAgent(null);
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -78,9 +92,9 @@ export function World({ graph }: { graph: GraphSnapshot }) {
               agents={roster}
               activeAgentIds={activeAgentIds}
               matchedAgentIds={matchedAgentIds}
-              onSelectAgent={setSelectedAgent}
+              onSelectAgent={selectAgent}
             />
-            <GraphifyZone graph={graph} />
+            <GraphifyZone graph={graph} onSelectNode={selectNode} />
             <ExecutionZone
               modelBackends={models?.backends ?? {}}
               agentBackends={agentBackends?.backends ?? {}}
@@ -102,6 +116,7 @@ export function World({ graph }: { graph: GraphSnapshot }) {
       <PolicyEnginePanel />
       <McpAreaPanel />
       {selectedAgent && <SelectedAgentCard agent={selectedAgent} onClose={() => setSelectedAgent(null)} />}
+      {selectedNode && <SelectedNodeCard node={selectedNode} onClose={() => setSelectedNode(null)} />}
     </div>
   );
 }
