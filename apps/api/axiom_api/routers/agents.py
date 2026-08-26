@@ -7,9 +7,12 @@ from axiom_core.agents import (
     AgentTask,
     ExecutionRunner,
 )
+from axiom_core.logging import get_logger
 
-from axiom_api.dependencies import get_agent_backend_gateway
+from axiom_api.dependencies import get_agent_backend_gateway, get_execution_store
 from axiom_api.schemas import ExecuteAgentRequest, ExecutionOut
+
+logger = get_logger(__name__)
 
 router = APIRouter(prefix="/v1/agents", tags=["agents"])
 
@@ -33,6 +36,7 @@ async def list_agent_backends(
 async def execute(
     body: ExecuteAgentRequest,
     gateway: AgentBackendRegistry = Depends(get_agent_backend_gateway),
+    execution_store=Depends(get_execution_store),
 ) -> ExecutionOut:
     try:
         backend = gateway.get(body.backend or "axiom_native")
@@ -48,6 +52,12 @@ async def execute(
     task = AgentTask(input=body.input, context=body.context)
 
     execution = await ExecutionRunner(backend).run(agent, task)
+
+    if execution_store is not None:
+        try:
+            await execution_store.record(execution)
+        except Exception as exc:  # noqa: BLE001 — observability is supplementary, not critical path
+            logger.warning("axiom.execution.record_failed", execution_id=execution.execution_id, error=str(exc))
 
     if execution.status.value == "failed":
         # A real backend failure (e.g. the model call itself failed) —

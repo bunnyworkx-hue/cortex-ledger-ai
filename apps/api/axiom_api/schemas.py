@@ -135,3 +135,26 @@ class MemoryRecordOut(BaseModel):
     permissions: list[str]
     retention_days: int | None
     created_at: str
+
+
+class ExecutionTraceOut(BaseModel):
+    execution_id: str
+    agent_id: str
+    backend_name: str
+    status: str
+    input: str
+    output: str | None
+    error: str | None
+    raw: dict
+    started_at: str
+    completed_at: str | None
+    duration_ms: float | None
+
+
+class ObservabilityMetricsOut(BaseModel):
+    total_executions: int
+    succeeded: int
+    failed: int
+    success_rate: float | None
+    avg_duration_ms: float | None
+    top_agents_by_execution_count: dict[str, int]

@@ -7,19 +7,17 @@ decision here.
 
 ## Status
 
-Milestones 6–16 done: Foundation, Model Gateway, Knowledge Gateway (real
-Graphify MCP adapter), Agent Runtime, Agent Fabric (a real registry over
-`agency-agents`, 254/255 agents + a 12-agent curated cohort), Tool
-Registry + MCP (`/v1/tools`, all 10 real Graphify tools auto-discovered),
-Hermes Integration (a second real `AgentBackend`), Memory (`/v1/memory`,
-real Postgres), Policy + Human Approval (`/v1/approvals`: a real
-`modify_business_record` demo tool — CLAUDE.md's own Demo 6 — gated
-high-risk by a real `PolicyEngine`, held as a real pending row until a
-human approves it via the API, at which point it actually executes
-through the same audited `ToolRegistry.execute()` path every other tool
-call takes; rejecting or double-approving are both real, checked paths,
-not just the happy path). See `docs/IMPLEMENTATION_PLAN.md` for what's
-next (Observability, Dashboard, Evaluation, Security).
+Milestones 6–17 done: Foundation, Model Gateway, Knowledge Gateway, Agent
+Runtime, Agent Fabric (a real registry over `agency-agents`, 254/255
+agents + a 12-agent curated cohort), Tool Registry + MCP, Hermes
+Integration, Memory (`/v1/memory`), Policy + Human Approval
+(`/v1/approvals`, gating a real `modify_business_record` demo tool),
+Observability (`/v1/observability/executions` and `/metrics` — a real
+`executions` table recording every Task → Backend → Result run, success
+or failure, with real token usage/cost/duration; not the same thing as
+`memories`, which only records successful task content). See
+`docs/IMPLEMENTATION_PLAN.md` for what's next (Dashboard, Evaluation,
+Security).
 
 ## Layout
 

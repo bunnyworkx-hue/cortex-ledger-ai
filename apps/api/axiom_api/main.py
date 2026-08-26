@@ -15,6 +15,7 @@ from axiom_core.policy import PolicyEngine
 from axiom_core.tools import ToolRegistry
 from axiom_db.approvals import PostgresApprovalStore
 from axiom_db.engine import DatabaseNotConfiguredError, check_database_health, get_sessionmaker
+from axiom_db.executions import PostgresExecutionStore
 from axiom_db.memory import PostgresMemoryStore
 from axiom_graphify import GraphifyBackend
 from axiom_hermes import HermesBackend
@@ -27,6 +28,7 @@ from axiom_api.routers.approvals import router as approvals_router
 from axiom_api.routers.knowledge import router as knowledge_router
 from axiom_api.routers.memory import router as memory_router
 from axiom_api.routers.models import router as models_router
+from axiom_api.routers.observability import router as observability_router
 from axiom_api.routers.tools import router as tools_router
 
 settings = get_settings()
@@ -117,6 +119,13 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     else:
         logger.warning("axiom.approval_store.not_configured")
 
+    app.state.execution_store = None
+    if settings.database_url:
+        app.state.execution_store = PostgresExecutionStore(get_sessionmaker())
+        logger.info("axiom.execution_store.registered", backend="postgres")
+    else:
+        logger.warning("axiom.execution_store.not_configured")
+
     yield
     logger.info("axiom.shutdown")
 
@@ -129,6 +138,7 @@ app.include_router(agent_fabric_router)
 app.include_router(tools_router)
 app.include_router(memory_router)
 app.include_router(approvals_router)
+app.include_router(observability_router)
 
 
 @app.get("/health")

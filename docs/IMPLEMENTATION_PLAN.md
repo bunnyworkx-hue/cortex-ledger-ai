@@ -211,8 +211,18 @@ external integrations landing simultaneously.
    just gates entry to the same one. `approvals` is the second real
    Alembic migration (same shared-core-table gotcha as `memories`, fixed
    the same way before ever running it).
-10. **Observability, Dashboard, Evaluation, Security** — as originally
-    sequenced in `CLAUDE.md` §93–96, no changes proposed here.
+10. **Observability** — done. A real `executions` table (CLAUDE.md §48,
+    §93), distinct from `memories`: every Task → Backend → Result run is
+    recorded, success or failure, with real per-backend `raw` usage data
+    (Anthropic's token counts, Hermes's cost/token JSON) and a real
+    `duration_ms`. Third real Alembic migration (same shared-core-table
+    gotcha, fixed the same way). `/v1/observability/executions[/{id}]`
+    and `/metrics` (total/succeeded/failed/success_rate/avg_duration_ms/
+    top agents by execution count) — all computed from real recorded
+    rows, not fabricated. Wired into both execution entry points
+    (`/v1/agents/execute` and `/v1/agent-fabric/.../delegate`).
+11. **Dashboard, Evaluation, Security** — as originally sequenced in
+    `CLAUDE.md` §94–96, no changes proposed here.
 
 ## 7. Decisions (confirmed with user, 2026-08-25)
 

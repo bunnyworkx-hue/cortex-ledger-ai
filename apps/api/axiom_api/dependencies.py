@@ -1,7 +1,7 @@
 from fastapi import Request
 
 from axiom_agent_fabric import AgentInvocationGateway
-from axiom_core.agents import AgentBackendRegistry
+from axiom_core.agents import AgentBackendRegistry, ExecutionStore
 from axiom_core.knowledge import KnowledgeGatewayRegistry
 from axiom_core.memory import MemoryStore
 from axiom_core.models import ModelGatewayRegistry
@@ -39,3 +39,7 @@ def get_policy_engine(request: Request) -> PolicyEngine:
 
 def get_approval_store(request: Request) -> ApprovalStore | None:
     return request.app.state.approval_store
+
+
+def get_execution_store(request: Request) -> ExecutionStore | None:
+    return request.app.state.execution_store
