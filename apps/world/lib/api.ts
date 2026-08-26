@@ -59,6 +59,21 @@ export type DelegateResult = {
   content: string | null;
 };
 
+export type Approval = {
+  id: string;
+  action: string;
+  risk_level: string;
+  reason: string;
+  payload: { tool_name: string; arguments: Record<string, unknown> };
+  status: string;
+  created_at: string;
+  decided_at: string | null;
+  decided_by: string | null;
+};
+
+export type PendingApproval = { approval_id: string; status: string; reason: string };
+export type ToolCallResult = { content: Record<string, unknown>; is_error: boolean };
+
 export const api = {
   health: () => request<{ status: string; database: string }>("/health"),
   agentFabricStatus: () => request<AgentFabricStatus>("/v1/agent-fabric"),
@@ -76,5 +91,26 @@ export const api = {
     request<DelegateResult>(`/v1/agent-fabric/agents/${agentId}/delegate`, {
       method: "POST",
       body: JSON.stringify({ input }),
+    }),
+  listApprovals: () => request<Approval[]>("/v1/approvals"),
+  approve: (id: string, decidedBy: string) =>
+    request<ToolCallResult>(`/v1/approvals/${id}/approve`, {
+      method: "POST",
+      body: JSON.stringify({ decided_by: decidedBy }),
+    }),
+  reject: (id: string, decidedBy: string) =>
+    request<Approval>(`/v1/approvals/${id}/reject`, {
+      method: "POST",
+      body: JSON.stringify({ decided_by: decidedBy }),
+    }),
+  // Proposes a real high-risk action (the same demo mutating tool the
+  // rest of Axiom OS uses to prove the approval gate — see
+  // apps/api/axiom_api/native_tools.py) so the world can demonstrate the
+  // full real propose -> approve -> execute loop, not just review
+  // approvals that happened to already exist.
+  proposeDemoAction: (recordId: string, status: string) =>
+    request<PendingApproval | ToolCallResult>("/v1/tools/modify_business_record/call", {
+      method: "POST",
+      body: JSON.stringify({ arguments: { record_id: recordId, fields: { status } } }),
     }),
 };

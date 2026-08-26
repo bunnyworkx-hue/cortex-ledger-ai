@@ -80,6 +80,18 @@ to.
   report intermediate stages for a single HTTP delegate call — but it
   does make the one real async hop (agent selected → agent executing)
   visible and correctly timed.
+- **Human Approval station** (§19, CLAUDE.md §64's Sixth Demo) —
+  `ApprovalStation` is a real, working panel, not a mockup: "Propose test
+  action" calls the real `POST /v1/tools/modify_business_record/call`
+  (the same demo high-risk tool the rest of Axiom OS uses), which the
+  real Policy Engine genuinely refuses to run, returning a real pending
+  `approval_id`. The panel polls `GET /v1/approvals` every 6s and lists
+  every real pending approval (21 in the live system as of this build —
+  mostly left over from earlier test runs, a real number, not staged).
+  Approve calls the real `POST /v1/approvals/{id}/approve`, which
+  actually executes the held action and returns the real mutated record;
+  Reject calls the real `.../reject`, which never executes it. Verified
+  live end-to-end through the exact same proxy path the component uses.
 
 ## What's honestly not built
 
@@ -102,11 +114,10 @@ not silently assumed:
   itself ("do not implement voice unless the existing architecture
   supports it cleanly... text talk-back is mandatory for MVP"). Text
   only.
-- **Human Approval station, Policy Engine room, Tool Registry area,
-  MCP area, ORVYN destination** (§16-19, §31) — real endpoints exist for
-  approvals/tools (see the Dashboard and DEMO.md for the working
-  propose→approve→execute flow) but have no dedicated 3D representation
-  here yet.
+- **Policy Engine room, Tool Registry area, MCP area, ORVYN destination**
+  (§16-18, §31) — Human Approval (§19) is now real and working (see
+  above); these others still have no dedicated representation, in the 3D
+  scene or as an overlay panel.
 - **Mobile fallback, LOD/instancing tuning beyond drei's `Instances`
   defaults, formal security testing pass** (§27-28, Phase 14-15) — not
   done.

@@ -14,6 +14,7 @@ import { GraphifyZone } from "./GraphifyZone";
 import { ExecutionZone } from "./ExecutionZone";
 import { ExecutionPulse } from "./ExecutionPulse";
 import { TalkBack } from "./TalkBack";
+import { ApprovalStation } from "./ApprovalStation";
 
 const PAGES = 8;
 
@@ -85,6 +86,7 @@ export function World({ graph }: { graph: GraphSnapshot }) {
         onMatchedAgentsChange={setMatchedAgentIds}
         onExecutingChange={setExecuting}
       />
+      <ApprovalStation />
     </div>
   );
 }

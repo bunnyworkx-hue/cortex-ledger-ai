@@ -204,6 +204,165 @@ body {
   cursor: default;
 }
 
+/* ---------- approval station ---------- */
+.approval-station {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.approval-toggle {
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  color: var(--muted);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 7px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.approval-toggle:hover {
+  color: var(--ink);
+}
+
+.approval-panel {
+  margin-top: 8px;
+  width: min(360px, 88vw);
+  max-height: 60vh;
+  overflow-y: auto;
+  background: rgba(20, 22, 31, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--surface-line);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 12.5px;
+}
+
+.approval-panel-head {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.approval-panel-head button {
+  align-self: flex-start;
+  background: var(--accent);
+  color: #14161c;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.approval-panel-head button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.approval-error {
+  color: #f0796b;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+}
+.approval-last {
+  color: #7fd6a0;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.approval-empty {
+  color: var(--faint);
+  font-style: italic;
+}
+
+.approval-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.approval-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--surface-line);
+  border-radius: 9px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.approval-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.approval-action {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11.5px;
+  color: var(--ink);
+}
+.approval-risk {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+.approval-risk-high,
+.approval-risk-critical {
+  background: rgba(192, 57, 43, 0.18);
+  color: #f0796b;
+}
+.approval-risk-medium {
+  background: rgba(227, 170, 76, 0.18);
+  color: #e3aa4c;
+}
+.approval-risk-low {
+  background: rgba(79, 204, 142, 0.18);
+  color: #4fcc8e;
+}
+.approval-reason {
+  color: var(--muted);
+  line-height: 1.4;
+}
+.approval-buttons {
+  display: flex;
+  gap: 8px;
+}
+.approval-approve,
+.approval-reject {
+  flex: 1;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 0;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.approval-approve {
+  background: #4fcc8e;
+  color: #0c1a12;
+}
+.approval-reject {
+  background: transparent;
+  border: 1px solid var(--surface-line);
+  color: var(--muted);
+}
+.approval-approve:disabled,
+.approval-reject:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;

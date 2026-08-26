@@ -520,6 +520,45 @@ real, correctly-timed visualization of the one hop that does exist.
 Clean `tsc`/`build`/`lint`; 106/106 backend tests unaffected (no backend
 changes this pass).
 
+## 6f. Axiom World — a real Human Approval station (2026-08-26)
+
+Continuing the build after the user's "proceed with the next step":
+picked the highest-value remaining real gap — §19's Human Approval
+station, CLAUDE.md §64's own Sixth Demo — since the backend flow it
+needs (propose → pending → approve/reject → execute) was already fully
+real and tested, just absent from the 3D world.
+
+New `ApprovalStation.tsx`: a fixed HTML overlay panel (same pattern as
+Talk-Back — real interaction needs real DOM buttons, not raycasted 3D
+meshes). "Propose test action" calls the real
+`POST /v1/tools/modify_business_record/call`; the real Policy Engine
+genuinely refuses to run it, returning a real pending `approval_id`.
+The panel polls `GET /v1/approvals` every 6s (real polling, not a fake
+timer) and lists every real pending approval — 21 in the live system at
+verification time, mostly left over from earlier test runs across this
+whole project, a real number. Approve calls the real
+`POST /v1/approvals/{id}/approve` (which actually executes the held
+action and returns the real mutated record); Reject calls the real
+`.../reject` (which never executes it). `lib/api.ts` gained
+`listApprovals`/`approve`/`reject`/`proposeDemoAction`, typed against
+the real `ApprovalOut`/`PendingApprovalOut`/`ToolCallResultOut` schemas
+in `apps/api/axiom_api/schemas.py`, not guessed.
+
+**Real lint error hit and fixed, not just a warning this time**: the
+first draft called a `useCallback`-wrapped `refresh()` directly inside a
+`useEffect` body, which `eslint-plugin-react-hooks`'s
+`set-state-in-effect` rule flags as an error (cascading-render risk) —
+`next build` genuinely failed on it. Fixed by inlining the poll function
+inside the effect with its own `cancelled` guard (the same pattern
+`World.tsx`'s own data-loading effect already used), keeping a separate
+plain `refresh()` for the two call sites outside any effect
+(`proposeDemoAction`, `decide`) where the rule doesn't apply. Verified
+live end-to-end through the real proxy path: propose → real pending
+approval appears in a live `GET /v1/approvals` → approve → real mutated
+record returned — the exact same calls the component makes. Clean
+`tsc`/`build`/`lint`; 106/106 backend tests unaffected (no backend
+changes this pass).
+
 ## 7. Decisions (confirmed with user, 2026-08-25)
 
 1. **Database**: new, independent Supabase project for Axiom OS — not
