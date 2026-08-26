@@ -12,6 +12,7 @@ import { EntryZone } from "./EntryZone";
 import { AgentFabricZone } from "./AgentFabricZone";
 import { GraphifyZone } from "./GraphifyZone";
 import { ExecutionZone } from "./ExecutionZone";
+import { ExecutionPulse } from "./ExecutionPulse";
 import { TalkBack } from "./TalkBack";
 
 const PAGES = 8;
@@ -23,6 +24,8 @@ export function World({ graph }: { graph: GraphSnapshot }) {
   const [knowledge, setKnowledge] = useState<BackendStatus | null>(null);
   const [liveError, setLiveError] = useState<string | null>(null);
   const [activeAgentIds, setActiveAgentIds] = useState<Set<string>>(new Set());
+  const [matchedAgentIds, setMatchedAgentIds] = useState<Set<string>>(new Set());
+  const [executing, setExecuting] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -63,20 +66,25 @@ export function World({ graph }: { graph: GraphSnapshot }) {
 
           <Suspense fallback={null}>
             <EntryZone />
-            <AgentFabricZone agents={roster} activeAgentIds={activeAgentIds} />
+            <AgentFabricZone agents={roster} activeAgentIds={activeAgentIds} matchedAgentIds={matchedAgentIds} />
             <GraphifyZone graph={graph} />
             <ExecutionZone
               modelBackends={models?.backends ?? {}}
               agentBackends={agentBackends?.backends ?? {}}
               knowledgeBackends={knowledge?.backends ?? {}}
             />
+            <ExecutionPulse active={executing} />
           </Suspense>
 
           <ZoneOverlay pages={PAGES} />
         </ScrollControls>
       </Canvas>
 
-      <TalkBack onActiveAgentsChange={setActiveAgentIds} />
+      <TalkBack
+        onActiveAgentsChange={setActiveAgentIds}
+        onMatchedAgentsChange={setMatchedAgentIds}
+        onExecutingChange={setExecuting}
+      />
     </div>
   );
 }

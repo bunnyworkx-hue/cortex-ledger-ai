@@ -60,17 +60,26 @@ to.
   Fabric zone (or another zone on a recognized keyword — a literal
   keyword map, `lib/scrollBridge.ts::zoneIdForQuery`, not NLU, named as
   such).
-- **The 3D scene visibly reacts to real work.** Whichever real agent
-  Talk-Back is currently running lights up gold and grows in the Agent
-  Fabric point cloud — `World.tsx` lifts an `activeAgentIds` set from
-  Talk-Back's real in-flight delegations down into `AgentFabricZone`, so
-  you can watch, in the 3D view, which specific real agent out of 254 is
-  actually doing your work right now. This closes the half of §7's "Agent
-  Discovery" ask that's about *highlighting the selected agent*; the
-  other half — dimming every *non*-matching agent while a search is
-  active, "the irrelevant agents fade back" — isn't built yet, since
-  `AgentFabricZone` currently only special-cases the active id rather
-  than tracking a broader "currently searched" set.
+- **The 3D scene visibly reacts to real work — both halves of §7 now.**
+  Whichever real agent Talk-Back is currently running lights up gold and
+  grows (`activeAgentIds`, lifted from Talk-Back's real in-flight
+  delegations). Separately, the moment a real search returns results,
+  every agent *not* in that result set fades to a dim, shrunk grey
+  (`matchedAgentIds`, `AgentFabricZone`'s `DIM_COLOR`) while the real
+  matches stay at full color — "the irrelevant agents fade back, selected
+  agents become highlighted," tied to an actual search response, not
+  simulated. The fade clears back to normal once a query returns zero
+  matches.
+- **A real execution pulse between zones.** While any real `delegate()`
+  call is in flight — the initial automatic run or a follow-up chip —
+  `ExecutionPulse` animates a small light along the line from the Agent
+  Fabric zone to the Execution Engine zone, driven by the same real
+  `running` set Talk-Back already tracks (`onExecutingChange`), not a
+  fake timer. This is deliberately *not* a fabricated multi-stage
+  Planner→Backend→Tools→Verify trace (§20) — the real backend doesn't
+  report intermediate stages for a single HTTP delegate call — but it
+  does make the one real async hop (agent selected → agent executing)
+  visible and correctly timed.
 
 ## What's honestly not built
 
@@ -83,10 +92,12 @@ not silently assumed:
   Hermes shows up as one real backend node in the Execution Engine zone
   (via `/v1/agents`), not as a separate physical gateway with an animated
   request→authorization→budget→approval sequence.
-- **A live execution-graph animation** (§20) — real delegations happen
-  and their real results appear in the chat, but there's no separate
-  animated "watch the request travel through Planner → Backend → Tools
-  → Verify" sequence.
+- **A multi-stage execution-graph animation** (§20) — `ExecutionPulse`
+  now shows the one real hop that exists (Agent Fabric → Execution
+  Engine, timed to real in-flight state), but there's no separate
+  Planner → Backend → Tools → Verify staged sequence, because the real
+  backend doesn't emit intermediate progress events for a single
+  delegate call to animate honestly.
 - **Voice input/output** (§22) — explicitly deferred by the prompt
   itself ("do not implement voice unless the existing architecture
   supports it cleanly... text talk-back is mandatory for MVP"). Text

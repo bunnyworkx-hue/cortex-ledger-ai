@@ -501,6 +501,25 @@ closing half of §7's original Agent Discovery ask (highlighting the
 selected agent; dimming the non-matching rest is still not built, named
 honestly in `AXIOM_WORLD.md` rather than claimed).
 
+## 6e. Axiom World — fade-back and a real execution pulse (2026-08-26)
+
+Immediate follow-up: closed the other half of §7 and added an honest
+stand-in for §20. `AgentFabricZone` now takes a real `matchedAgentIds`
+set (Talk-Back's real search-result ids, reported via a new
+`onMatchedAgentsChange` callback) — every non-matching real agent dims
+to grey and shrinks the moment a search returns results, matching "the
+irrelevant agents fade back" from the original spec, tied to a genuine
+search response rather than simulated. A new `ExecutionPulse` component
+animates a light along the real line between the Agent Fabric and
+Execution Engine zone centers while any real `delegate()` call is
+in-flight (`onExecutingChange`, driven by the same `running` set
+Talk-Back already tracked for the chip-disable UI) — deliberately not a
+fabricated multi-stage Planner/Backend/Tools/Verify trace, since the
+real backend doesn't emit intermediate progress for one HTTP call, but a
+real, correctly-timed visualization of the one hop that does exist.
+Clean `tsc`/`build`/`lint`; 106/106 backend tests unaffected (no backend
+changes this pass).
+
 ## 7. Decisions (confirmed with user, 2026-08-25)
 
 1. **Database**: new, independent Supabase project for Axiom OS — not

@@ -17,13 +17,16 @@ const DIVISION_COLOR = [
 ];
 
 const ACTIVE_COLOR = "#F5C24B";
+const DIM_COLOR = "#33364a";
 
 export function AgentFabricZone({
   agents,
   activeAgentIds,
+  matchedAgentIds,
 }: {
   agents: AgentRecord[];
   activeAgentIds: Set<string>;
+  matchedAgentIds: Set<string>;
 }) {
   const divisions = useMemo(() => {
     const counts = new Map<string, number>();
@@ -65,14 +68,28 @@ export function AgentFabricZone({
         <meshStandardMaterial roughness={0.4} />
         {agents.map((agent) => {
           const active = activeAgentIds.has(agent.agent_id);
-          const color = active ? ACTIVE_COLOR : divisionColor.get(agent.division) ?? "#8f97ea";
+          const searching = matchedAgentIds.size > 0;
+          const matched = matchedAgentIds.has(agent.agent_id);
+          const baseColor = divisionColor.get(agent.division) ?? "#8f97ea";
+
+          // Idle (no search yet): everyone at full color/scale. Once a
+          // search has real results, non-matches fade back — the "the
+          // irrelevant agents fade back, selected agents become
+          // highlighted" behavior from the original spec's Agent
+          // Discovery section, tied to a real search result set rather
+          // than simulated.
+          let color = baseColor;
+          let scale = 1;
+          if (active) {
+            color = ACTIVE_COLOR;
+            scale = 2.6;
+          } else if (searching) {
+            color = matched ? baseColor : DIM_COLOR;
+            scale = matched ? 1.35 : 0.55;
+          }
+
           return (
-            <Instance
-              key={agent.agent_id}
-              position={positions.get(agent.agent_id) ?? [0, 0, 0]}
-              color={color}
-              scale={active ? 2.6 : 1}
-            />
+            <Instance key={agent.agent_id} position={positions.get(agent.agent_id) ?? [0, 0, 0]} color={color} scale={scale} />
           );
         })}
       </Instances>

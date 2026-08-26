@@ -10,7 +10,15 @@ type LogEntry =
   | { role: "result"; text: string; agentId: string }
   | { role: "error"; text: string };
 
-export function TalkBack({ onActiveAgentsChange }: { onActiveAgentsChange: (ids: Set<string>) => void }) {
+export function TalkBack({
+  onActiveAgentsChange,
+  onMatchedAgentsChange,
+  onExecutingChange,
+}: {
+  onActiveAgentsChange: (ids: Set<string>) => void;
+  onMatchedAgentsChange: (ids: Set<string>) => void;
+  onExecutingChange: (executing: boolean) => void;
+}) {
   const [open, setOpen] = useState(true);
   const [value, setValue] = useState("");
   const [busy, setBusy] = useState(false);
@@ -30,6 +38,11 @@ export function TalkBack({ onActiveAgentsChange }: { onActiveAgentsChange: (ids:
         else next.delete(id);
       }
       onActiveAgentsChange(next);
+      // The real signal for "is a request actually in flight right now"
+      // — every delegate() call (the first automatic one or a follow-up
+      // chip) passes through here, so this reflects genuine execution
+      // state, not a simulated timer.
+      onExecutingChange(next.size > 0);
       return next;
     });
   }
@@ -71,9 +84,12 @@ export function TalkBack({ onActiveAgentsChange }: { onActiveAgentsChange: (ids:
     try {
       const matches = await api.agentFabricSearch(query);
       if (matches.length === 0) {
+        onMatchedAgentsChange(new Set());
         setLog((l) => [...l, { role: "axiom", text: "No agents matched that in the real registry — try different wording." }]);
         return;
       }
+
+      onMatchedAgentsChange(new Set(matches.map((a) => a.agent_id)));
 
       const [lead, ...rest] = matches;
       setLog((l) => [
@@ -89,6 +105,7 @@ export function TalkBack({ onActiveAgentsChange }: { onActiveAgentsChange: (ids:
       ]);
       await runAgent(lead, query);
     } catch (err) {
+      onMatchedAgentsChange(new Set());
       setLog((l) => [...l, { role: "error", text: err instanceof ApiError ? err.message : "Could not reach the Axiom API." }]);
     } finally {
       setBusy(false);
