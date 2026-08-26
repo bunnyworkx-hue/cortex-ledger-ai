@@ -3440,4 +3440,96 @@ DO NOT BYPASS AXIOM PERMISSIONS, BUDGETS, POLICY, OR AUDIT LOGGING.
 
 DO NOT FABRICATE TEST RESULTS.
 
+---
+
+# 111. AXIOM OS — CONVERSATIONAL COMMAND INTERFACE
+
+## Purpose
+
+Axiom OS must not be built as a backend-only AI orchestration system.
+
+It must provide a human-facing conversational command interface that allows a user to communicate with Axiom through:
+
+- Text
+- Voice
+- Spoken responses
+- Execution status
+- Agent activity
+- Approval requests
+- Results
+- Follow-up conversation
+
+The user should be able to communicate with Axiom naturally rather than needing to know:
+
+- which agent to use
+- which model to use
+- which tool to use
+- which MCP server to use
+- which workflow to execute
+- how the Agent Registry works
+
+The user communicates with:
+
+# AXIOM
+
+Axiom determines what needs to happen internally.
+
+## Architecture
+
+The conversational interface is a separate layer from the core Axiom infrastructure.
+
+Architecture:
+
+```
+                         USER
+                           │
+              ┌────────────┴────────────┐
+              │                         │
+             TEXT                      VOICE
+              │                         │
+              │                  Speech-to-Text
+              │                         │
+              └────────────┬────────────┘
+                           │
+                           ▼
+                AXIOM COMMAND INTERFACE
+                           │
+                           ▼
+                     ORCHESTRATOR
+                           │
+          ┌────────────────┼────────────────┐
+          │                │                │
+          ▼                ▼                ▼
+    AGENT FABRIC     KNOWLEDGE FABRIC   EXECUTION ENGINE
+          │                │                │
+     237 Agents         Graphify        Claude
+          │                │             Hermes
+          │                │             Native
+          │                │             Tools
+          │                │             MCP
+          └────────────────┼────────────────┘
+                           │
+                           ▼
+                     VERIFICATION
+                           │
+                           ▼
+                      EVALUATION
+                           │
+                           ▼
+                    RESPONSE ENGINE
+                           │
+                  ┌────────┴────────┐
+                  │                 │
+                TEXT              VOICE
+                  │                 │
+                  │            Text-to-Speech
+                  │                 │
+                  └────────┬────────┘
+                           │
+                           ▼
+                          USER
+```
+
+---
+
 BUILD THE FIRST REAL VERSION OF AXIOM OS.
