@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from axiom_agent_fabric import AgencyAgentsSourceError, AgentInvocationGateway, AgentRegistry
 from axiom_anthropic import AnthropicBackend, build_anthropic_client
@@ -131,6 +132,16 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(title="Axiom OS API", version="0.1.0", lifespan=lifespan)
+app.add_middleware(
+    CORSMiddleware,
+    # Milestone 18 (Dashboard): the dashboard is a separate Next.js dev
+    # server (localhost:3000) calling this API cross-origin. Dev-only
+    # convenience — origin allowlisting for a real deployment is
+    # Milestone 20 (Security)'s job, not invented here.
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.include_router(models_router)
 app.include_router(knowledge_router)
 app.include_router(agents_router)

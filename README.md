@@ -7,17 +7,16 @@ decision here.
 
 ## Status
 
-Milestones 6–17 done: Foundation, Model Gateway, Knowledge Gateway, Agent
-Runtime, Agent Fabric (a real registry over `agency-agents`, 254/255
-agents + a 12-agent curated cohort), Tool Registry + MCP, Hermes
-Integration, Memory (`/v1/memory`), Policy + Human Approval
-(`/v1/approvals`, gating a real `modify_business_record` demo tool),
-Observability (`/v1/observability/executions` and `/metrics` — a real
-`executions` table recording every Task → Backend → Result run, success
-or failure, with real token usage/cost/duration; not the same thing as
-`memories`, which only records successful task content). See
-`docs/IMPLEMENTATION_PLAN.md` for what's next (Dashboard, Evaluation,
-Security).
+Milestones 6–18 done: Foundation, Model Gateway, Knowledge Gateway, Agent
+Runtime, Agent Fabric, Tool Registry + MCP, Hermes Integration, Memory,
+Policy + Human Approval, Observability, and a real Next.js Dashboard
+(`apps/dashboard`) — Overview (live subsystem status), Agent Fabric
+(search + live delegate), Execution Trace, Approvals (real approve/
+reject buttons that call the API), and Tools. A deliberate subset of
+CLAUDE.md §50's ~18-view list, not all of it — Agent Teams, Execution/
+Knowledge Graph visualizations, a dedicated Knowledge Explorer/MCP/
+Backends/Memory/Evaluations/Security/Settings view are not built; see
+`docs/IMPLEMENTATION_PLAN.md` for what's next (Evaluation, Security).
 
 ## Layout
 
@@ -30,6 +29,7 @@ packages/axiom-graphify/  real Graphify MCP adapter (Knowledge Gateway)
 packages/axiom-agent-fabric/ real agent registry + invocation gateway over agency-agents
 packages/axiom-mcp/       generic MCP client + Tool Registry integration
 packages/axiom-hermes/    real Hermes Agent CLI adapter (AgentBackend)
+apps/dashboard/           Next.js operations dashboard
 tests/                    unit + integration tests
 docs/                     audits (Graphify, Hermes, agent library) + architecture plan
 var/                      generated artifacts (graphify-out/graph.json, ...) — gitignored
@@ -69,3 +69,18 @@ prompt that reads `/dev/tty` directly and hangs forever in a non-interactive
 shell (see `docs/hermes/HERMES_INTEGRATION.md` §10). `AXIOM_HERMES_BIN`
 should point at the installed binary (`~/.local/bin/hermes` by default) if
 it isn't already on the API process's PATH.
+
+### Dashboard
+
+```bash
+cd apps/dashboard && npm install   # first time only
+./scripts/dev/run.sh               # API on :8000, in one terminal
+./scripts/dev/dashboard.sh         # dashboard on :3000, in another
+```
+
+The API's CORS policy only allows `localhost:3000`/`127.0.0.1:3000` — see
+`apps/api/axiom_api/main.py`. Build/typecheck/lint are verified
+(`npm run build`, clean TypeScript, clean ESLint) and every route was
+curl-verified to serve 200 with working CORS; the rendered UI itself
+was not visually verified — no browser/screenshot tool was available in
+this environment.

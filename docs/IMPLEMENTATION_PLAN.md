@@ -221,8 +221,25 @@ external integrations landing simultaneously.
     top agents by execution count) — all computed from real recorded
     rows, not fabricated. Wired into both execution entry points
     (`/v1/agents/execute` and `/v1/agent-fabric/.../delegate`).
-11. **Dashboard, Evaluation, Security** — as originally sequenced in
-    `CLAUDE.md` §94–96, no changes proposed here.
+11. **Dashboard** — done, deliberately scoped down from CLAUDE.md §50's
+    ~18-view list. Real Next.js 16 + TypeScript + Tailwind app
+    (`apps/dashboard`) with 5 pages, all hitting the real running API
+    (CORS added to `axiom-api` for `localhost:3000`): Overview (every
+    subsystem's live status plus real execution metrics), Agent Fabric
+    (search the curated cohort, delegate a real task, pick the backend),
+    Execution Trace (list + detail from the real `executions` table),
+    Approvals (real approve/reject buttons — approving executes the
+    original high-risk action for real, same as the API-only proof in
+    Milestone 16), and Tools. Not built: Agent Teams, Execution/Knowledge
+    Graph visualizations, a dedicated Knowledge Explorer, MCP-specific
+    view, Backends view, Memory view, Evaluations, Security, Settings —
+    named here rather than silently absent. `npm run build`/TypeScript/
+    ESLint are all clean and every route was curl-verified to serve 200
+    with working CORS against the real API; the rendered UI was **not**
+    visually verified — no browser/screenshot tool was available in this
+    environment, and that gap is stated rather than papered over.
+12. **Evaluation, Security** — as originally sequenced in `CLAUDE.md`
+    §95–96, no changes proposed here.
 
 ## 7. Decisions (confirmed with user, 2026-08-25)
 
