@@ -7,16 +7,23 @@ decision here.
 
 ## Status
 
-Milestones 6–19 done: Foundation, Model Gateway, Knowledge Gateway, Agent
+Milestones 6–20 done: Foundation, Model Gateway, Knowledge Gateway, Agent
 Runtime, Agent Fabric, Tool Registry + MCP, Hermes Integration, Memory,
 Policy + Human Approval, Observability, a Next.js Dashboard
-(`apps/dashboard`), and Evaluation (`scripts/evaluation/run_benchmark.py`
+(`apps/dashboard`), Evaluation (`scripts/evaluation/run_benchmark.py`
 — a real 20-task benchmark, CLAUDE.md §75's own spec, hitting the live
 API across all 12 required categories: research/analysis/planning/
 marketing/finance/operations/tool_use/agent_delegation/
 hermes_delegation/knowledge_query/graphify_query/human_approval — 20/20
-passed on the last real run, report at `var/evaluation/`). See
-`docs/IMPLEMENTATION_PLAN.md` for what's next (Security).
+passed on the last real run, report at `var/evaluation/`), and Security
+(`docs/security/SECURITY_AUDIT.md` — real, live-verified findings across
+all 11 of CLAUDE.md §96's categories: Tool Authorization, Approval
+Bypass, Hermes Security, and Graphify Access are enforced and tested;
+Prompt Injection was live-probed against the real model with a mixed,
+honestly-reported result; Memory/Tenant Isolation, Agent Authorization,
+Budget enforcement, Knowledge Isolation, and Recursive Delegation are
+named as real, undone gaps rather than claimed as covered). 94/94 tests
+passing.
 
 ## Layout
 

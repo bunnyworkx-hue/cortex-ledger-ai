@@ -6,7 +6,17 @@ from mcp.client.streamable_http import streamable_http_client
 
 from axiom_core.tools import ToolCallResult, ToolDefinition
 
-_READ_ONLY_PREFIXES = ("get_", "list_", "query_", "search_", "graph_", "god_", "triage_")
+_READ_ONLY_PREFIXES = (
+    "get_",
+    "list_",
+    "query_",
+    "search_",
+    "graph_",
+    "god_",
+    "triage_",
+    "shortest_",
+    "find_",
+)
 
 
 @asynccontextmanager

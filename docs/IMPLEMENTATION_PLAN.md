@@ -256,8 +256,42 @@ external integrations landing simultaneously.
     `var/`'s existing generated-artifact convention (same as
     `graphify-out/`) instead of adding schema for a v1 that doesn't need
     it yet.
-13. **Security** — as originally sequenced in `CLAUDE.md` §96, no changes
-    proposed here.
+13. **Security** — done. Full writeup in `docs/security/SECURITY_AUDIT.md`,
+    organized by all 11 of CLAUDE.md §96's named categories. Real,
+    live-verified enforcement for Tool Authorization (the propose→approve
+    gate lives at the API router layer, not inside `ToolRegistry` itself
+    — documented as a real architectural boundary, not fixed, since the
+    only two current callers of `execute()` are both policy-aware),
+    Approval Bypass (double-decision, nonexistent-id, and
+    unregistered-tool paths all correctly rejected), Hermes Security (no
+    shell interpretation of the prompt — proven against a real
+    subprocess with shell-metacharacter payloads — and the API key
+    travels via subprocess `env`, never argv), and Graphify Access (the
+    adapter exposes only 4 read methods; the live MCP server's 10
+    advertised tools are all read-only by name and now correctly
+    classified `"low"` risk). One real bug found and fixed along the way:
+    `shortest_path` was misclassified `"medium"` by
+    `axiom_mcp.client._infer_risk_level`'s naming heuristic even though
+    the Graphify audit had already confirmed it's genuinely read-only —
+    added `"shortest_"`/`"find_"` to the recognized prefixes and
+    re-verified live (all 10 tools now report `"low"`). Prompt Injection
+    was live-probed against the real Anthropic-backed model (not
+    unit-tested — CLAUDE.md §45 rules out a fabricated pass/fail
+    assertion for a non-deterministic property): 2 of 3 payloads were
+    correctly refused, but a `SYSTEM OVERRIDE`-style payload succeeded
+    and the agent broke character entirely, output only `PWNED` — a real,
+    reported result, not smoothed over. Five categories are named as
+    real, undone gaps rather than claimed as covered: Memory/Tenant
+    Isolation (`owner_id`/`tenant_id` are caller-supplied query params
+    with no auth deriving them from a real identity — proven live, any
+    caller can read any other owner's memory), Agent Authorization (no
+    authN/authZ layer exists in this build at all), Budget enforcement
+    (usage data is captured per-call but never aggregated or gated),
+    Knowledge Isolation (Graphify is one shared graph, no tenant
+    partitioning), and Recursive Delegation (not applicable — no code
+    path has one agent invoke another yet, so there's nothing to guard).
+    94/94 tests passing after this milestone (88 pre-existing + 6 new
+    security-focused files).
 
 ## 7. Decisions (confirmed with user, 2026-08-25)
 
