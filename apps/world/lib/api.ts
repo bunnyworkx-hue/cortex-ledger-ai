@@ -74,6 +74,19 @@ export type Approval = {
 export type PendingApproval = { approval_id: string; status: string; reason: string };
 export type ToolCallResult = { content: Record<string, unknown>; is_error: boolean };
 
+export type ToolDefinition = {
+  name: string;
+  description: string;
+  input_schema: {
+    type?: string;
+    properties?: Record<string, { type?: string; description?: string }>;
+    required?: string[];
+  };
+  source: string;
+  permissions: string[];
+  risk_level: string;
+};
+
 export const api = {
   health: () => request<{ status: string; database: string }>("/health"),
   agentFabricStatus: () => request<AgentFabricStatus>("/v1/agent-fabric"),
@@ -112,5 +125,11 @@ export const api = {
     request<PendingApproval | ToolCallResult>("/v1/tools/modify_business_record/call", {
       method: "POST",
       body: JSON.stringify({ arguments: { record_id: recordId, fields: { status } } }),
+    }),
+  listTools: () => request<ToolDefinition[]>("/v1/tools"),
+  callTool: (name: string, args: Record<string, unknown>) =>
+    request<PendingApproval | ToolCallResult>(`/v1/tools/${encodeURIComponent(name)}/call`, {
+      method: "POST",
+      body: JSON.stringify({ arguments: args }),
     }),
 };

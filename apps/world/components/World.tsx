@@ -15,6 +15,7 @@ import { ExecutionZone } from "./ExecutionZone";
 import { ExecutionPulse } from "./ExecutionPulse";
 import { TalkBack } from "./TalkBack";
 import { ApprovalStation } from "./ApprovalStation";
+import { ToolRegistryPanel } from "./ToolRegistryPanel";
 
 const PAGES = 8;
 
@@ -87,6 +88,7 @@ export function World({ graph }: { graph: GraphSnapshot }) {
         onExecutingChange={setExecuting}
       />
       <ApprovalStation />
+      <ToolRegistryPanel />
     </div>
   );
 }

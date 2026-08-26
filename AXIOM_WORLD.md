@@ -92,6 +92,15 @@ to.
   actually executes the held action and returns the real mutated record;
   Reject calls the real `.../reject`, which never executes it. Verified
   live end-to-end through the exact same proxy path the component uses.
+- **Tool Registry panel** (§16) — `ToolRegistryPanel` is genuinely
+  schema-driven, not a hardcoded subset: it fetches the real
+  `GET /v1/tools` (all 12 real tools) and, for each one, builds its input
+  fields directly from that tool's own real `input_schema.required`/
+  `properties` — so a tool added to the registry later works here with
+  no code change. "Call" hits the real `POST /v1/tools/{name}/call` with
+  the real constructed arguments; a real high-risk call correctly routes
+  to a pending approval (visible in the Human Approval panel) instead of
+  executing, exactly like every other real path into the Policy Engine.
 
 ## What's honestly not built
 
@@ -114,10 +123,10 @@ not silently assumed:
   itself ("do not implement voice unless the existing architecture
   supports it cleanly... text talk-back is mandatory for MVP"). Text
   only.
-- **Policy Engine room, Tool Registry area, MCP area, ORVYN destination**
-  (§16-18, §31) — Human Approval (§19) is now real and working (see
-  above); these others still have no dedicated representation, in the 3D
-  scene or as an overlay panel.
+- **Policy Engine room, MCP area, ORVYN destination** (§17-18, §31) —
+  Human Approval (§19) and Tool Registry (§16) are now real and working
+  (see above); these others still have no dedicated representation, in
+  the 3D scene or as an overlay panel.
 - **Mobile fallback, LOD/instancing tuning beyond drei's `Instances`
   defaults, formal security testing pass** (§27-28, Phase 14-15) — not
   done.

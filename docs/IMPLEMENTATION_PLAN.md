@@ -559,6 +559,33 @@ record returned — the exact same calls the component makes. Clean
 `tsc`/`build`/`lint`; 106/106 backend tests unaffected (no backend
 changes this pass).
 
+## 6g. Axiom World — a real, schema-driven Tool Registry panel (2026-08-26)
+
+Next real gap on "next": §16's Tool Registry. Built `ToolRegistryPanel.tsx`
+to be genuinely schema-driven rather than a hardcoded per-tool UI —
+it fetches the real `GET /v1/tools` (all 12) and, for each one, builds
+its input fields directly from that tool's own real
+`input_schema.required`/`properties`, coercing `integer`/`number`
+properties with `Number()`. This means every real tool works, including
+ones with zero required args (`graph_stats`, `god_nodes`, `list_prs`,
+`triage_prs` — a bare "Call" button), one required arg
+(`query_graph`'s `question`, `get_node`'s `label`), two
+(`shortest_path`'s `source`/`target`, `delegate_to_agent`'s
+`agent_id`/`task_input`), and a high-risk one
+(`modify_business_record`) — which correctly routes to a real pending
+approval via the exact same Policy Engine path the Human Approval panel
+already demonstrates, rather than a separate, redundant code path.
+`lib/api.ts` gained `listTools`/`callTool`, typed against the real
+`ToolDefinition` schema.
+
+Verified live through the real proxy for all three real shapes: a
+zero-arg call (`graph_stats` → real node/edge/community stats), a
+one-required-arg call (`query_graph` → real graph traversal text), and
+the high-risk call (`modify_business_record` → a real pending
+`approval_id`, confirmed it'll surface in the same `GET /v1/approvals`
+the Approval panel polls). Clean `tsc`/`build`/`lint`; 106/106 backend
+tests unaffected (no backend changes this pass).
+
 ## 7. Decisions (confirmed with user, 2026-08-25)
 
 1. **Database**: new, independent Supabase project for Axiom OS — not
