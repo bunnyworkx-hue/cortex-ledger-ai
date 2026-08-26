@@ -1,0 +1,206 @@
+@import "tailwindcss";
+
+:root {
+  --ink: #eef0fb;
+  --muted: #9aa0c9;
+  --faint: #656b8a;
+  --accent: #8791e8;
+  --surface: #14161f;
+  --surface-line: #2a2d40;
+  --bg: #0a0b12;
+}
+
+html,
+body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "IBM Plex Sans", -apple-system, "Segoe UI", sans-serif;
+  overscroll-behavior: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.world-root {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.world-error {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  background: rgba(192, 57, 43, 0.14);
+  border: 1px solid rgba(192, 57, 43, 0.4);
+  color: #f0796b;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  max-width: min(560px, 90vw);
+  text-align: center;
+}
+.world-error code {
+  color: #f5a99e;
+}
+
+/* ---------- talk-back ---------- */
+.talkback {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+}
+
+.talkback-toggle {
+  pointer-events: auto;
+  margin-bottom: -1px;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-bottom: none;
+  color: var(--muted);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 7px 16px;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+}
+.talkback-toggle:hover {
+  color: var(--ink);
+}
+
+.talkback-panel {
+  pointer-events: auto;
+  width: min(680px, 94vw);
+  background: rgba(20, 22, 31, 0.92);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--surface-line);
+  border-radius: 12px 12px 0 0;
+  box-shadow: 0 -12px 32px -16px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  max-height: 46vh;
+}
+
+.talkback-log {
+  overflow-y: auto;
+  padding: 14px 16px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.talkback-entry {
+  display: flex;
+  gap: 10px;
+}
+.talkback-role {
+  flex: none;
+  width: 44px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--faint);
+  padding-top: 2px;
+}
+.talkback-user .talkback-role {
+  color: var(--accent);
+}
+.talkback-error .talkback-role {
+  color: #f0796b;
+}
+.talkback-text {
+  flex: 1;
+  color: var(--ink);
+  line-height: 1.5;
+}
+.talkback-error .talkback-text {
+  color: #f0796b;
+}
+
+.talkback-agents {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.talkback-agent-chip {
+  background: rgba(135, 145, 232, 0.12);
+  border: 1px solid rgba(135, 145, 232, 0.32);
+  color: var(--ink);
+  font-size: 12px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: "IBM Plex Sans", sans-serif;
+}
+.talkback-agent-chip:hover:not(:disabled) {
+  background: rgba(135, 145, 232, 0.22);
+}
+.talkback-agent-chip:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.talkback-agent-division {
+  color: var(--faint);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  margin-left: 4px;
+}
+
+.talkback-form {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px 16px;
+  border-top: 1px solid var(--surface-line);
+}
+.talkback-form input {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--ink);
+  font-size: 13px;
+  font-family: "IBM Plex Sans", sans-serif;
+}
+.talkback-form input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.talkback-form button {
+  background: var(--accent);
+  color: #14161c;
+  border: none;
+  border-radius: 8px;
+  padding: 0 18px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
+.talkback-form button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

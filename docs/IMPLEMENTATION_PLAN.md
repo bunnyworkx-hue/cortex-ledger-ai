@@ -384,6 +384,86 @@ after the fix: clean `tsc --noEmit`, clean `next build`, clean `eslint`,
 and `curl http://localhost:3000/api/v1/tools` returning the real 12-tool
 list through the new proxy path.
 
+## 6c. Axiom World — the 3D operations view (2026-08-26)
+
+The user handed over a large (39-section) build prompt for a cinematic
+scroll-driven 3D interface, explicitly built on a tool named
+"Scroll-Word," with its own instruction not to assume that tool's APIs
+and to audit it first. No repository named "Scroll-Word" exists;
+`docs/scroll-word/SCROLL_WORD_AUDIT.md` inspected the real, obvious match
+(`oso95/scroll-world`, ~3,587 stars) live — its README, repo tree, and
+real `SKILL.md` — before writing any code, per the same discipline the
+Graphify/Hermes audits followed at the very start of this project.
+
+**Real, load-bearing finding**: scroll-world is a Claude Code *skill*
+that runs an 8-step procedure once (interview → generate AI stills via
+Higgsfield → render AI video clips via Monid/Higgsfield, real metered
+cost, human budget approval required → encode → assemble) to produce one
+fixed, pre-rendered video that scroll position seeks through. Its only
+runtime input is scroll position mapped to playback time — it cannot
+highlight a live search result, move the camera to an arbitrary
+chat-driven point, or reflect any state that changes after the video
+finished rendering. That's the opposite of what most of the build
+prompt's own acceptance criteria (§37) require: live Agent Discovery
+against the real 254-agent registry, a chat-driven camera, a live
+execution trace. Presented this fork to the user via AskUserQuestion
+rather than silently picking a side or force-fitting the tool; the user
+chose to skip scroll-world entirely and build a genuinely interactive
+scene instead.
+
+**Built**: `apps/world`, a new Next.js + react-three-fiber + drei app,
+same `/api/*` same-origin proxy pattern that fixed the dashboard's
+connectivity bug (`next.config.ts` rewrite to `AXIOM_API_ORIGIN`). Scope
+matches the build prompt's own §32 MVP list (Entry → Agent Fabric →
+Graphify → Execution Engine → Talk-Back), built with real data
+throughout rather than the placeholder/mock data the prompt's own §34/§35
+explicitly forbid presenting as live:
+
+- Scroll-driven camera (`components/CameraRig.tsx`) built on drei's
+  `ScrollControls`/`useScroll` with a keyframe interpolator — a real
+  library primitive, not a hand-rolled scroll listener.
+- Agent Fabric zone: the real, live `by_division` breakdown from
+  `/v1/agent-fabric` (254 agents / 17 divisions the day this was built),
+  rendered as an instanced point cloud clustered by real division size.
+- Knowledge Fabric zone: the real Graphify extraction
+  (`var/graphify-out/graph.json`) read directly server-side rather than
+  through the MCP tools — those return LLM-formatted text, not bulk
+  structured JSON, a real finding from Milestone 8 that still holds here
+  — sampled to the 400 highest-degree real nodes, real `EXTRACTED`/
+  `INFERRED` edge confidence preserved.
+- Execution Engine zone: whichever Model/Agent/Knowledge backends are
+  actually registered right now (`/v1/models`, `/v1/agents`,
+  `/v1/knowledge`), with an unconfigured backend rendered visibly dim
+  rather than hidden.
+- Talk-Back: a real working chat calling the real
+  `/v1/agent-fabric/search` and `/v1/agent-fabric/{id}/delegate` — not a
+  canned response list. A recognized keyword also scrolls the camera to
+  the matching zone, explicitly documented as a literal keyword map
+  (`lib/scrollBridge.ts`), not NLU.
+
+**Real bug found while wiring Talk-Back's own onboarding example**:
+`/v1/agent-fabric/search` does literal substring matching against each
+agent's real description, not stemming — `"finance"` returns zero
+results because the FP&A Analyst's real description says "**Financial**
+Planning & Analysis," not "finance." Existing Agent Fabric behavior, not
+introduced here; fixed by rewriting the onboarding hint to a verified-
+working query (`"security"`, `"frontend"`) instead of promising something
+the real search can't do.
+
+**Not built**, named honestly in `AXIOM_WORLD.md` rather than silently
+assumed: a dedicated Hermes gateway visualization (§8-9 — Hermes appears
+as one real backend node in Execution Engine, not its own zone), live
+visual highlighting of the agent cloud in response to search (§7 — the
+chat surfaces real matches today, the 3D cloud doesn't yet react),
+animated execution-graph playback (§20), voice I/O (§22 — explicitly
+deferred by the prompt's own text), and dedicated Policy/Approval/Tool
+Registry/MCP/ORVYN zones (§16-19, §31). Verified: clean `tsc --noEmit`,
+clean `next build`, clean ESLint (one known App-Router false-positive
+warning about `<link>`-based font loading, harmless), and every real
+endpoint the app calls curl-verified through the new proxy including a
+live `delegate` call returning a real Anthropic completion. Not visually
+verified in a browser — same environment limitation as the dashboard.
+
 ## 7. Decisions (confirmed with user, 2026-08-25)
 
 1. **Database**: new, independent Supabase project for Axiom OS — not

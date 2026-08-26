@@ -17,6 +17,7 @@ decision here.
 | [AGENT_FABRIC.md](AGENT_FABRIC.md) | 255 real agents, corrected count, curation, normalization gaps |
 | [KNOWLEDGE_FABRIC.md](KNOWLEDGE_FABRIC.md) | The Knowledge Gateway abstraction and the `KnowledgeAnswer` design correction |
 | [DEMO.md](DEMO.md) | A literal, copy-pasteable walkthrough — the honest substitute for a demo video/screenshots (no browser tool in this environment) |
+| [AXIOM_WORLD.md](AXIOM_WORLD.md) | The scroll-driven 3D operations view (`apps/world`) — real data throughout, honest about what's not built |
 | `docs/IMPLEMENTATION_PLAN.md` | Full milestone-by-milestone build history — every real bug, every fix |
 
 ## Status
@@ -61,6 +62,7 @@ packages/axiom-agent-fabric/ real agent registry + invocation gateway over agenc
 packages/axiom-mcp/       generic MCP client + Tool Registry integration
 packages/axiom-hermes/    real Hermes Agent CLI adapter (AgentBackend)
 apps/dashboard/           Next.js operations dashboard
+apps/world/               scroll-driven 3D operations view (react-three-fiber, live API data)
 tests/                    unit + integration tests
 docs/                     audits (Graphify, Hermes, agent library) + architecture plan
 var/                      generated artifacts (graphify-out/graph.json, ...) — gitignored
@@ -125,6 +127,21 @@ Build/typecheck/lint are verified (`npm run build`, clean TypeScript,
 clean ESLint) and every route was curl-verified to serve 200 through the
 proxy; the rendered UI itself was not visually verified — no browser/
 screenshot tool was available in this environment.
+
+### Axiom World (3D operations view)
+
+```bash
+cd apps/world && npm install   # first time only
+./scripts/dev/run.sh           # API on :8000, in one terminal
+./scripts/dev/world.sh         # world on the next free port, in another
+```
+
+See [AXIOM_WORLD.md](AXIOM_WORLD.md) for what's real (live agent/graph/
+backend data throughout, a working Talk-Back chat wired to real search
+and delegation) versus what's honestly not built yet from the original
+39-section spec. Same `/api/*` same-origin proxy pattern as the
+dashboard. Clean `tsc --noEmit`, clean `next build`, clean ESLint; not
+visually verified in a browser for the same reason as the dashboard.
 
 ### Evaluation
 
