@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 
+from axiom_core.policy import ApprovalRequest, ApprovalStore, PolicyEngine, PolicyStatus
 from axiom_core.tools import (
     ToolExecutionError,
     ToolNotFoundError,
@@ -7,8 +8,8 @@ from axiom_core.tools import (
     ToolRegistry,
 )
 
-from axiom_api.dependencies import get_tool_registry
-from axiom_api.schemas import ToolCallRequest, ToolCallResultOut, ToolDefinitionOut
+from axiom_api.dependencies import get_approval_store, get_policy_engine, get_tool_registry
+from axiom_api.schemas import PendingApprovalOut, ToolCallRequest, ToolCallResultOut, ToolDefinitionOut
 
 router = APIRouter(prefix="/v1/tools", tags=["tools"])
 
@@ -28,20 +29,41 @@ async def list_tools(registry: ToolRegistry = Depends(get_tool_registry)) -> lis
     ]
 
 
-@router.post("/{name}/call", response_model=ToolCallResultOut)
+@router.post("/{name}/call", response_model=ToolCallResultOut | PendingApprovalOut)
 async def call_tool(
     name: str,
     body: ToolCallRequest,
     registry: ToolRegistry = Depends(get_tool_registry),
-) -> ToolCallResultOut:
-    # No Policy Engine yet (Milestone 15) — granted_permissions is
-    # deliberately omitted, so ToolRegistry.execute() allows the call and
-    # logs "permission_check": "not_enforced" rather than pretending to
-    # enforce something that isn't built yet.
+    policy: PolicyEngine = Depends(get_policy_engine),
+    approvals: ApprovalStore | None = Depends(get_approval_store),
+) -> ToolCallResultOut | PendingApprovalOut:
     try:
-        result = await registry.execute(name, body.arguments)
+        definition = registry.get(name)
     except ToolNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    decision = policy.evaluate(definition.risk_level, action=f"tool:{name}")
+
+    if decision.status == PolicyStatus.REQUIRES_APPROVAL:
+        if approvals is None:
+            raise HTTPException(
+                status_code=503,
+                detail="This action requires approval but no approval store is configured "
+                "(set AXIOM_DATABASE_URL).",
+            )
+        request = ApprovalRequest.new(
+            action=f"tool:{name}",
+            risk_level=definition.risk_level,
+            reason=decision.reason,
+            payload={"tool_name": name, "arguments": body.arguments},
+        )
+        saved = await approvals.create(request)
+        return PendingApprovalOut(approval_id=saved.id, status=saved.status.value, reason=saved.reason)
+
+    # PolicyStatus.ALLOW (DENY isn't reachable yet — v1's threshold rule
+    # never denies outright, see PolicyEngine's docstring).
+    try:
+        result = await registry.execute(name, body.arguments)
     except ToolPermissionDeniedError as exc:
         raise HTTPException(status_code=403, detail=str(exc)) from exc
     except ToolExecutionError as exc:

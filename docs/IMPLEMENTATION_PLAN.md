@@ -194,9 +194,25 @@ external integrations landing simultaneously.
    app (one uvicorn loop for its whole life) actually behaves. Every
    successful `/v1/agent-fabric/.../delegate` call now auto-persists a
    `task`-scoped memory record.
-9. **Policy, Human Approval, Observability, Dashboard, Evaluation,
-   Security** — as originally sequenced in `CLAUDE.md` §91–96, no changes
-   proposed here.
+9. **Policy + Human Approval** — done, built together since CLAUDE.md's
+   own workflow (§37) couples them: Agent → Proposed Action → Policy
+   Engine → HIGH RISK → Approval Required → Human Approves → Execute →
+   Verify → Audit. `PolicyEngine` v1 is a single risk threshold
+   (low/medium auto-allow, high/critical → `requires_approval`) — per
+   CLAUDE.md §10's "don't jump to Version 4," not budgets/rate-limits/
+   denial yet, which need a real reason to build (an actually-exhausted
+   budget) rather than an invented one. A real `modify_business_record`
+   native tool (CLAUDE.md §64's own example) is the first — and
+   currently only — real high-risk action in the system; every other
+   registered tool (Graphify's 10, all read/query) is low/medium and
+   auto-allowed. Approving a pending request executes the original
+   action for real through `ToolRegistry.execute()`'s existing audit-log
+   path — approval isn't a separate code path from normal execution, it
+   just gates entry to the same one. `approvals` is the second real
+   Alembic migration (same shared-core-table gotcha as `memories`, fixed
+   the same way before ever running it).
+10. **Observability, Dashboard, Evaluation, Security** — as originally
+    sequenced in `CLAUDE.md` §93–96, no changes proposed here.
 
 ## 7. Decisions (confirmed with user, 2026-08-25)
 

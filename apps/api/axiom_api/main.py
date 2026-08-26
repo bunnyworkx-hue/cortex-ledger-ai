@@ -11,15 +11,19 @@ from axiom_core.config import get_settings
 from axiom_core.knowledge import KnowledgeGatewayRegistry
 from axiom_core.logging import configure_logging, get_logger
 from axiom_core.models import ModelGatewayRegistry
+from axiom_core.policy import PolicyEngine
 from axiom_core.tools import ToolRegistry
+from axiom_db.approvals import PostgresApprovalStore
 from axiom_db.engine import DatabaseNotConfiguredError, check_database_health, get_sessionmaker
 from axiom_db.memory import PostgresMemoryStore
 from axiom_graphify import GraphifyBackend
 from axiom_hermes import HermesBackend
 from axiom_mcp import register_mcp_server
 
+from axiom_api.native_tools import register_native_tools
 from axiom_api.routers.agent_fabric import router as agent_fabric_router
 from axiom_api.routers.agents import router as agents_router
+from axiom_api.routers.approvals import router as approvals_router
 from axiom_api.routers.knowledge import router as knowledge_router
 from axiom_api.routers.memory import router as memory_router
 from axiom_api.routers.models import router as models_router
@@ -94,6 +98,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             logger.info("axiom.tools.mcp_registered", server="graphify", tool_count=count)
     else:
         logger.warning("axiom.tools.graphify_mcp_not_configured")
+    register_native_tools(tool_registry)
     app.state.tool_registry = tool_registry
 
     app.state.memory_store = None
@@ -102,6 +107,15 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         logger.info("axiom.memory_store.registered", backend="postgres")
     else:
         logger.warning("axiom.memory_store.not_configured")
+
+    app.state.policy_engine = PolicyEngine(approval_threshold="high")
+
+    app.state.approval_store = None
+    if settings.database_url:
+        app.state.approval_store = PostgresApprovalStore(get_sessionmaker())
+        logger.info("axiom.approval_store.registered", backend="postgres")
+    else:
+        logger.warning("axiom.approval_store.not_configured")
 
     yield
     logger.info("axiom.shutdown")
@@ -114,6 +128,7 @@ app.include_router(agents_router)
 app.include_router(agent_fabric_router)
 app.include_router(tools_router)
 app.include_router(memory_router)
+app.include_router(approvals_router)
 
 
 @app.get("/health")

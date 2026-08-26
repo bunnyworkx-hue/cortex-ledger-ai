@@ -93,6 +93,28 @@ class ToolCallResultOut(BaseModel):
     is_error: bool
 
 
+class PendingApprovalOut(BaseModel):
+    approval_id: str
+    status: str
+    reason: str
+
+
+class ApprovalOut(BaseModel):
+    id: str
+    action: str
+    risk_level: str
+    reason: str
+    payload: dict
+    status: str
+    created_at: str
+    decided_at: str | None
+    decided_by: str | None
+
+
+class DecideApprovalRequest(BaseModel):
+    decided_by: str
+
+
 class SaveMemoryRequest(BaseModel):
     scope: str = Field(pattern="^(task|working|long_term|business_knowledge)$")
     owner_id: str

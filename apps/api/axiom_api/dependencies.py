@@ -5,6 +5,7 @@ from axiom_core.agents import AgentBackendRegistry
 from axiom_core.knowledge import KnowledgeGatewayRegistry
 from axiom_core.memory import MemoryStore
 from axiom_core.models import ModelGatewayRegistry
+from axiom_core.policy import ApprovalStore, PolicyEngine
 from axiom_core.tools import ToolRegistry
 
 
@@ -30,3 +31,11 @@ def get_tool_registry(request: Request) -> ToolRegistry:
 
 def get_memory_store(request: Request) -> MemoryStore | None:
     return request.app.state.memory_store
+
+
+def get_policy_engine(request: Request) -> PolicyEngine:
+    return request.app.state.policy_engine
+
+
+def get_approval_store(request: Request) -> ApprovalStore | None:
+    return request.app.state.approval_store
