@@ -122,6 +122,14 @@ explicit 130s timeout instead, past `HermesBackend`'s own 120s default.
   (10 low, 1 medium, 1 high, 0 critical at verification time) — no new
   backend endpoint needed, since every number it shows was already being
   fetched by Tool Registry.
+- **MCP interoperability panel** (§18) — `McpAreaPanel` renders the real
+  `AXIOM → MCP → [servers]` diagram CLAUDE.md §18 itself describes, with
+  a real branch node per connected MCP server and how many real tools it
+  contributed on discovery (derived from `GET /v1/tools`'s `source`
+  field, e.g. `"mcp:graphify"` → server `graphify`, 10 tools — verified
+  live). One real server is connected today; the panel shows an honest
+  empty state if none are, rather than inventing placeholder
+  connections.
 
 ## What's honestly not built
 
@@ -151,12 +159,11 @@ not silently assumed:
   itself ("do not implement voice unless the existing architecture
   supports it cleanly... text talk-back is mandatory for MVP"). Text
   only.
-- **MCP area, ORVYN destination** (§18, §31) — Human Approval (§19),
-  Tool Registry (§16), and Policy Engine (§17) are now real and working
-  (see above); these two still have no dedicated representation, in the
-  3D scene or as an overlay panel. (ORVYN itself also isn't a real
-  project yet — see `docs/IMPLEMENTATION_PLAN.md` §7's decision to defer
-  it entirely.)
+- **ORVYN destination** (§31) — Human Approval (§19), Tool Registry
+  (§16), Policy Engine (§17), and MCP (§18) are all now real and working
+  (see above). ORVYN itself isn't a real project yet — see
+  `docs/IMPLEMENTATION_PLAN.md` §7's decision to defer it entirely —
+  so there's nothing real to build a destination toward.
 - **Mobile fallback, LOD/instancing tuning beyond drei's `Instances`
   defaults, formal security testing pass** (§27-28, Phase 14-15) — not
   done.

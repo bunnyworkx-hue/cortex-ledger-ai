@@ -769,6 +769,29 @@ Verified: clean `tsc`/`build`/`lint`, the live tier counts confirmed to
 match a fresh `curl` of the real tool registry. 106/106 backend tests
 unaffected (no backend changes this pass).
 
+## 6m. Axiom World — a real MCP interoperability panel (2026-08-26)
+
+Next real gap: §18's MCP area. `McpAreaPanel.tsx` is deliberately
+distinct content from Tool Registry (which shows what each tool does)
+and Policy Engine (which shows the risk rule) — this is specifically
+about the protocol layer: which external systems are connected via MCP
+and how many real tools each contributed on discovery. Derived from the
+same `GET /v1/tools` every other panel already fetches, by reading each
+tool's real `source` field (`"mcp:graphify"` → server `graphify`) rather
+than a new endpoint — verified live: `{"native": 2, "mcp:graphify": 10}`,
+matching the panel's own derivation exactly. Renders as the
+`AXIOM → MCP → [servers]` diagram CLAUDE.md §18 itself describes, with
+real branch nodes per connected server and their real tool counts — a
+single real branch (`graphify`, 10 tools) today, and an honest empty
+state ("No MCP server reachable right now") if none are, rather than
+inventing placeholder servers.
+
+Positioned top-center — the one open position alongside Tool Registry
+(top-left), Human Approval (top-right), Policy Engine (bottom-left), and
+Talk-Back (bottom-center). Clean `tsc`/`build`/`lint`, live data
+re-verified through the proxy. 106/106 backend tests unaffected (no
+backend changes this pass).
+
 ## 7. Decisions (confirmed with user, 2026-08-25)
 
 1. **Database**: new, independent Supabase project for Axiom OS — not

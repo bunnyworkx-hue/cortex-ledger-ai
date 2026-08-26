@@ -18,6 +18,7 @@ import { TalkBack } from "./TalkBack";
 import { ApprovalStation } from "./ApprovalStation";
 import { ToolRegistryPanel } from "./ToolRegistryPanel";
 import { PolicyEnginePanel } from "./PolicyEnginePanel";
+import { McpAreaPanel } from "./McpAreaPanel";
 
 const PAGES = 8;
 
@@ -92,6 +93,7 @@ export function World({ graph }: { graph: GraphSnapshot }) {
       <ApprovalStation />
       <ToolRegistryPanel />
       <PolicyEnginePanel />
+      <McpAreaPanel />
     </div>
   );
 }
