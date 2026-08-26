@@ -748,6 +748,27 @@ all, so neither was at risk; confirmed by grep, not assumed. Clean
 `tsc`/`build`/`lint`; real data flow re-verified live through the proxy.
 Backend suite unaffected (frontend-only change).
 
+## 6l. Axiom World — a real Policy Engine panel (2026-08-26)
+
+Next real gap: §17's Policy Engine room. Built `PolicyEnginePanel.tsx`
+entirely from data already being fetched elsewhere — no new backend
+endpoint needed. It states the one real rule every approval's own
+`reason` text already spells out in words ("...is risk_level='high', at
+or above the approval threshold...") as its own first-class thing: a
+risk ladder (low/medium/high/critical) with the real configured
+threshold (`"high"`, `apps/api/axiom_api/main.py`'s
+`PolicyEngine(approval_threshold="high")`) marked — stated as a fixed,
+documented fact rather than fetched, since no endpoint exposes the
+configured value — and real live tier counts computed from
+`GET /v1/tools`'s actual risk levels (verified live: 10 low, 1 medium, 1
+high, 0 critical, matching the real registry exactly). This ties
+together what Tool Registry and Human Approval each only showed a slice
+of into one place explaining why.
+
+Verified: clean `tsc`/`build`/`lint`, the live tier counts confirmed to
+match a fresh `curl` of the real tool registry. 106/106 backend tests
+unaffected (no backend changes this pass).
+
 ## 7. Decisions (confirmed with user, 2026-08-25)
 
 1. **Database**: new, independent Supabase project for Axiom OS — not

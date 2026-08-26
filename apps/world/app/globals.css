@@ -571,6 +571,115 @@ body {
   line-height: 1.5;
 }
 
+/* ---------- policy engine ---------- */
+.policy-engine {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-start;
+}
+
+.policy-engine-toggle {
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  color: var(--muted);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 7px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.policy-engine-toggle:hover {
+  color: var(--ink);
+}
+
+.policy-engine-panel {
+  margin-bottom: 8px;
+  width: min(340px, 88vw);
+  background: rgba(20, 22, 31, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--surface-line);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 12.5px;
+}
+
+.policy-engine-head {
+  color: var(--muted);
+  line-height: 1.5;
+}
+.policy-engine-head strong {
+  color: #e3aa4c;
+}
+.policy-engine-error {
+  color: #f0796b;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+}
+.policy-engine-loading {
+  color: var(--faint);
+  font-style: italic;
+}
+
+.policy-ladder {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 2px;
+}
+.policy-tier {
+  border-radius: 7px;
+  padding: 7px 10px;
+}
+.policy-tier-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.policy-tier-name {
+  flex: none;
+  width: 60px;
+  text-transform: uppercase;
+  font-size: 10.5px;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+.policy-tier-count {
+  flex: 1;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  color: var(--muted);
+}
+.policy-tier-outcome {
+  font-size: 10px;
+  color: var(--faint);
+}
+.policy-tier-low { background: rgba(79, 204, 142, 0.1); }
+.policy-tier-low .policy-tier-name { color: #4fcc8e; }
+.policy-tier-medium { background: rgba(227, 170, 76, 0.1); }
+.policy-tier-medium .policy-tier-name { color: #e3aa4c; }
+.policy-tier-high { background: rgba(192, 57, 43, 0.1); }
+.policy-tier-high .policy-tier-name { color: #f0796b; }
+.policy-tier-critical { background: rgba(192, 57, 43, 0.18); }
+.policy-tier-critical .policy-tier-name { color: #f0796b; }
+
+.policy-threshold-line {
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px dashed var(--surface-line);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--faint);
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;

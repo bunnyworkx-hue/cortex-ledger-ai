@@ -114,6 +114,14 @@ explicit 130s timeout instead, past `HermesBackend`'s own 120s default.
   Execution Engine zone renders with a distinct ring, marking it as an
   external, gated runtime per CLAUDE.md §8-9's own framing ("Hermes
   should never visually appear to own the Axiom environment").
+- **Policy Engine panel** (§17) — `PolicyEnginePanel` states the one
+  real rule every approval's own `reason` text already spells out in
+  words (risk at or above the real configured threshold, `"high"`,
+  stops for a human) as its own visible thing: a risk ladder with real
+  live tier counts computed from `GET /v1/tools`'s actual risk levels
+  (10 low, 1 medium, 1 high, 0 critical at verification time) — no new
+  backend endpoint needed, since every number it shows was already being
+  fetched by Tool Registry.
 
 ## What's honestly not built
 
@@ -143,10 +151,12 @@ not silently assumed:
   itself ("do not implement voice unless the existing architecture
   supports it cleanly... text talk-back is mandatory for MVP"). Text
   only.
-- **Policy Engine room, MCP area, ORVYN destination** (§17-18, §31) —
-  Human Approval (§19) and Tool Registry (§16) are now real and working
-  (see above); these others still have no dedicated representation, in
-  the 3D scene or as an overlay panel.
+- **MCP area, ORVYN destination** (§18, §31) — Human Approval (§19),
+  Tool Registry (§16), and Policy Engine (§17) are now real and working
+  (see above); these two still have no dedicated representation, in the
+  3D scene or as an overlay panel. (ORVYN itself also isn't a real
+  project yet — see `docs/IMPLEMENTATION_PLAN.md` §7's decision to defer
+  it entirely.)
 - **Mobile fallback, LOD/instancing tuning beyond drei's `Instances`
   defaults, formal security testing pass** (§27-28, Phase 14-15) — not
   done.

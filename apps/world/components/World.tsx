@@ -17,6 +17,7 @@ import { ExecutionPulse } from "./ExecutionPulse";
 import { TalkBack } from "./TalkBack";
 import { ApprovalStation } from "./ApprovalStation";
 import { ToolRegistryPanel } from "./ToolRegistryPanel";
+import { PolicyEnginePanel } from "./PolicyEnginePanel";
 
 const PAGES = 8;
 
@@ -90,6 +91,7 @@ export function World({ graph }: { graph: GraphSnapshot }) {
       />
       <ApprovalStation />
       <ToolRegistryPanel />
+      <PolicyEnginePanel />
     </div>
   );
 }
