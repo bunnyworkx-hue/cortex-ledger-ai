@@ -11,13 +11,16 @@ from axiom_core.config import get_settings
 from axiom_core.knowledge import KnowledgeGatewayRegistry
 from axiom_core.logging import configure_logging, get_logger
 from axiom_core.models import ModelGatewayRegistry
+from axiom_core.tools import ToolRegistry
 from axiom_db.engine import DatabaseNotConfiguredError, check_database_health
 from axiom_graphify import GraphifyBackend
+from axiom_mcp import register_mcp_server
 
 from axiom_api.routers.agent_fabric import router as agent_fabric_router
 from axiom_api.routers.agents import router as agents_router
 from axiom_api.routers.knowledge import router as knowledge_router
 from axiom_api.routers.models import router as models_router
+from axiom_api.routers.tools import router as tools_router
 
 settings = get_settings()
 configure_logging(settings)
@@ -66,6 +69,18 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     else:
         logger.warning("axiom.agent_fabric.not_configured")
 
+    tool_registry = ToolRegistry()
+    if settings.graphify_mcp_url:
+        try:
+            count = await register_mcp_server(tool_registry, "graphify", settings.graphify_mcp_url)
+        except Exception as exc:  # noqa: BLE001 — optional external MCP server may be down at startup
+            logger.warning("axiom.tools.mcp_registration_failed", server="graphify", error=str(exc))
+        else:
+            logger.info("axiom.tools.mcp_registered", server="graphify", tool_count=count)
+    else:
+        logger.warning("axiom.tools.graphify_mcp_not_configured")
+    app.state.tool_registry = tool_registry
+
     yield
     logger.info("axiom.shutdown")
 
@@ -75,6 +90,7 @@ app.include_router(models_router)
 app.include_router(knowledge_router)
 app.include_router(agents_router)
 app.include_router(agent_fabric_router)
+app.include_router(tools_router)
 
 
 @app.get("/health")

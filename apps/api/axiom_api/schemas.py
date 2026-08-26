@@ -73,3 +73,21 @@ class DelegateRequest(BaseModel):
     input: str
     context: str | None = None
     backend: str | None = None
+
+
+class ToolDefinitionOut(BaseModel):
+    name: str
+    description: str
+    input_schema: dict
+    source: str
+    permissions: list[str]
+    risk_level: str
+
+
+class ToolCallRequest(BaseModel):
+    arguments: dict = {}
+
+
+class ToolCallResultOut(BaseModel):
+    content: dict
+    is_error: bool

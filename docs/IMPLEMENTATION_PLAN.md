@@ -154,8 +154,16 @@ external integrations landing simultaneously.
 4. **Agent Runtime** — Agent/Task/Execution/Result primitives.
 5. **Agent Fabric** — registry + curated first cohort + explicit-routing
    discovery + gateway adapted from `agency-agents-router`.
-6. **Tool Registry / MCP client** — generic MCP consumption, reusable for
-   both Graphify and any future MCP server.
+6. **Tool Registry / MCP client** — done. `axiom-mcp` consumes any MCP
+   server generically (not hand-coded per-tool like axiom-graphify's
+   Knowledge Gateway adapter): live-verified by auto-discovering all 10
+   real Graphify MCP tools via `/v1/tools`, including `get_community`,
+   `god_nodes`, `graph_stats`, `list_prs`, `get_pr_impact`, `triage_prs`
+   — six tools the Knowledge Gateway never exposed. `ToolRegistry.execute()`
+   has a permission-check hook (used when a caller supplies
+   `granted_permissions`) and audit-logs every call (tool, risk_level,
+   permission_check outcome, duration_ms) — real today; full Policy
+   Engine enforcement is still Milestone 15.
 7. **Hermes Integration** — only after Hermes is actually installed
    locally and `delegate_task` has been called for real once.
 8. **Memory, Policy, Human Approval, Observability, Dashboard, Evaluation,

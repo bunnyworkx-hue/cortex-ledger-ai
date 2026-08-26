@@ -4,6 +4,7 @@ from axiom_agent_fabric import AgentInvocationGateway
 from axiom_core.agents import AgentBackendRegistry
 from axiom_core.knowledge import KnowledgeGatewayRegistry
 from axiom_core.models import ModelGatewayRegistry
+from axiom_core.tools import ToolRegistry
 
 
 def get_model_gateway(request: Request) -> ModelGatewayRegistry:
@@ -20,3 +21,7 @@ def get_agent_backend_gateway(request: Request) -> AgentBackendRegistry:
 
 def get_agent_fabric(request: Request) -> AgentInvocationGateway | None:
     return request.app.state.agent_fabric
+
+
+def get_tool_registry(request: Request) -> ToolRegistry:
+    return request.app.state.tool_registry

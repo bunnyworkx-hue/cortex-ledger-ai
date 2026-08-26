@@ -7,7 +7,7 @@ decision here.
 
 ## Status
 
-Milestones 6–10 done: Foundation (config, logging, Postgres/Supabase),
+Milestones 6–12 done: Foundation (config, logging, Postgres/Supabase),
 Model Gateway (real Anthropic adapter), Knowledge Gateway (real Graphify
 MCP adapter, graph built from `agency-agents`: 1,121 nodes / 1,594 edges),
 Agent Runtime (Agent/Task/Execution/Result primitives + a real
@@ -15,17 +15,22 @@ Agent Runtime (Agent/Task/Execution/Result primitives + a real
 `agency-agents` — 254/255 agents, one malformed file skipped and logged —
 plus a 12-agent curated cohort, search/inspect/load/delegate via
 `/v1/agent-fabric/*`, proven end-to-end with a real in-character
-completion from the Application Security Engineer agent). No Hermes
-integration yet — see `docs/IMPLEMENTATION_PLAN.md`.
+completion from the Application Security Engineer agent), Tool
+Registry + MCP (`/v1/tools`: generic MCP server consumption — all 10 real
+Graphify tools auto-discovered and callable, including 6 never exposed by
+the Knowledge Gateway, each call audit-logged). No Hermes integration
+yet — see `docs/IMPLEMENTATION_PLAN.md`.
 
 ## Layout
 
 ```
 apps/api/                FastAPI app — the Axiom control-plane HTTP surface
-packages/axiom-core/      config, logging, Model/Knowledge Gateway abstractions
+packages/axiom-core/      config, logging, Model/Knowledge/Tool Registry abstractions, Agent Runtime
 packages/axiom-db/        async SQLAlchemy engine, ORM base, Alembic migrations
 packages/axiom-anthropic/ real Anthropic adapter (Model Gateway)
 packages/axiom-graphify/  real Graphify MCP adapter (Knowledge Gateway)
+packages/axiom-agent-fabric/ real agent registry + invocation gateway over agency-agents
+packages/axiom-mcp/       generic MCP client + Tool Registry integration
 tests/                    unit + integration tests
 docs/                     audits (Graphify, Hermes, agent library) + architecture plan
 var/                      generated artifacts (graphify-out/graph.json, ...) — gitignored

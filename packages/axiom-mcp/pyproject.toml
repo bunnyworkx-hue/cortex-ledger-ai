@@ -1,0 +1,19 @@
+[project]
+name = "axiom-mcp"
+version = "0.1.0"
+description = "Axiom OS MCP interoperability layer — generic MCP client + Tool Registry integration (CLAUDE.md §33)"
+requires-python = ">=3.11"
+dependencies = [
+    "axiom-core",
+    "mcp>=1.0",
+]
+
+[tool.uv.sources]
+axiom-core = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["axiom_mcp"]
