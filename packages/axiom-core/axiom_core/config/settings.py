@@ -41,6 +41,11 @@ class AxiomSettings(BaseSettings):
     # §4) — None means the Knowledge Gateway has no backend registered.
     graphify_mcp_url: str | None = None
 
+    # Milestone 10 (Agent Fabric). Path to a real agency-agents checkout
+    # (see docs/agent-fabric/AGENT_LIBRARY_AUDIT.md) — None means the
+    # Agent Fabric registry is empty.
+    agency_agents_path: str | None = None
+
     def model_post_init(self, __context: object) -> None:
         # Prod should never fall back to human-readable console logging.
         if self.environment == "prod" and self.log_format == "console":

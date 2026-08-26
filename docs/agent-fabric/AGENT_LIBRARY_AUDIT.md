@@ -134,3 +134,31 @@ records elsewhere (e.g. `agents/registry/` in this repo, per the layout in
 place. That also means picking up upstream updates (new agents, edited
 personas) by re-running normalization against `agency-agents`, not by
 hand-maintaining a divergent copy.
+
+## 8. Milestone 10 — live registry load results
+
+Ran for real against the actual repo (commit `ebe9c99a`), not simulated:
+
+- **254/255 agents loaded**, one skipped and logged:
+  `engineering/engineering-developer-tooling-engineer.md` has an
+  unquoted `description:` containing a bare `": "` ("...with great DX:
+  intuitive command design...") — invalid plain-scalar YAML under strict
+  parsing (`yaml.safe_load`). This is a genuine quirk in the real source
+  file, not a parsing bug on Axiom's side; the fix was resilience, not a
+  workaround — `axiom_agent_fabric.normalize` skips and logs a single
+  malformed file rather than failing the whole registry load (one bad
+  file in 255 must not take down the whole Agent Fabric). Division
+  counts in §3 above are unaffected as a source-of-truth (still 255 real
+  files); the live registry's `engineering` count is 57 instead of 58
+  because of this one skip.
+- **17/255 agents (~7%) have a real `tools:` frontmatter field**
+  (comma-separated, e.g. `WebFetch, WebSearch, Read, Write, Edit` on
+  `marketing-seo-specialist.md`) — a partial exception to §2's "no
+  structured metadata" finding. The mechanical pass now captures these
+  as `frontmatter_tools`, separate from curated `capabilities`/
+  `permissions`, which the vast majority of agents (238/255) still lack.
+- **12-agent curated cohort** (`axiom_agent_fabric.curated`), spanning 10
+  divisions, hand-tagged from each agent's real description — verified
+  live via `/v1/agent-fabric/agents/security/security-appsec-engineer/
+  delegate`, which returned a real, in-character Anthropic completion
+  from the actual Application Security Engineer persona.

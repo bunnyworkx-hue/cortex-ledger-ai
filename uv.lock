@@ -10,6 +10,7 @@ resolution-markers = [
 
 [manifest]
 members = [
+    "axiom-agent-fabric",
     "axiom-anthropic",
     "axiom-api",
     "axiom-core",
@@ -139,6 +140,21 @@ wheels = [
 ]
 
 [[package]]
+name = "axiom-agent-fabric"
+version = "0.1.0"
+source = { editable = "packages/axiom-agent-fabric" }
+dependencies = [
+    { name = "axiom-core" },
+    { name = "pyyaml" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "axiom-core", editable = "packages/axiom-core" },
+    { name = "pyyaml", specifier = ">=6.0" },
+]
+
+[[package]]
 name = "axiom-anthropic"
 version = "0.1.0"
 source = { editable = "packages/axiom-anthropic" }
@@ -158,6 +174,7 @@ name = "axiom-api"
 version = "0.1.0"
 source = { editable = "apps/api" }
 dependencies = [
+    { name = "axiom-agent-fabric" },
     { name = "axiom-anthropic" },
     { name = "axiom-core" },
     { name = "axiom-db" },
@@ -168,6 +185,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "axiom-agent-fabric", editable = "packages/axiom-agent-fabric" },
     { name = "axiom-anthropic", editable = "packages/axiom-anthropic" },
     { name = "axiom-core", editable = "packages/axiom-core" },
     { name = "axiom-db", editable = "packages/axiom-db" },

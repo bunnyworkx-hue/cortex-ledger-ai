@@ -47,3 +47,29 @@ class ExecutionOut(BaseModel):
     backend_name: str
     status: str
     content: str | None
+
+
+class AgentRecordOut(BaseModel):
+    agent_id: str
+    name: str
+    description: str
+    division: str
+    category: str
+    status: str
+    is_curated: bool
+    capabilities: list[str] | None
+    permissions: list[str] | None
+    risk_level: str | None
+    frontmatter_tools: list[str]
+
+
+class AgentRecordDetailOut(AgentRecordOut):
+    instructions: str
+    source_path: str
+    source_commit: str
+
+
+class DelegateRequest(BaseModel):
+    input: str
+    context: str | None = None
+    backend: str | None = None

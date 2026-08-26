@@ -11,6 +11,7 @@ members = [
     "packages/axiom-db",
     "packages/axiom-anthropic",
     "packages/axiom-graphify",
+    "packages/axiom-agent-fabric",
     "apps/api",
 ]
 

@@ -7,13 +7,16 @@ decision here.
 
 ## Status
 
-Milestones 6–9 done: Foundation (config, logging, Postgres/Supabase),
+Milestones 6–10 done: Foundation (config, logging, Postgres/Supabase),
 Model Gateway (real Anthropic adapter), Knowledge Gateway (real Graphify
 MCP adapter, graph built from `agency-agents`: 1,121 nodes / 1,594 edges),
 Agent Runtime (Agent/Task/Execution/Result primitives + a real
-`AxiomNativeBackend` proven end-to-end via `/v1/agents/execute`, with
-execution-id tracing threaded through every log line). No Agent Fabric
-registry or Hermes integration yet — see `docs/IMPLEMENTATION_PLAN.md`.
+`AxiomNativeBackend`), Agent Fabric (a real registry loaded from
+`agency-agents` — 254/255 agents, one malformed file skipped and logged —
+plus a 12-agent curated cohort, search/inspect/load/delegate via
+`/v1/agent-fabric/*`, proven end-to-end with a real in-character
+completion from the Application Security Engineer agent). No Hermes
+integration yet — see `docs/IMPLEMENTATION_PLAN.md`.
 
 ## Layout
 
