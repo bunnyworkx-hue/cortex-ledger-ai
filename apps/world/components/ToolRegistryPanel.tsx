@@ -40,6 +40,38 @@ export function ToolRegistryPanel() {
   }
 
   async function call(tool: ToolDefinition) {
+    const required = tool.input_schema.required ?? [];
+    const values = argValues[tool.name] ?? {};
+
+    // Real bug this caught, live: an empty numeric field silently became
+    // Number("") === 0 (a genuinely valid-looking call graphify accepted
+    // for community_id), and an empty required string reached
+    // get_neighbors and crashed Graphify's own handler with a raw Python
+    // "not enough values to unpack" exception instead of a clean
+    // validation error. Neither is a bug this panel can fix upstream —
+    // but it shouldn't let an unfilled required field reach the API at
+    // all, so it can't happen here regardless of what the tool does with
+    // bad input.
+    const missing = required.filter((key) => !(values[key] ?? "").trim());
+    if (missing.length > 0) {
+      setResults((prev) => ({
+        ...prev,
+        [tool.name]: { text: `Fill in: ${missing.join(", ")}`, isError: true, pending: false },
+      }));
+      return;
+    }
+    const invalidNumeric = required.filter((key) => {
+      const propType = tool.input_schema.properties?.[key]?.type;
+      return (propType === "integer" || propType === "number") && Number.isNaN(Number(values[key]));
+    });
+    if (invalidNumeric.length > 0) {
+      setResults((prev) => ({
+        ...prev,
+        [tool.name]: { text: `${invalidNumeric.join(", ")} must be a number`, isError: true, pending: false },
+      }));
+      return;
+    }
+
     setBusy((prev) => new Set(prev).add(tool.name));
     setResults((prev) => {
       const next = { ...prev };
@@ -47,11 +79,9 @@ export function ToolRegistryPanel() {
       return next;
     });
     try {
-      const required = tool.input_schema.required ?? [];
-      const values = argValues[tool.name] ?? {};
       const args: Record<string, unknown> = {};
       for (const key of required) {
-        const raw = values[key] ?? "";
+        const raw = values[key];
         const propType = tool.input_schema.properties?.[key]?.type;
         args[key] = propType === "integer" || propType === "number" ? Number(raw) : raw;
       }
@@ -112,14 +142,19 @@ export function ToolRegistryPanel() {
 
                 {required.length > 0 && (
                   <div className="tool-args">
-                    {required.map((key) => (
-                      <input
-                        key={key}
-                        placeholder={key}
-                        value={argValues[tool.name]?.[key] ?? ""}
-                        onChange={(e) => setArg(tool.name, key, e.target.value)}
-                      />
-                    ))}
+                    {required.map((key) => {
+                      const propType = tool.input_schema.properties?.[key]?.type;
+                      const isNumeric = propType === "integer" || propType === "number";
+                      return (
+                        <input
+                          key={key}
+                          type={isNumeric ? "number" : "text"}
+                          placeholder={key}
+                          value={argValues[tool.name]?.[key] ?? ""}
+                          onChange={(e) => setArg(tool.name, key, e.target.value)}
+                        />
+                      );
+                    })}
                   </div>
                 )}
 

@@ -632,6 +632,39 @@ Verified after the World fix: clean `tsc`/`build`/`lint`, confirmed
 across multiple real page loads. Backend suite unaffected: 106/106
 passing.
 
+## 6i. Axiom World — Tool Registry: a real UX gap, not a broken app (2026-08-26)
+
+More real screenshots — this time of the Tool Registry panel showing
+"multiple errors." Investigated each one rather than assuming a repeat
+of the crash pattern: `graph_stats`/`god_nodes` (zero-arg tools) worked
+perfectly when re-verified live via curl; `list_prs`/`triage_prs`
+correctly report a real environment limitation ("gh CLI not found or
+not authenticated") that has nothing to do with this panel. The actual
+finding, visible in the screenshots: every "error" came from clicking
+Call before filling in a tool's required field.
+
+Two real, distinct problems that produced confusing output rather than
+a clean stop: `Number("")` evaluates to `0` in JavaScript, not `NaN` —
+so an empty `community_id` field silently became a genuinely "valid"
+call (`get_community` with id 0), returning a real but unintended
+result. And an empty required `label` reached `get_neighbors` and
+crashed *Graphify's own* handler with a raw Python "not enough values
+to unpack (expected 4, got 0)" exception instead of a clean validation
+message — a real bug in Graphify's tool implementation, not something
+fixable from this panel, but also not something that should ever reach
+the API in the first place.
+
+Fixed in `ToolRegistryPanel.tsx`: `call()` now validates required
+fields *before* touching the network — empty fields short-circuit with
+"Fill in: `<names>`" and non-numeric input to an integer/number field
+short-circuits with "`<name>` must be a number," neither of which
+makes an API call at all. Inputs for integer/number schema properties
+now render as `type="number"` for a better native input experience.
+Clean `tsc`/`build`/`lint`; 106/106 backend tests unaffected (no
+backend changes — both real underlying issues, the JS empty-string
+coercion and Graphify's unpacking crash, are now prevented from being
+reachable rather than patched after the fact).
+
 ## 7. Decisions (confirmed with user, 2026-08-25)
 
 1. **Database**: new, independent Supabase project for Axiom OS — not
