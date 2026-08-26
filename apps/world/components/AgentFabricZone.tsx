@@ -2,8 +2,9 @@
 
 import { Instance, Instances, Text } from "@react-three/drei";
 import { useMemo } from "react";
-import { agentClusterPositions } from "@/lib/layout";
+import { agentPositions } from "@/lib/layout";
 import { ZONES } from "@/lib/zones";
+import type { AgentRecord } from "@/lib/api";
 
 const CENTER = ZONES[1].center;
 
@@ -15,10 +16,40 @@ const DIVISION_COLOR = [
   "#C98F6B", "#6FB0D8", "#B491DD", "#8FC79A", "#D6A5D0", "#7FA8B8",
 ];
 
-export function AgentFabricZone({ byDivision }: { byDivision: Record<string, number> }) {
-  const divisions = useMemo(() => Object.keys(byDivision).sort((a, b) => byDivision[b] - byDivision[a]), [byDivision]);
-  const clusters = useMemo(() => agentClusterPositions(byDivision), [byDivision]);
-  const total = useMemo(() => Object.values(byDivision).reduce((a, b) => a + b, 0), [byDivision]);
+const ACTIVE_COLOR = "#F5C24B";
+
+export function AgentFabricZone({
+  agents,
+  activeAgentIds,
+}: {
+  agents: AgentRecord[];
+  activeAgentIds: Set<string>;
+}) {
+  const divisions = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const agent of agents) counts.set(agent.division, (counts.get(agent.division) ?? 0) + 1);
+    return [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([d]) => d);
+  }, [agents]);
+  const divisionColor = useMemo(() => {
+    const map = new Map<string, string>();
+    divisions.forEach((d, i) => map.set(d, DIVISION_COLOR[i % DIVISION_COLOR.length]));
+    return map;
+  }, [divisions]);
+  const positions = useMemo(() => agentPositions(agents), [agents]);
+
+  const divisionCenters = useMemo(() => {
+    const sums = new Map<string, { x: number; z: number; n: number }>();
+    for (const agent of agents) {
+      const pos = positions.get(agent.agent_id);
+      if (!pos) continue;
+      const acc = sums.get(agent.division) ?? { x: 0, z: 0, n: 0 };
+      acc.x += pos[0];
+      acc.z += pos[2];
+      acc.n += 1;
+      sums.set(agent.division, acc);
+    }
+    return sums;
+  }, [agents, positions]);
 
   return (
     <group position={CENTER}>
@@ -26,36 +57,44 @@ export function AgentFabricZone({ byDivision }: { byDivision: Record<string, num
         AGENT FABRIC
       </Text>
       <Text position={[0, 2.5, 0]} fontSize={0.13} color="#8f95bd" anchorX="center">
-        {total ? `${total} real agents · ${divisions.length} divisions` : "loading live registry…"}
+        {agents.length ? `${agents.length} real agents · ${divisions.length} divisions` : "loading live registry…"}
       </Text>
 
-      <Instances limit={300}>
+      <Instances limit={Math.max(agents.length, 1)}>
         <sphereGeometry args={[0.032, 8, 8]} />
-        <meshStandardMaterial color="#8f97ea" emissive="#4a55c7" emissiveIntensity={0.6} roughness={0.4} />
-        {divisions.map((division, di) =>
-          (clusters.get(division) ?? []).map((pos, i) => (
-            <Instance key={`${division}-${i}`} position={pos} color={DIVISION_COLOR[di % DIVISION_COLOR.length]} />
-          ))
-        )}
+        <meshStandardMaterial roughness={0.4} />
+        {agents.map((agent) => {
+          const active = activeAgentIds.has(agent.agent_id);
+          const color = active ? ACTIVE_COLOR : divisionColor.get(agent.division) ?? "#8f97ea";
+          return (
+            <Instance
+              key={agent.agent_id}
+              position={positions.get(agent.agent_id) ?? [0, 0, 0]}
+              color={color}
+              scale={active ? 2.6 : 1}
+            />
+          );
+        })}
       </Instances>
 
-      {divisions.slice(0, 8).map((division, di) => {
-        const positions = clusters.get(division) ?? [];
-        if (!positions.length) return null;
-        const cx = positions.reduce((s, p) => s + p[0], 0) / positions.length;
-        const cz = positions.reduce((s, p) => s + p[2], 0) / positions.length;
+      {divisions.slice(0, 8).map((division) => {
+        const c = divisionCenters.get(division);
+        if (!c) return null;
+        const cx = c.x / c.n;
+        const cz = c.z / c.n;
         const labelRadius = Math.hypot(cx, cz) + 0.55;
         const angle = Math.atan2(cz, cx);
+        const count = agents.filter((a) => a.division === division).length;
         return (
           <Text
             key={division}
             position={[Math.cos(angle) * labelRadius, 0.9, Math.sin(angle) * labelRadius]}
             fontSize={0.1}
-            color={DIVISION_COLOR[di % DIVISION_COLOR.length]}
+            color={divisionColor.get(division)}
             anchorX="center"
             letterSpacing={0.05}
           >
-            {`${division.toUpperCase()} · ${byDivision[division]}`}
+            {`${division.toUpperCase()} · ${count}`}
           </Text>
         );
       })}

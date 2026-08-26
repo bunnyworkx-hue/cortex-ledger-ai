@@ -18,35 +18,41 @@ function seededRandom(seed: string): () => number {
 }
 
 /**
- * Places agents in angular sectors by division — one sector per real
- * division, sized proportionally to that division's real agent count, so
- * the biggest real divisions (engineering, specialized) visibly occupy
- * the most space rather than every division getting equal real estate
- * regardless of size.
+ * Places each real agent (by its real agent_id) in an angular sector by
+ * division — one sector per real division, sized proportionally to that
+ * division's real agent count, so the biggest real divisions
+ * (engineering, specialized) visibly occupy the most space. Seeded by
+ * agent_id rather than by division+index, so a given real agent always
+ * lands in the same spot regardless of list order — a stable identity a
+ * caller can look up later to highlight one specific agent.
  */
-export function agentClusterPositions(
-  divisionCounts: Record<string, number>,
+export function agentPositions(
+  agents: { agent_id: string; division: string }[],
   radius = 3.4
-): Map<string, [number, number, number][]> {
-  const divisions = Object.entries(divisionCounts).sort((a, b) => b[1] - a[1]);
-  const total = divisions.reduce((sum, [, n]) => sum + n, 0) || 1;
+): Map<string, [number, number, number]> {
+  const byDivision = new Map<string, string[]>();
+  for (const agent of agents) {
+    const list = byDivision.get(agent.division) ?? [];
+    list.push(agent.agent_id);
+    byDivision.set(agent.division, list);
+  }
+  const divisions = [...byDivision.entries()].sort((a, b) => b[1].length - a[1].length);
+  const total = agents.length || 1;
 
-  const result = new Map<string, [number, number, number][]>();
+  const positions = new Map<string, [number, number, number]>();
   let angleCursor = 0;
-  for (const [division, count] of divisions) {
-    const sectorSpan = (count / total) * Math.PI * 2;
-    const rand = seededRandom(division);
-    const positions: [number, number, number][] = [];
-    for (let i = 0; i < count; i++) {
+  for (const [, agentIds] of divisions) {
+    const sectorSpan = (agentIds.length / total) * Math.PI * 2;
+    for (const agentId of agentIds) {
+      const rand = seededRandom(agentId);
       const angle = angleCursor + rand() * sectorSpan;
       const r = radius * (0.35 + 0.65 * rand());
       const y = (rand() - 0.5) * 1.6;
-      positions.push([Math.cos(angle) * r, y, Math.sin(angle) * r]);
+      positions.set(agentId, [Math.cos(angle) * r, y, Math.sin(angle) * r]);
     }
-    result.set(division, positions);
     angleCursor += sectorSpan;
   }
-  return result;
+  return positions;
 }
 
 /**

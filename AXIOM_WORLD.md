@@ -28,11 +28,15 @@ to.
   `useScroll` and a keyframe interpolator (`components/CameraRig.tsx`) —
   not a hand-rolled scroll listener, and not scroll-world's pre-rendered
   video seek.
-- **Agent Fabric zone**: renders the *actual* live division breakdown
-  (fetched from `/v1/agent-fabric` at page load — 254 real agents, 17
-  real divisions the day this was built) as an instanced point cloud,
-  clustered into angular sectors sized proportionally to each division's
-  real agent count (`lib/layout.ts::agentClusterPositions`).
+- **Agent Fabric zone**: renders the *actual full roster* — every one of
+  the 254 real agents, each with a real, individually addressable
+  `agent_id` (a new endpoint, `GET /v1/agent-fabric/agents`, added
+  alongside the existing aggregate-only status route specifically so the
+  scene could give real identity to individual points instead of
+  anonymous dots) — as an instanced point cloud, clustered into angular
+  sectors sized proportionally to each division's real agent count
+  (`lib/layout.ts::agentPositions`, seeded per-agent so a given real
+  agent always renders in the same spot).
 - **Knowledge Fabric zone**: renders the *actual* Graphify extraction
   (`var/graphify-out/graph.json`, read server-side —
   `lib/graphData.server.ts`) — real node labels, real communities, real
@@ -44,14 +48,29 @@ to.
   now (`/v1/models`, `/v1/agents`, `/v1/knowledge`) — an unconfigured
   backend renders visibly dim rather than being hidden or faked as
   present.
-- **Talk-Back command bar**: a real, working chat — every query calls
-  the real `/v1/agent-fabric/search` (Lazy Agent Discovery against the
-  actual registry, not a canned response list), and clicking a result
-  actually calls `/v1/agent-fabric/agents/{id}/delegate` and shows the
-  real Anthropic completion. A query containing a recognized keyword
-  also scrolls the camera to the matching zone — a literal keyword map
-  (`lib/scrollBridge.ts::zoneIdForQuery`), not NLU, and named as such
-  rather than oversold.
+- **Talk-Back command bar operates the system, not just queries it.**
+  Typing a real task — not a fixed canned prompt — calls the real
+  `/v1/agent-fabric/search` (Lazy Agent Discovery against the actual
+  254-agent registry), then *automatically delegates that same real task*
+  to the closest real match via `/v1/agent-fabric/agents/{id}/delegate`
+  and shows the real Anthropic completion, no extra click required.
+  Other real matches appear as chips you can run the identical real task
+  against too — a genuine multi-agent "team" you assemble by clicking,
+  not a hypothetical. Submitting also scrolls the camera to the Agent
+  Fabric zone (or another zone on a recognized keyword — a literal
+  keyword map, `lib/scrollBridge.ts::zoneIdForQuery`, not NLU, named as
+  such).
+- **The 3D scene visibly reacts to real work.** Whichever real agent
+  Talk-Back is currently running lights up gold and grows in the Agent
+  Fabric point cloud — `World.tsx` lifts an `activeAgentIds` set from
+  Talk-Back's real in-flight delegations down into `AgentFabricZone`, so
+  you can watch, in the 3D view, which specific real agent out of 254 is
+  actually doing your work right now. This closes the half of §7's "Agent
+  Discovery" ask that's about *highlighting the selected agent*; the
+  other half — dimming every *non*-matching agent while a search is
+  active, "the irrelevant agents fade back" — isn't built yet, since
+  `AgentFabricZone` currently only special-cases the active id rather
+  than tracking a broader "currently searched" set.
 
 ## What's honestly not built
 
@@ -64,12 +83,6 @@ not silently assumed:
   Hermes shows up as one real backend node in the Execution Engine zone
   (via `/v1/agents`), not as a separate physical gateway with an animated
   request→authorization→budget→approval sequence.
-- **Live-reactive Agent Discovery** (§7) — the real search narrows to
-  real matching agents in the chat log, but the 3D agent cloud itself
-  doesn't yet visually fade/highlight in response; that's a real,
-  reachable next step (the search result already has each agent's real
-  `agent_id`, which the Agent Fabric zone could key off of), not built
-  in this pass.
 - **A live execution-graph animation** (§20) — real delegations happen
   and their real results appear in the chat, but there's no separate
   animated "watch the request travel through Planner → Backend → Tools

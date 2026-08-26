@@ -3,7 +3,7 @@
 import { Canvas } from "@react-three/fiber";
 import { ScrollControls, Stars } from "@react-three/drei";
 import { Suspense, useEffect, useState } from "react";
-import { api, type AgentFabricStatus, type BackendStatus } from "@/lib/api";
+import { api, type AgentRecord, type BackendStatus } from "@/lib/api";
 import type { GraphSnapshot } from "@/lib/graphData.server";
 import { CameraRig } from "./CameraRig";
 import { ScrollBridgeSync } from "./ScrollBridgeSync";
@@ -17,20 +17,21 @@ import { TalkBack } from "./TalkBack";
 const PAGES = 8;
 
 export function World({ graph }: { graph: GraphSnapshot }) {
-  const [fabric, setFabric] = useState<AgentFabricStatus | null>(null);
+  const [roster, setRoster] = useState<AgentRecord[]>([]);
   const [models, setModels] = useState<BackendStatus | null>(null);
-  const [agents, setAgents] = useState<BackendStatus | null>(null);
+  const [agentBackends, setAgentBackends] = useState<BackendStatus | null>(null);
   const [knowledge, setKnowledge] = useState<BackendStatus | null>(null);
   const [liveError, setLiveError] = useState<string | null>(null);
+  const [activeAgentIds, setActiveAgentIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([api.agentFabricStatus(), api.modelBackends(), api.agentBackends(), api.knowledgeBackends()])
-      .then(([f, m, a, k]) => {
+    Promise.all([api.listAgents(), api.modelBackends(), api.agentBackends(), api.knowledgeBackends()])
+      .then(([r, m, a, k]) => {
         if (cancelled) return;
-        setFabric(f);
+        setRoster(r);
         setModels(m);
-        setAgents(a);
+        setAgentBackends(a);
         setKnowledge(k);
       })
       .catch((err) => {
@@ -62,11 +63,11 @@ export function World({ graph }: { graph: GraphSnapshot }) {
 
           <Suspense fallback={null}>
             <EntryZone />
-            <AgentFabricZone byDivision={fabric?.by_division ?? {}} />
+            <AgentFabricZone agents={roster} activeAgentIds={activeAgentIds} />
             <GraphifyZone graph={graph} />
             <ExecutionZone
               modelBackends={models?.backends ?? {}}
-              agentBackends={agents?.backends ?? {}}
+              agentBackends={agentBackends?.backends ?? {}}
               knowledgeBackends={knowledge?.backends ?? {}}
             />
           </Suspense>
@@ -75,7 +76,7 @@ export function World({ graph }: { graph: GraphSnapshot }) {
         </ScrollControls>
       </Canvas>
 
-      <TalkBack />
+      <TalkBack onActiveAgentsChange={setActiveAgentIds} />
     </div>
   );
 }

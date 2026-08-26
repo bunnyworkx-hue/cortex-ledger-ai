@@ -6,19 +6,57 @@ import { scrollToZone, zoneIdForQuery } from "@/lib/scrollBridge";
 
 type LogEntry =
   | { role: "user"; text: string }
-  | { role: "axiom"; text: string; agents?: AgentRecord[] }
+  | { role: "axiom"; text: string; agents?: AgentRecord[]; task?: string }
+  | { role: "result"; text: string; agentId: string }
   | { role: "error"; text: string };
 
-export function TalkBack() {
+export function TalkBack({ onActiveAgentsChange }: { onActiveAgentsChange: (ids: Set<string>) => void }) {
   const [open, setOpen] = useState(true);
   const [value, setValue] = useState("");
   const [busy, setBusy] = useState(false);
+  const [running, setRunning] = useState<Set<string>>(new Set());
   const [log, setLog] = useState<LogEntry[]>([
     {
       role: "axiom",
-      text: 'Search matches literal words in each agent\'s real description — try "security" or "frontend" or "sales analyst". A matching query also jumps the camera to the right zone. Once you see an agent below, click it to actually delegate.',
+      text: 'Tell me what you need done — I\'ll find the real agent and run it. Try "who can help with security" or "run a frontend accessibility review". Search matches literal words in each agent\'s real description.',
     },
   ]);
+
+  function markRunning(ids: string[], value: boolean) {
+    setRunning((prev) => {
+      const next = new Set(prev);
+      for (const id of ids) {
+        if (value) next.add(id);
+        else next.delete(id);
+      }
+      onActiveAgentsChange(next);
+      return next;
+    });
+  }
+
+  async function runAgent(agent: AgentRecord, task: string) {
+    markRunning([agent.agent_id], true);
+    try {
+      const result = await api.delegate(agent.agent_id, task);
+      setLog((l) => [
+        ...l,
+        {
+          role: "result",
+          agentId: agent.agent_id,
+          text: result.content
+            ? `${agent.name} (${agent.division}, via ${result.backend_name}): ${result.content}`
+            : `${agent.name}: execution ${result.execution_id} ${result.status}.`,
+        },
+      ]);
+    } catch (err) {
+      setLog((l) => [
+        ...l,
+        { role: "error", text: `${agent.name} failed: ${err instanceof ApiError ? err.message : "could not reach the API"}` },
+      ]);
+    } finally {
+      markRunning([agent.agent_id], false);
+    }
+  }
 
   async function handleSubmit(query: string) {
     if (!query.trim() || busy) return;
@@ -28,44 +66,30 @@ export function TalkBack() {
 
     const zoneId = zoneIdForQuery(query);
     if (zoneId) scrollToZone(zoneId);
+    else scrollToZone("agent-fabric");
 
     try {
       const matches = await api.agentFabricSearch(query);
       if (matches.length === 0) {
         setLog((l) => [...l, { role: "axiom", text: "No agents matched that in the real registry — try different wording." }]);
-      } else {
-        setLog((l) => [
-          ...l,
-          {
-            role: "axiom",
-            text: `Found ${matches.length} real agent${matches.length === 1 ? "" : "s"} in the registry${zoneId ? ` — moved to ${zoneId.replace("-", " ")}` : ""}:`,
-            agents: matches,
-          },
-        ]);
+        return;
       }
-    } catch (err) {
-      setLog((l) => [...l, { role: "error", text: err instanceof ApiError ? err.message : "Could not reach the Axiom API." }]);
-    } finally {
-      setBusy(false);
-    }
-  }
 
-  async function handleDelegate(agent: AgentRecord, task: string) {
-    setBusy(true);
-    setLog((l) => [...l, { role: "user", text: `run ${agent.agent_id}: ${task}` }]);
-    try {
-      const result = await api.delegate(agent.agent_id, task);
+      const [lead, ...rest] = matches;
       setLog((l) => [
         ...l,
         {
           role: "axiom",
-          text: result.content
-            ? `${agent.name} (${result.backend_name}): ${result.content}`
-            : `Execution ${result.execution_id} ${result.status}.`,
+          text: `Running this on ${lead.name} (${lead.division}) — the closest real match.${
+            rest.length ? ` ${rest.length} more matched; run any of them on the same task too:` : ""
+          }`,
+          agents: rest,
+          task: query,
         },
       ]);
+      await runAgent(lead, query);
     } catch (err) {
-      setLog((l) => [...l, { role: "error", text: err instanceof ApiError ? err.message : "Delegation failed to reach the API." }]);
+      setLog((l) => [...l, { role: "error", text: err instanceof ApiError ? err.message : "Could not reach the Axiom API." }]);
     } finally {
       setBusy(false);
     }
@@ -82,20 +106,23 @@ export function TalkBack() {
           <div className="talkback-log">
             {log.map((entry, i) => (
               <div key={i} className={`talkback-entry talkback-${entry.role}`}>
-                <span className="talkback-role">{entry.role === "user" ? "you" : entry.role === "error" ? "!" : "axiom"}</span>
+                <span className="talkback-role">
+                  {entry.role === "user" ? "you" : entry.role === "error" ? "!" : entry.role === "result" ? "ran" : "axiom"}
+                </span>
                 <div className="talkback-text">
                   {entry.text}
-                  {"agents" in entry && entry.agents && (
+                  {"agents" in entry && entry.agents && entry.agents.length > 0 && (
                     <div className="talkback-agents">
                       {entry.agents.map((agent) => (
                         <button
                           key={agent.agent_id}
                           className="talkback-agent-chip"
-                          disabled={busy}
-                          onClick={() => handleDelegate(agent, "In one sentence, what do you do?")}
+                          disabled={busy || running.has(agent.agent_id)}
+                          onClick={() => entry.task && runAgent(agent, entry.task)}
                           title={agent.description}
                         >
-                          {agent.name} <span className="talkback-agent-division">{agent.division}</span>
+                          {running.has(agent.agent_id) ? "running…" : agent.name}{" "}
+                          <span className="talkback-agent-division">{agent.division}</span>
                         </button>
                       ))}
                     </div>
@@ -114,12 +141,12 @@ export function TalkBack() {
             <input
               value={value}
               onChange={(e) => setValue(e.target.value)}
-              placeholder="Ask Axiom anything…"
+              placeholder="Tell Axiom what you need done…"
               disabled={busy}
               aria-label="Command Axiom"
             />
             <button type="submit" disabled={busy || !value.trim()}>
-              {busy ? "…" : "Send"}
+              {busy ? "…" : "Run"}
             </button>
           </form>
         </div>

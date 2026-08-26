@@ -62,6 +62,11 @@ export type DelegateResult = {
 export const api = {
   health: () => request<{ status: string; database: string }>("/health"),
   agentFabricStatus: () => request<AgentFabricStatus>("/v1/agent-fabric"),
+  // The full real roster (all 254, each with a real addressable
+  // agent_id) — unlike agentFabricStatus's aggregate-only counts, this
+  // is what lets the 3D scene give individual real identity to
+  // individual rendered points instead of anonymous dots.
+  listAgents: () => request<AgentRecord[]>("/v1/agent-fabric/agents"),
   agentFabricSearch: (q: string) =>
     request<AgentRecord[]>(`/v1/agent-fabric/search?q=${encodeURIComponent(q)}&limit=6`),
   modelBackends: () => request<BackendStatus>("/v1/models"),

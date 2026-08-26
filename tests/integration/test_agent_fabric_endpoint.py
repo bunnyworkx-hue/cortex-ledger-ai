@@ -19,6 +19,36 @@ async def test_status_reports_the_real_registry_honestly(api_client: httpx.Async
 
 
 @pytest.mark.asyncio
+async def test_list_agents_returns_the_full_real_roster(api_client: httpx.AsyncClient):
+    status = (await api_client.get("/v1/agent-fabric")).json()
+    if not status["configured"]:
+        pytest.skip("AXIOM_AGENCY_AGENTS_PATH not set in this environment")
+
+    response = await api_client.get("/v1/agent-fabric/agents")
+    assert response.status_code == 200
+    records = response.json()
+    # The full roster, not just the 12 curated — every record has a real,
+    # addressable agent_id and division, unlike GET /v1/agent-fabric's
+    # aggregate-only counts.
+    assert len(records) == status["total_agents"]
+    assert any(r["agent_id"] == "engineering/engineering-frontend-developer" for r in records)
+    assert all(r["agent_id"] and r["division"] for r in records)
+
+
+@pytest.mark.asyncio
+async def test_list_agents_filters_by_division(api_client: httpx.AsyncClient):
+    status = (await api_client.get("/v1/agent-fabric")).json()
+    if not status["configured"]:
+        pytest.skip("AXIOM_AGENCY_AGENTS_PATH not set in this environment")
+
+    response = await api_client.get("/v1/agent-fabric/agents", params={"division": "finance"})
+    assert response.status_code == 200
+    records = response.json()
+    assert len(records) == status["by_division"]["finance"]
+    assert all(r["division"] == "finance" for r in records)
+
+
+@pytest.mark.asyncio
 async def test_search_and_inspect_a_real_curated_agent(api_client: httpx.AsyncClient):
     status = (await api_client.get("/v1/agent-fabric")).json()
     if not status["configured"]:

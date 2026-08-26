@@ -58,6 +58,22 @@ async def status(gateway: AgentInvocationGateway | None = Depends(get_agent_fabr
     }
 
 
+@router.get("/agents", response_model=list[AgentRecordOut])
+async def list_agents(
+    division: str | None = None,
+    gateway: AgentInvocationGateway | None = Depends(get_agent_fabric),
+) -> list[AgentRecordOut]:
+    """The full real roster (all 254, not just the 12 curated) — unlike
+    GET /v1/agent-fabric's aggregate by_division counts, this gives every
+    agent a real, addressable agent_id. Built for Axiom World's 3D view
+    (Milestone: Axiom World) to assign real identity to individual
+    rendered points instead of anonymous dots, but generically useful
+    anywhere a real roster (not just a search-scoped subset) is needed.
+    """
+    gateway = _require_gateway(gateway)
+    return [_to_out(r) for r in gateway.list(division=division)]
+
+
 @router.get("/search", response_model=list[AgentRecordOut])
 async def search(
     q: str,

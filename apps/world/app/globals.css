@@ -124,6 +124,9 @@ body {
 .talkback-error .talkback-role {
   color: #f0796b;
 }
+.talkback-result .talkback-role {
+  color: #7fd6a0;
+}
 .talkback-text {
   flex: 1;
   color: var(--ink);
@@ -131,6 +134,9 @@ body {
 }
 .talkback-error .talkback-text {
   color: #f0796b;
+}
+.talkback-result .talkback-text {
+  color: #cdeedb;
 }
 
 .talkback-agents {

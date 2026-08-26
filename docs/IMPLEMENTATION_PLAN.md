@@ -464,6 +464,43 @@ endpoint the app calls curl-verified through the new proxy including a
 live `delegate` call returning a real Anthropic completion. Not visually
 verified in a browser — same environment limitation as the dashboard.
 
+## 6d. Axiom World — operate the system, don't just view it (2026-08-26)
+
+The user's follow-up: "I want it to function like an agentic OS system"
+— matching CLAUDE.md §39's own "I am operating an AI organization, not
+chatting with an AI." The gap: Talk-Back could search real agents, but
+clicking a result always ran the same fixed placeholder prompt ("In one
+sentence, what do you do?") instead of whatever the user actually asked
+for, and the 3D scene had no way to show *which* real agent was doing
+real work, because the only Agent Fabric data available
+(`/v1/agent-fabric`'s aggregate `by_division` counts) had no individual
+agent identity to key off of.
+
+**New, real, small backend addition**: `GET /v1/agent-fabric/agents`
+(`apps/api/axiom_api/routers/agent_fabric.py`), returning the full real
+254-agent roster via the same `gateway.list()` the aggregate endpoint
+already calls internally — every record gets a real, addressable
+`agent_id`, unlike the aggregate-only status route. Two new real
+integration tests confirm it returns the same total as the aggregate
+count and correctly filters by division. 106/106 tests passing (up from
+104).
+
+**Frontend rewrite**: `lib/layout.ts::agentPositions` now seeds each
+point's position by real `agent_id` (not division+index), so a specific
+real agent always renders in the same spot — a stable identity Talk-Back
+can look up. Talk-Back no longer sends a canned prompt: submitting a
+real task searches the real registry, then *automatically delegates that
+same real task* to the closest match and shows the real result, with
+other real matches offered as one-click "also run this same task" chips
+— a genuine multi-agent team assembled by clicking, not simulated.
+`World.tsx` now lifts an `activeAgentIds` set from Talk-Back's real
+in-flight delegations into `AgentFabricZone`, so whichever specific real
+agent is actually working right now visibly lights up gold and grows in
+the point cloud — the first real link between the chat and the 3D scene,
+closing half of §7's original Agent Discovery ask (highlighting the
+selected agent; dimming the non-matching rest is still not built, named
+honestly in `AXIOM_WORLD.md` rather than claimed).
+
 ## 7. Decisions (confirmed with user, 2026-08-25)
 
 1. **Database**: new, independent Supabase project for Axiom OS — not
