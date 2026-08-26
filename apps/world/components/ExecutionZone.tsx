@@ -54,8 +54,21 @@ export function ExecutionZone({
           const x = Math.cos(angle) * group.radius;
           const z = Math.sin(angle) * group.radius;
           const configured = status === "configured";
+          // Hermes is a real, distinct external agent runtime
+          // (packages/axiom-hermes, a subprocess CLI call — not part of
+          // Axiom's own execution path). CLAUDE.md §8-9's own framing:
+          // "Hermes should never visually appear to own the Axiom
+          // environment. Axiom controls access." — the gate ring is that
+          // boundary made visible, not decoration.
+          const isHermes = name === "hermes";
           return (
             <group key={`${group.label}-${name}`} position={[x, 0, z]}>
+              {isHermes && (
+                <mesh rotation={[Math.PI / 2, 0, 0]}>
+                  <torusGeometry args={[0.27, 0.008, 8, 48]} />
+                  <meshBasicMaterial color="#E0A860" transparent opacity={configured ? 0.6 : 0.2} />
+                </mesh>
+              )}
               <mesh>
                 <sphereGeometry args={[0.16, 16, 16]} />
                 <meshStandardMaterial
@@ -69,7 +82,7 @@ export function ExecutionZone({
                 {name}
               </Text>
               <Text position={[0, -0.46, 0]} fontSize={0.06} color={configured ? "#7fd6a0" : "#8a8f9e"} anchorX="center">
-                {status}
+                {isHermes ? `${status} · external gateway` : status}
               </Text>
             </group>
           );

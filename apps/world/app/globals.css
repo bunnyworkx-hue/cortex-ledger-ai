@@ -169,6 +169,19 @@ body {
   margin-left: 4px;
 }
 
+.talkback-hermes-toggle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 16px 0;
+  font-size: 11.5px;
+  color: var(--muted);
+  cursor: pointer;
+}
+.talkback-hermes-toggle input {
+  accent-color: var(--accent);
+}
+
 .talkback-form {
   display: flex;
   gap: 8px;

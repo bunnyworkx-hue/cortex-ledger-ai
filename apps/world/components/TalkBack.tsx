@@ -23,6 +23,14 @@ export function TalkBack({
   const [value, setValue] = useState("");
   const [busy, setBusy] = useState(false);
   const [running, setRunning] = useState<Set<string>>(new Set());
+  // Real, not cosmetic: Axiom's native path (AxiomNativeBackend) has
+  // always been the only one Talk-Back could reach, even though the
+  // real Hermes CLI backend (packages/axiom-hermes) has been fully
+  // built and tested since Milestone 13 — this toggle is what actually
+  // routes a real delegate() call through it instead, closing §8-9's
+  // "Hermes is a real, distinct external runtime" gap with real
+  // functionality, not just a visual.
+  const [useHermes, setUseHermes] = useState(false);
   const [log, setLog] = useState<LogEntry[]>([
     {
       role: "axiom",
@@ -50,7 +58,7 @@ export function TalkBack({
   async function runAgent(agent: AgentRecord, task: string) {
     markRunning([agent.agent_id], true);
     try {
-      const result = await api.delegate(agent.agent_id, task);
+      const result = await api.delegate(agent.agent_id, task, useHermes ? "hermes" : undefined);
       setLog((l) => [
         ...l,
         {
@@ -148,6 +156,10 @@ export function TalkBack({
               </div>
             ))}
           </div>
+          <label className="talkback-hermes-toggle">
+            <input type="checkbox" checked={useHermes} onChange={(e) => setUseHermes(e.target.checked)} />
+            Run via Hermes (real external CLI runtime, not Axiom&apos;s native path)
+          </label>
           <form
             className="talkback-form"
             onSubmit={(e) => {

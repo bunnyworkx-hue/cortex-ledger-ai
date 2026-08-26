@@ -113,16 +113,21 @@ cd apps/dashboard && npm install   # first time only
 
 The browser never calls the API directly — the dashboard proxies every
 `/api/*` request through its own Next.js server to `AXIOM_API_ORIGIN`
-(default `http://127.0.0.1:8000`, see `apps/dashboard/next.config.ts`),
-so the browser's fetches are same-origin. This replaced an earlier
-direct-cross-origin design: the API's CORS policy (still present,
-`apps/api/axiom_api/main.py`) was verified correct — including a
-simulated browser preflight with the right `Origin` header — but a real
-user still hit a browser-side "failed to fetch" that no server-side
-check could reproduce or explain (likely an extension or embedded-webview
-context blocking a cross-origin fetch to a non-standard local port).
-Proxying through Next's own server sidesteps that whole class of problem
-by construction, rather than chasing the exact browser-side cause.
+(default `http://127.0.0.1:8000`) via a real Route Handler
+(`apps/dashboard/app/api/[...path]/route.ts`), so the browser's fetches
+are same-origin. This replaced an earlier direct-cross-origin design:
+the API's CORS policy (still present, `apps/api/axiom_api/main.py`) was
+verified correct — including a simulated browser preflight with the
+right `Origin` header — but a real user still hit a browser-side "failed
+to fetch" that no server-side check could reproduce or explain (likely
+an extension or embedded-webview context blocking a cross-origin fetch
+to a non-standard local port). Proxying through Next's own server
+sidesteps that whole class of problem by construction, rather than
+chasing the exact browser-side cause. The route handler itself replaced
+an even earlier version built on `next.config.ts`'s `rewrites()`, which
+had an undocumented ~30s timeout that cut off genuinely slow real calls
+(found live via Axiom World's real Hermes delegations, which routinely
+take 10-35s+) — the route handler sets an explicit 130s timeout instead.
 Build/typecheck/lint are verified (`npm run build`, clean TypeScript,
 clean ESLint) and every route was curl-verified to serve 200 through the
 proxy; the rendered UI itself was not visually verified — no browser/

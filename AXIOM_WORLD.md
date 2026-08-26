@@ -16,9 +16,13 @@ API instead.
 ```
 
 Same same-origin `/api/*` proxy pattern as `apps/dashboard` (see that
-app's `next.config.ts` comment for the full CORS-avoidance rationale) —
+app's route handler comment for the full CORS-avoidance rationale) —
 `AXIOM_API_ORIGIN` in `apps/world/.env.local` controls where it forwards
-to.
+to. The proxy is a real Route Handler (`app/api/[...path]/route.ts`),
+not `next.config.ts`'s built-in `rewrites()` — that had an undocumented
+~30s timeout that cut off genuinely successful, slower real calls (real
+Hermes delegations routinely take 10-35s+); the route handler sets an
+explicit 130s timeout instead, past `HermesBackend`'s own 120s default.
 
 ## What's real
 
@@ -101,6 +105,15 @@ to.
   the real constructed arguments; a real high-risk call correctly routes
   to a pending approval (visible in the Human Approval panel) instead of
   executing, exactly like every other real path into the Policy Engine.
+- **Real Hermes routing** (§8-9) — Talk-Back's "Run via Hermes" checkbox
+  threads `backend: "hermes"` through the same real `delegate()` call,
+  which reaches the real `HermesBackend` (a genuine subprocess `hermes`
+  CLI call, ~10-35s real overhead, not Axiom's native path). Verified
+  live: `sales/sales-deal-strategist` via Hermes returned a real
+  completion with `backend_name: "hermes"`. Hermes's node in the
+  Execution Engine zone renders with a distinct ring, marking it as an
+  external, gated runtime per CLAUDE.md §8-9's own framing ("Hermes
+  should never visually appear to own the Axiom environment").
 
 ## What's honestly not built
 
@@ -109,10 +122,17 @@ here is its own §32 MVP scope (Entry → Agent Fabric → Graphify →
 Execution Engine → Talk-Back) with real data throughout. Not built, and
 not silently assumed:
 
-- **Hermes as its own dedicated zone/gateway visualization** (§8-9) —
-  Hermes shows up as one real backend node in the Execution Engine zone
-  (via `/v1/agents`), not as a separate physical gateway with an animated
-  request→authorization→budget→approval sequence.
+- **A full physical Hermes gateway with an animated
+  request→authorization→budget→approval sequence** (§8-9) — Hermes
+  itself is now real and working, not just present: Talk-Back's "Run via
+  Hermes" checkbox actually routes a real `delegate()` call through the
+  real `HermesBackend` (a real subprocess `hermes` CLI call, not
+  Axiom's native path), and its node in the Execution Engine zone gets a
+  distinct visual ring marking it as an external, gated runtime. What's
+  still not built is the dedicated multi-step gateway *sequence*
+  animation (request → authorization → budget → risk → approval →
+  execution as separate visualized stages) — the real path exists and
+  is now reachable, it just isn't broken into animated steps.
 - **A multi-stage execution-graph animation** (§20) — `ExecutionPulse`
   now shows the one real hop that exists (Agent Fabric → Execution
   Engine, timed to real in-flight state), but there's no separate

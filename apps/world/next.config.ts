@@ -1,14 +1,12 @@
 import type { NextConfig } from "next";
 
-// Same pattern as apps/dashboard/next.config.ts (see its comment for the
-// full rationale): the browser calls this server's own same-origin
-// /api/* path, which Next proxies server-side to the real Axiom API.
-const AXIOM_API_ORIGIN = process.env.AXIOM_API_ORIGIN ?? "http://127.0.0.1:8000";
-
-const nextConfig: NextConfig = {
-  async rewrites() {
-    return [{ source: "/api/:path*", destination: `${AXIOM_API_ORIGIN}/:path*` }];
-  },
-};
+// The browser calls this server's own same-origin /api/* path, which
+// app/api/[...path]/route.ts proxies server-side to the real Axiom API
+// (AXIOM_API_ORIGIN) — a real, explicit route handler rather than
+// next.config.ts's built-in rewrites(), which this app used originally
+// but had an undocumented ~30s timeout that cut off genuinely
+// successful, slower real calls (Hermes delegations routinely take
+// 10-35s+). See the route handler's own comment for the full story.
+const nextConfig: NextConfig = {};
 
 export default nextConfig;

@@ -665,6 +665,50 @@ backend changes — both real underlying issues, the JS empty-string
 coercion and Graphify's unpacking crash, are now prevented from being
 reachable rather than patched after the fact).
 
+## 6j. Axiom World — real Hermes routing, and a real proxy timeout bug (2026-08-26)
+
+Closed §8-9's Hermes gap with real functionality, not just a visual:
+Talk-Back had always routed through `AxiomNativeBackend` only, even
+though the real Hermes CLI backend (`packages/axiom-hermes`) has been
+fully built and tested since Milestone 13 — it just had zero exposure
+in the world. Added a real "Run via Hermes" checkbox that threads
+`backend: "hermes"` through the same real `delegate()` call
+(`lib/api.ts`'s `delegate` gained an optional `backend` param,
+`DelegateRequest.backend` was already optional server-side). Hermes
+also got a real distinct visual in `ExecutionZone` — a thin ring around
+its node — matching CLAUDE.md §8-9's own explicit framing ("Hermes
+should never visually appear to own the Axiom environment. Axiom
+controls access.").
+
+**Real bug found live while verifying it**: the first real Hermes call
+through the world's proxy failed with an empty 500 at almost exactly
+30 seconds, while the identical request hitting the API directly
+succeeded in ~32s with a real completion. Reproduced twice, consistent
+timing both times. Root cause: `next.config.ts`'s built-in
+`rewrites()` — the same mechanism that fixed the dashboard's
+cross-origin bug in Milestone 6b — has an undocumented ~30s timeout on
+the proxied request, well under what real Hermes calls routinely need
+(10-35s+, real CLI subprocess overhead). This had been a real, latent
+ceiling since the proxy was first introduced; it just took a genuinely
+slow real call to surface it.
+
+Fixed by replacing `rewrites()` with an explicit Route Handler,
+`app/api/[...path]/route.ts`, that forwards to `AXIOM_API_ORIGIN` with
+an explicit `AbortSignal.timeout(130_000)` — comfortably past
+`HermesBackend`'s own real 120s default
+(`packages/axiom-hermes/axiom_hermes/adapter.py`), so nothing this app
+owns cuts a request off before the backend's own real timeout would.
+Applied the identical fix to `apps/dashboard` too, even though it
+doesn't call Hermes today — it shared the exact same rewrite pattern
+and therefore the exact same latent bug, left unfixed there would have
+just meant hitting it later instead of never.
+
+Verified: clean `tsc`/`build`/`lint` on both apps, the previously-failing
+real Hermes call now succeeds through the world's new proxy (15.2s,
+real completion, `backend_name: "hermes"`), a fast call still works
+normally, and the dashboard's `/v1/tools` still returns the real
+12-tool list through its new route handler.
+
 ## 7. Decisions (confirmed with user, 2026-08-25)
 
 1. **Database**: new, independent Supabase project for Axiom OS — not

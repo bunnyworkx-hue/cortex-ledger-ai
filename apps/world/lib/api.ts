@@ -100,10 +100,10 @@ export const api = {
   modelBackends: () => request<BackendStatus>("/v1/models"),
   agentBackends: () => request<BackendStatus>("/v1/agents"),
   knowledgeBackends: () => request<BackendStatus>("/v1/knowledge"),
-  delegate: (agentId: string, input: string) =>
+  delegate: (agentId: string, input: string, backend?: string) =>
     request<DelegateResult>(`/v1/agent-fabric/agents/${agentId}/delegate`, {
       method: "POST",
-      body: JSON.stringify({ input }),
+      body: JSON.stringify({ input, backend }),
     }),
   listApprovals: () => request<Approval[]>("/v1/approvals"),
   approve: (id: string, decidedBy: string) =>
