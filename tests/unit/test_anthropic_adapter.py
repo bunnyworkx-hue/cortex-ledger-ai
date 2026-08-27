@@ -77,7 +77,7 @@ async def test_generate_maps_request_and_response():
         ],
         model="claude-sonnet-5",
         max_tokens=100,
-        system="You are Axiom.",
+        system="You are Cortex Ledger AI.",
     )
 
     response = await backend.generate(request)
@@ -93,7 +93,7 @@ async def test_generate_maps_request_and_response():
     # System-role messages must be merged into the `system` param, not
     # sent as a message (the Anthropic API rejects role="system" messages).
     call_kwargs = client.messages.last_call_kwargs
-    assert call_kwargs["system"] == "You are Axiom.\n\nBe terse."
+    assert call_kwargs["system"] == "You are Cortex Ledger AI.\n\nBe terse."
     assert call_kwargs["messages"] == [{"role": "user", "content": "Say hi."}]
 
 

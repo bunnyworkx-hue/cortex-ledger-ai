@@ -1,7 +1,7 @@
 [project]
 name = "axiom-mcp"
 version = "0.1.0"
-description = "Axiom OS MCP interoperability layer — generic MCP client + Tool Registry integration (CLAUDE.md §33)"
+description = "Cortex Ledger AI MCP interoperability layer — generic MCP client + Tool Registry integration (CLAUDE.md §33)"
 requires-python = ">=3.11"
 dependencies = [
     "axiom-core",

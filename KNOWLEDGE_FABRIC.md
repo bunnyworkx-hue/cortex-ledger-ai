@@ -1,6 +1,6 @@
 # Knowledge Fabric
 
-The Knowledge Gateway is the provider-neutral abstraction Axiom's API
+The Knowledge Gateway is the provider-neutral abstraction Cortex Ledger AI's API
 routes through to reach a knowledge backend — today that's Graphify (see
 `GRAPHIFY_INTEGRATION.md` for the specific backend). This document is
 about the abstraction itself: `axiom_core.knowledge`.
@@ -38,7 +38,7 @@ The original design (before any live testing) proposed structured
 Graphify's real MCP server was queried live, `CallToolResult.structured_content`
 came back `None` on every query-shaped tool; the actual payload is
 human-readable text formatted for LLM context insertion (`NODE X
-[src=... community=N]` / `EDGE A --relation [EXTRACTED]--> B`). Axiom's
+[src=... community=N]` / `EDGE A --relation [EXTRACTED]--> B`). Cortex Ledger AI's
 type was corrected to match the real API rather than force a structured
 shape the backend doesn't provide — `text` is what belongs in an agent's
 prompt context, `raw` keeps the underlying MCP payload for anything that
@@ -63,7 +63,7 @@ Every route proxies straight to the registered backend and returns
 CLAUDE.md §19 names `get_dependencies`/`get_dependents`/`get_architecture`/
 `get_documentation` as knowledge operations — none have a direct 1:1
 Graphify MCP tool today; `get_impact` maps onto Graphify's `get_pr_impact`
-only for the PR-scoped case. Correlating the knowledge graph with Axiom's
+only for the PR-scoped case. Correlating the knowledge graph with Cortex Ledger AI's
 own execution trace (CLAUDE.md §43's "knowledge → reasoning → execution →
 verification") is a stated future direction, not built — see
 `ARCHITECTURE.md`'s "What's deliberately not built" section.

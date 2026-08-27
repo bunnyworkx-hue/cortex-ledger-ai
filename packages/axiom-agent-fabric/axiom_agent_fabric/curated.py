@@ -3,7 +3,7 @@ divisions, hand-picked and hand-tagged per IMPLEMENTATION_PLAN.md §2
 ("populated by hand for a small first cohort ... not auto-inferred from
 prose for all 255 on day one"). Every entry below is grounded in that
 agent's real frontmatter `description` (see docs/agent-fabric/
-AGENT_LIBRARY_AUDIT.md) — capabilities/permissions/risk_level are Axiom's
+AGENT_LIBRARY_AUDIT.md) — capabilities/permissions/risk_level are Cortex Ledger AI's
 own categorization of real, described capabilities, not invented ones
 (CLAUDE.md §56 forbids fabricating capabilities, not tagging real ones).
 

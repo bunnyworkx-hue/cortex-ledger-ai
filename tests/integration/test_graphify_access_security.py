@@ -1,6 +1,6 @@
 """Milestone 20 (Security) — Graphify Access Tests, CLAUDE.md §96.
 
-Graphify is Axiom's Knowledge Gateway backend (packages/axiom-graphify) —
+Graphify is Cortex Ledger AI's Knowledge Gateway backend (packages/axiom-graphify) —
 a real, running MCP server over a knowledge graph built from the agent
 library. Its own client adapter only exposes four read methods (search /
 get_node / get_neighbors / get_path — see axiom_graphify/adapter.py), and

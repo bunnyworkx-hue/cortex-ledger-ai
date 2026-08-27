@@ -17,7 +17,7 @@ class MemoryScope(str, Enum):
 class MemoryRecord:
     """CLAUDE.md §38: memory must include tenant, scope, owner,
     permissions, retention, source — "do not automatically store
-    everything." Nothing in Axiom writes a MemoryRecord implicitly;
+    everything." Nothing in Cortex Ledger AI writes a MemoryRecord implicitly;
     every write is a deliberate call (see ExecutionRunner's post-run
     save in Milestone 14's wiring).
     """

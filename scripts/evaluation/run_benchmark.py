@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Milestone 19 — Axiom OS evaluation benchmark (CLAUDE.md §75).
+"""Milestone 19 — Cortex Ledger AI evaluation benchmark (CLAUDE.md §75).
 
-Runs a real 20-task benchmark against a REAL, already-running Axiom API
+Runs a real 20-task benchmark against a REAL, already-running Cortex Ledger AI API
 (default http://127.0.0.1:8000) — every task is a genuine HTTP call
 through the same endpoints a real client would use (delegate, tool call,
 approval flow). Nothing here calls Python internals directly and nothing

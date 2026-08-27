@@ -18,7 +18,7 @@ be derived or hand-curated, not parsed out of an existing schema.
 
 CLAUDE.md assumed "approximately 237." The real, filesystem-tallied count
 across 17 divisions is **255** real agent definitions (`divisions.json`
-is the enforced, canonical division list upstream — Axiom imports it
+is the enforced, canonical division list upstream — Cortex Ledger AI imports it
 rather than re-deriving categories by hand).
 
 | Division | Count | Division | Count |
@@ -42,7 +42,7 @@ real upstream source. `axiom_agent_fabric.normalize` treats one malformed
 file as a skip-and-log event, not a fatal error for the other 254.
 
 17/255 agents (~7%) carry a real `tools:` frontmatter field, captured
-separately as `frontmatter_tools` from Axiom's own curated
+separately as `frontmatter_tools` from Cortex Ledger AI's own curated
 `capabilities`/`permissions`.
 
 ## Curation
@@ -55,7 +55,7 @@ discoverable and loaded but not yet individually risk-tagged; extending
 curation to the full library is future work, not something quietly
 assumed done.
 
-## How Axiom invokes them
+## How Cortex Ledger AI invokes them
 
 `AgentInvocationGateway` (`packages/axiom-agent-fabric/axiom_agent_fabric/gateway.py`)
 looks an agent up by id, picks a backend (`axiom_native` by default, or
@@ -68,6 +68,6 @@ Application Security Engineer persona.
 ## Preservation
 
 Per CLAUDE.md §67/§57, the 255 source files are treated as read-only —
-Axiom's registry writes derived records, it never edits or forks
+Cortex Ledger AI's registry writes derived records, it never edits or forks
 `agency-agents` in place. Picking up upstream changes means re-running
 normalization, not hand-maintaining a divergent copy.

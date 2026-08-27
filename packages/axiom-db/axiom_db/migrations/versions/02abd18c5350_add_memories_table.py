@@ -7,8 +7,8 @@ Create Date: 2026-08-25 23:38:10.801067
 NOTE: hand-edited after `alembic revision --autogenerate`. The raw
 autogenerate output also proposed dropping `organizations`, `profiles`,
 `subscriptions`, and `org_product_access` — real, pre-existing shared-core
-tables in this Supabase project that simply aren't declared in Axiom's own
-SQLAlchemy models (they belong to a different, non-Axiom migration
+tables in this Supabase project that simply aren't declared in Cortex Ledger AI's own
+SQLAlchemy models (they belong to a different, non-Cortex Ledger AI migration
 history). Removed those drop/recreate statements from upgrade()/
 downgrade() so this migration only ever touches the `memories` table —
 see docs/ARCHITECTURE_AUDIT.md for why axiom-os-production has that

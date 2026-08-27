@@ -116,7 +116,7 @@ def register_native_tools(
             ToolDefinition(
                 name="delegate_to_agent",
                 description=(
-                    "Delegate a task to another registered Axiom agent. Bounded to a real "
+                    "Delegate a task to another registered Cortex Ledger AI agent. Bounded to a real "
                     f"recursion depth of {_MAX_DELEGATION_DEPTH} via `_delegation_depth`."
                 ),
                 input_schema={

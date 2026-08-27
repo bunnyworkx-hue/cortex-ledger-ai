@@ -1,11 +1,11 @@
-# AXIOM OS
+# CORTEX LEDGER AI
 
-## Autonomous Execution, Built for Business Operations
+## Every Decision Traced. Every Agent Accountable.
 
 **Company:** Orvyn Workx AI  
-**Platform:** Axiom OS  
-**Primary Business Application:** ORVYN  
-**Project Priority:** Project 1 — Axiom OS  
+**Platform:** Cortex Ledger AI  
+**Primary Business Application:** Business Operations  
+**Project Priority:** Project 1 — Cortex Ledger AI  
 **Primary Engineering Objective:** Build a production-oriented agentic AI operating system capable of orchestrating frontier models, external agent runtimes, specialized business agents, tools, MCP servers, knowledge graphs, memory, approvals, autonomous workflows, evaluation, and secure execution.
 
 ---
@@ -16,15 +16,15 @@ You are Claude Code acting as:
 
 > Lead AI Systems Engineer + Agentic AI Architect
 
-Your job is to build **Axiom OS**, not a collection of disconnected AI demos.
+Your job is to build **Cortex Ledger AI**, not a collection of disconnected AI demos.
 
-Axiom OS is the intelligence, knowledge, orchestration, and execution layer behind the ORVYN ecosystem.
+Cortex Ledger AI is the intelligence, knowledge, orchestration, and execution layer behind the Business Operations ecosystem.
 
 Core positioning:
 
-> **Axiom OS — Autonomous execution, built for business operations.**
+> **Cortex Ledger AI — Every decision traced. Every agent accountable.**
 
-Axiom should eventually allow organizations to deploy AI systems that can:
+Cortex Ledger AI should eventually allow organizations to deploy AI systems that can:
 
 - understand objectives
 - understand the systems they operate on
@@ -58,46 +58,46 @@ The first priority is building the infrastructure that can eventually power them
 Roadmap:
 
 PROJECT 1
-AXIOM OS
+CORTEX LEDGER AI
 Agentic AI Operating System
 
         ↓
 
 PROJECT 2
-ORVYN
+BUSINESS OPERATIONS
 Autonomous Business / Workforce Operations
 
         ↓
 
 PROJECT 3
-AXIOM SWE
+CORTEX LEDGER AI SWE
 AI Software Engineering Agent
 
         ↓
 
 PROJECT 4
-AXIOM SENTINEL
+CORTEX LEDGER AI SENTINEL
 AI Incident Response Agent
 
         ↓
 
 PROJECT 5
-AXIOM EVAL
+CORTEX LEDGER AI EVAL
 AI Agent Evaluation Platform
 
         ↓
 
 PROJECT 6
-AXIOM GUARD
+CORTEX LEDGER AI GUARD
 AI Agent Security Platform
 
 Do not begin Projects 2–6 until Project 1 has a functional foundation.
 
 ---
 
-# 3. THE AXIOM THREE-PILLAR ARCHITECTURE
+# 3. THE CORTEX LEDGER AI THREE-PILLAR ARCHITECTURE
 
-Axiom OS is built around three primary infrastructure layers:
+Cortex Ledger AI is built around three primary infrastructure layers:
 
 1. AGENT FABRIC
 2. KNOWLEDGE FABRIC
@@ -116,7 +116,7 @@ EXECUTION ENGINE
 
 Architecture:
 
-                         AXIOM OS
+                         CORTEX LEDGER AI
                             │
           ┌─────────────────┼─────────────────┐
           │                 │                 │
@@ -131,16 +131,15 @@ Architecture:
           │                 │                 │
           └─────────────────┼─────────────────┘
                             │
-                           ORVYN
-                    BUSINESS PLATFORM
+                    BUSINESS OPERATIONS
 
 These layers must remain modular.
 
 ---
 
-# 4. AXIOM CONTROL PLANE
+# 4. CORTEX LEDGER AI CONTROL PLANE
 
-Axiom is the control plane.
+Cortex Ledger AI is the control plane.
 
 External systems are not the control plane.
 
@@ -153,7 +152,7 @@ This includes:
 - external tools
 - model providers
 
-Axiom controls:
+Cortex Ledger AI controls:
 
 - identity
 - discovery
@@ -170,7 +169,7 @@ Axiom controls:
 
 Conceptually:
 
-                         AXIOM
+                         CORTEX LEDGER AI
                       CONTROL PLANE
                             │
         ┌───────────────────┼───────────────────┐
@@ -210,7 +209,7 @@ The Agent Fabric contains:
 - Agent Evaluation
 - Agent Lifecycle Management
 
-The existing library of approximately 237 specialized agency agents becomes part of the Axiom Agent Fabric.
+The existing library of approximately 237 specialized agency agents becomes part of the Cortex Ledger AI Agent Fabric.
 
 The 237 agents are infrastructure.
 
@@ -220,7 +219,7 @@ They are NOT 237 disconnected applications.
 
 # 6. THE 237-AGENT LIBRARY
 
-Axiom must support the existing agency agent library.
+Cortex Ledger AI must support the existing agency agent library.
 
 Do not assume the library contains exactly 237 agents until it has been programmatically inspected.
 
@@ -235,7 +234,7 @@ The system must:
 7. identify tools
 8. identify memory requirements
 9. identify external API requirements
-10. normalize them into Axiom-compatible representations
+10. normalize them into Cortex Ledger AI-compatible representations
 
 If the agents are stored as:
 
@@ -255,11 +254,11 @@ Do NOT manually recreate 237 agents if an existing source of truth exists.
 
 ---
 
-# 7. AXIOM AGENT FABRIC
+# 7. CORTEX LEDGER AI AGENT FABRIC
 
 Conceptual architecture:
 
-                     AXIOM AGENT FABRIC
+                     CORTEX LEDGER AI AGENT FABRIC
                               │
              ┌────────────────┼────────────────┐
              │                │                │
@@ -286,7 +285,7 @@ Conceptual architecture:
 
 # 8. AGENT REGISTRY
 
-The Agent Registry is the source of truth for Axiom agents.
+The Agent Registry is the source of truth for Cortex Ledger AI agents.
 
 Each agent should eventually have a structured profile.
 
@@ -338,7 +337,7 @@ Do not create unnecessary metadata solely for appearance.
 
 # 9. AGENT DISCOVERY
 
-Axiom must NOT load all 237 agents into every model context.
+Cortex Ledger AI must NOT load all 237 agents into every model context.
 
 Use:
 
@@ -378,7 +377,7 @@ Benefits:
 
 Build an:
 
-# AXIOM AGENT ROUTER
+# CORTEX LEDGER AI AGENT ROUTER
 
 The router determines which agent or team should handle a task.
 
@@ -453,7 +452,7 @@ The gateway must enforce:
 
 Hermes must NEVER receive unrestricted access to the 237 agents.
 
-Hermes must interact with the Agent Fabric through Axiom-controlled interfaces.
+Hermes must interact with the Agent Fabric through Cortex Ledger AI-controlled interfaces.
 
 Architecture:
 
@@ -461,7 +460,7 @@ Architecture:
                             │
                      Agent Request
                             ↓
-                  AXIOM AGENT GATEWAY
+                  CORTEX LEDGER AI AGENT GATEWAY
                             │
                      Authorization
                             │
@@ -547,7 +546,7 @@ Implement:
 
 # 15. AGENT TEAMS
 
-Axiom should support temporary agent teams.
+Cortex Ledger AI should support temporary agent teams.
 
 Example:
 
@@ -570,13 +569,13 @@ Teams should be dynamically created for tasks.
 
 The Knowledge Fabric answers:
 
-> "WHAT does Axiom need to understand before acting?"
+> "WHAT does Cortex Ledger AI need to understand before acting?"
 
 The Knowledge Fabric is built around:
 
 # GRAPHIFY
 
-Graphify becomes a first-class Axiom knowledge subsystem.
+Graphify becomes a first-class Cortex Ledger AI knowledge subsystem.
 
 The current Graphify project describes itself as turning codebases and related artifacts into a queryable knowledge graph, with local AST-based code extraction, explainable graph relationships, querying, path tracing, and MCP support. :contentReference[oaicite:1]{index=1}
 
@@ -663,7 +662,7 @@ docs/graphify/GRAPHIFY_INTEGRATION.md
 
 # 19. KNOWLEDGE GATEWAY
 
-Create a standardized Axiom Knowledge Gateway.
+Create a standardized Cortex Ledger AI Knowledge Gateway.
 
 Conceptual interface:
 
@@ -727,7 +726,7 @@ USER:
 
         ↓
 
-AXIOM
+CORTEX LEDGER AI
 
         ↓
 
@@ -803,14 +802,14 @@ Result
 
 Hermes must not receive unrestricted access to Graphify.
 
-Hermes interacts through Axiom.
+Hermes interacts through Cortex Ledger AI.
 
 Architecture:
 
                     HERMES
                        │
                        ↓
-                AXIOM GATEWAY
+                CORTEX LEDGER AI GATEWAY
                        │
                  Permission
                        │
@@ -823,7 +822,7 @@ Architecture:
                  Knowledge Result
                        │
                        ↓
-                AXIOM VALIDATION
+                CORTEX LEDGER AI VALIDATION
                        │
                        ↓
                     HERMES
@@ -836,7 +835,7 @@ Hermes cannot directly manipulate:
 - repositories
 - knowledge stores
 
-unless explicitly authorized through Axiom.
+unless explicitly authorized through Cortex Ledger AI.
 
 ---
 
@@ -857,7 +856,7 @@ Modification capabilities belong to the Execution Engine and require separate au
 
 ---
 
-# 24. GRAPHIFY VS AXIOM MEMORY
+# 24. GRAPHIFY VS CORTEX LEDGER AI MEMORY
 
 Do not confuse these systems.
 
@@ -873,7 +872,7 @@ Examples:
 - documentation
 - repository relationships
 
-AXIOM MEMORY:
+CORTEX LEDGER AI MEMORY:
 
 Information retained from execution.
 
@@ -936,13 +935,13 @@ MODEL GATEWAY:
 
 AGENT GATEWAY:
 
-- Axiom Native Agents
+- Cortex Ledger AI Native Agents
 - Hermes
 - future external agent runtimes
 
 Architecture:
 
-                    AXIOM
+                    CORTEX LEDGER AI
                        │
              ┌─────────┴─────────┐
              │                   │
@@ -950,7 +949,7 @@ Architecture:
              │                   │
       ┌──────┼──────┐      ┌─────┼─────┐
       │      │      │      │     │     │
-   Claude  OpenAI  Gemini Axiom Hermes Future
+   Claude  OpenAI  Gemini Cortex Ledger AI Hermes Future
 
 ---
 
@@ -960,7 +959,7 @@ Anthropic is the primary frontier model integration for Project 1.
 
 Implement through a provider-neutral abstraction.
 
-Do not hard-code Anthropic logic throughout Axiom Core.
+Do not hard-code Anthropic logic throughout Cortex Ledger AI Core.
 
 ---
 
@@ -1011,7 +1010,7 @@ packages/axiom-hermes/
 
 The adapter translates between:
 
-Axiom Execution Interface
+Cortex Ledger AI Execution Interface
 
 and
 
@@ -1046,7 +1045,7 @@ Potential implementations:
 
 # 31. TOOL REGISTRY
 
-Axiom must maintain a centralized Tool Registry.
+Cortex Ledger AI must maintain a centralized Tool Registry.
 
 Each tool should eventually have:
 
@@ -1096,7 +1095,7 @@ Audit
 
 This applies to:
 
-- Axiom agents
+- Cortex Ledger AI agents
 - Hermes
 - future external runtimes
 
@@ -1110,7 +1109,7 @@ Architecture:
 
 Agent
  ↓
-Axiom Tool Registry
+Cortex Ledger AI Tool Registry
  ↓
 MCP Client
  ↓
@@ -1118,11 +1117,11 @@ MCP Server
  ↓
 External System
 
-Axiom should eventually support:
+Cortex Ledger AI should eventually support:
 
 - consuming MCP servers
-- exposing Axiom capabilities through MCP
-- mapping MCP tools into Axiom permissions
+- exposing Cortex Ledger AI capabilities through MCP
+- mapping MCP tools into Cortex Ledger AI permissions
 - auditing MCP calls
 
 ---
@@ -1139,7 +1138,7 @@ Graphify
  ↓
 MCP
  ↓
-Axiom Knowledge Gateway
+Cortex Ledger AI Knowledge Gateway
 
 If direct SDK/CLI integration is more appropriate:
 
@@ -1147,7 +1146,7 @@ Graphify
  ↓
 Graphify Adapter
  ↓
-Axiom Knowledge Gateway
+Cortex Ledger AI Knowledge Gateway
 
 Do not assume one integration path.
 
@@ -1163,7 +1162,7 @@ Hermes is not the authority.
 
 Graphify is not the authority.
 
-# AXIOM POLICY ENGINE IS THE AUTHORITY.
+# CORTEX LEDGER AI POLICY ENGINE IS THE AUTHORITY.
 
 Every sensitive action must pass through policy.
 
@@ -1234,7 +1233,7 @@ Audit
 
 This applies regardless of whether the request originated from:
 
-- Axiom
+- Cortex Ledger AI
 - Claude
 - Hermes
 - another agent
@@ -1244,7 +1243,7 @@ This applies regardless of whether the request originated from:
 
 # 38. MEMORY
 
-Axiom memory should support:
+Cortex Ledger AI memory should support:
 
 Task Memory
 Working Memory
@@ -1270,7 +1269,7 @@ Agents should not automatically see another agent's memory.
 
 Cross-agent memory access must be explicitly authorized.
 
-Hermes does not automatically receive access to all Axiom memory.
+Hermes does not automatically receive access to all Cortex Ledger AI memory.
 
 ---
 
@@ -1314,14 +1313,14 @@ For Graphify operations, track:
 
 # 41. AGENT GRAPH
 
-Axiom should eventually visualize execution as a graph.
+Cortex Ledger AI should eventually visualize execution as a graph.
 
 Example:
 
                  USER
                   │
                   ↓
-            AXIOM DIRECTOR
+            CORTEX LEDGER AI DIRECTOR
                   │
        ┌──────────┼──────────┐
        ↓          ↓          ↓
@@ -1340,7 +1339,7 @@ Example:
 
 # 42. KNOWLEDGE GRAPH
 
-Axiom should separately visualize knowledge relationships.
+Cortex Ledger AI should separately visualize knowledge relationships.
 
 Example:
 
@@ -1360,7 +1359,7 @@ This is distinct from the execution graph.
 
 ---
 
-# 43. GRAPHIFY KNOWLEDGE GRAPH VS AXIOM EXECUTION GRAPH
+# 43. GRAPHIFY KNOWLEDGE GRAPH VS CORTEX LEDGER AI EXECUTION GRAPH
 
 Keep these separate.
 
@@ -1368,11 +1367,11 @@ GRAPHIFY:
 
 "What is connected to what in the knowledge domain?"
 
-AXIOM EXECUTION GRAPH:
+CORTEX LEDGER AI EXECUTION GRAPH:
 
 "What did the agents do?"
 
-Eventually Axiom may correlate them.
+Eventually Cortex Ledger AI may correlate them.
 
 Example:
 
@@ -1927,15 +1926,15 @@ Always:
 
 ---
 
-# 58. PROJECT 1 — AXIOM OS MVP
+# 58. PROJECT 1 — CORTEX LEDGER AI MVP
 
 The first objective is to prove:
 
-> Axiom can orchestrate a frontier model, a real external agent runtime, a controlled library of specialized agents, a knowledge graph, tools, MCP services, memory, policy, approvals, and execution traces.
+> Cortex Ledger AI can orchestrate a frontier model, a real external agent runtime, a controlled library of specialized agents, a knowledge graph, tools, MCP services, memory, policy, approvals, and execution traces.
 
 Required MVP components:
 
-Axiom Runtime
+Cortex Ledger AI Runtime
 Model Gateway
 Hermes Adapter
 Agent Fabric
@@ -1964,7 +1963,7 @@ User:
 
 "Research this software repository and explain how authentication works."
 
-Axiom:
+Cortex Ledger AI:
 
 Receive Task
  ↓
@@ -2004,13 +2003,13 @@ Potential architecture:
 
 User
  ↓
-Axiom
+Cortex Ledger AI
  ↓
 Task Planner
  ↓
 Hermes
  ↓
-Axiom Agent Gateway
+Cortex Ledger AI Agent Gateway
  ↓
 Specialized Agent
  ↓
@@ -2022,7 +2021,7 @@ Graphify
  ↓
 Result
  ↓
-Axiom Verification
+Cortex Ledger AI Verification
  ↓
 Final Result
 
@@ -2039,11 +2038,11 @@ User:
 
               ↓
 
-Axiom Director
+Cortex Ledger AI Director
               ↓
          Hermes Agent
               ↓
-     Axiom Agent Gateway
+     Cortex Ledger AI Agent Gateway
               ↓
        Agent Discovery
               ↓
@@ -2060,7 +2059,7 @@ Research    Forecast     Campaign
               ↓
           Synthesis
               ↓
-            Axiom
+            Cortex Ledger AI
               ↓
         Final Response
 
@@ -2079,7 +2078,7 @@ Demonstrate:
 
 User
  ↓
-Axiom
+Cortex Ledger AI
  ↓
 Graphify
  ↓
@@ -2113,7 +2112,7 @@ This demonstrates that agents can reason over actual system structure instead of
 
 # 63. FIFTH DEMO — AGENT TEAM
 
-Axiom dynamically creates:
+Cortex Ledger AI dynamically creates:
 
 Business Strategy Director
         │
@@ -2165,7 +2164,7 @@ Audit
 
 Test with:
 
-- Axiom native agent
+- Cortex Ledger AI native agent
 - Hermes
 - agent-to-agent delegation
 
@@ -2175,7 +2174,7 @@ Test with:
 
 Demonstrate:
 
-Axiom Director
+Cortex Ledger AI Director
       ↓
 Claude
       ↓
@@ -2224,7 +2223,7 @@ Then import the existing agent library.
 
 # 67. AGENT NORMALIZATION
 
-Convert the existing agents into normalized Axiom representations.
+Convert the existing agents into normalized Cortex Ledger AI representations.
 
 Potential fields:
 
@@ -2291,13 +2290,13 @@ STALE
 UPDATING
 ERROR
 
-Axiom should know whether knowledge is current before relying on it.
+Cortex Ledger AI should know whether knowledge is current before relying on it.
 
 ---
 
 # 71. KNOWLEDGE FRESHNESS
 
-Axiom must eventually track:
+Cortex Ledger AI must eventually track:
 
 - graph generation time
 - source commit
@@ -2510,7 +2509,7 @@ docs/IMPLEMENTATION_PLAN.md
 
 Must show:
 
-Axiom
+Cortex Ledger AI
 Agent Fabric
 Knowledge Fabric
 Graphify
@@ -2535,7 +2534,7 @@ Existing Agents
  ↓
 Normalization Pipeline
  ↓
-Axiom Registry
+Cortex Ledger AI Registry
 
 Do not manually recreate the agent library unless necessary.
 
@@ -2778,9 +2777,9 @@ Setup Instructions
 
 # 98. DEFINITION OF DONE
 
-Axiom OS MVP is complete only when:
+Cortex Ledger AI MVP is complete only when:
 
-- Axiom runtime works
+- Cortex Ledger AI runtime works
 - Anthropic integration works
 - Hermes integration works
 - Agent Registry works
@@ -2791,7 +2790,7 @@ Axiom OS MVP is complete only when:
 - Agent permissions work
 - Agent budgets work
 - Agent-to-agent calls are controlled
-- Hermes cannot bypass Axiom
+- Hermes cannot bypass Cortex Ledger AI
 - Graphify integration works
 - Knowledge Gateway works
 - Knowledge permissions work
@@ -2814,17 +2813,16 @@ Axiom OS MVP is complete only when:
 
 ---
 
-# 99. ORVYN WILL CONSUME AXIOM
+# 99. BUSINESS OPERATIONS WILL CONSUME CORTEX LEDGER AI
 
-Once Axiom OS is stable, ORVYN should be built on top of it.
+Once Cortex Ledger AI is stable, Business Operations should be built on top of it.
 
 Architecture:
 
-                    ORVYN
-               BUSINESS PLATFORM
+                 BUSINESS OPERATIONS
                        │
                        ↓
-                   AXIOM OS
+                   CORTEX LEDGER AI
                        │
         ┌──────────────┼──────────────┐
         ↓              ↓              ↓
@@ -2839,7 +2837,7 @@ Architecture:
                        │
                  Business Systems
 
-ORVYN must not recreate:
+Business Operations must not recreate:
 
 - agent orchestration
 - model routing
@@ -2850,13 +2848,13 @@ ORVYN must not recreate:
 - evaluation
 - observability
 
-Axiom provides these capabilities.
+Cortex Ledger AI provides these capabilities.
 
 ---
 
-# 100. FUTURE PROJECT — AXIOM SWE
+# 100. FUTURE PROJECT — CORTEX LEDGER AI SWE
 
-Graphify becomes a core component of Axiom SWE.
+Graphify becomes a core component of Cortex Ledger AI SWE.
 
 Workflow:
 
@@ -2888,11 +2886,11 @@ Human Approval
  ↓
 Git / Pull Request
 
-This project should demonstrate that Axiom can reason about real software systems rather than simply generate code.
+This project should demonstrate that Cortex Ledger AI can reason about real software systems rather than simply generate code.
 
 ---
 
-# 101. FUTURE PROJECT — AXIOM SENTINEL
+# 101. FUTURE PROJECT — CORTEX LEDGER AI SENTINEL
 
 Incident
  ↓
@@ -2920,7 +2918,7 @@ Verification
 
 ---
 
-# 102. FUTURE PROJECT — AXIOM EVAL
+# 102. FUTURE PROJECT — CORTEX LEDGER AI EVAL
 
 Standalone evaluation platform for:
 
@@ -2931,12 +2929,12 @@ Tools
 MCP
 External Agents
 Hermes
-Axiom
+Cortex Ledger AI
 Knowledge Systems
 
 ---
 
-# 103. FUTURE PROJECT — AXIOM GUARD
+# 103. FUTURE PROJECT — CORTEX LEDGER AI GUARD
 
 Security infrastructure for:
 
@@ -2955,7 +2953,7 @@ Policy
 
 # 104. PORTFOLIO POSITIONING
 
-The completed Axiom project should demonstrate:
+The completed Cortex Ledger AI project should demonstrate:
 
 Frontier Model Integration
 Agent Runtime Architecture
@@ -2995,7 +2993,7 @@ The portfolio story:
 
 The deeper engineering story:
 
-> "Axiom separates who performs work, what the system knows, and how work is executed."
+> "Cortex Ledger AI separates who performs work, what the system knows, and how work is executed."
 
 That means:
 
@@ -3134,7 +3132,7 @@ docs/IMPLEMENTATION_PLAN.md
 
 Before major implementation, show how:
 
-Axiom
+Cortex Ledger AI
 Agent Fabric
 237 Agents
 Knowledge Fabric
@@ -3160,7 +3158,7 @@ The first meaningful end-to-end workflow:
 
 USER
  ↓
-AXIOM
+CORTEX LEDGER AI
  ↓
 TASK CLASSIFICATION
  ↓
@@ -3192,11 +3190,11 @@ Then extend to:
 
 USER
  ↓
-AXIOM
+CORTEX LEDGER AI
  ↓
 HERMES
  ↓
-AXIOM AGENT GATEWAY
+CORTEX LEDGER AI AGENT GATEWAY
  ↓
 237-AGENT REGISTRY
  ↓
@@ -3212,7 +3210,7 @@ RESULT
  ↓
 HERMES
  ↓
-AXIOM
+CORTEX LEDGER AI
  ↓
 VERIFICATION
  ↓
@@ -3226,7 +3224,7 @@ The 237 agents are not 237 applications.
 
 They are members of:
 
-# AXIOM AGENT FABRIC
+# CORTEX LEDGER AI AGENT FABRIC
 
 The Fabric provides:
 
@@ -3250,7 +3248,7 @@ Graphify is not simply a visualization tool.
 
 It becomes part of:
 
-# AXIOM KNOWLEDGE FABRIC
+# CORTEX LEDGER AI KNOWLEDGE FABRIC
 
 Graphify provides structured knowledge that agents can query before acting.
 
@@ -3262,7 +3260,7 @@ Graphify
  ↓
 Structured Knowledge
  ↓
-Axiom Knowledge Gateway
+Cortex Ledger AI Knowledge Gateway
  ↓
 Agent Context
  ↓
@@ -3278,11 +3276,11 @@ Verification
 
 Hermes is an execution capability.
 
-Hermes is not the owner of Axiom.
+Hermes is not the owner of Cortex Ledger AI.
 
-Axiom remains the control plane.
+Cortex Ledger AI remains the control plane.
 
-                    AXIOM
+                    CORTEX LEDGER AI
                  CONTROL PLANE
                       │
        ┌──────────────┼──────────────┐
@@ -3341,7 +3339,7 @@ The Dashboard should make the entire system visible.
 
 The final architecture:
 
-                         AXIOM OS
+                         CORTEX LEDGER AI
                             │
        ┌────────────────────┼────────────────────┐
        │                    │                    │
@@ -3367,8 +3365,7 @@ The final architecture:
        │                    │                    │
        └────────────────────┼────────────────────┘
                             │
-                           ORVYN
-                    BUSINESS PLATFORM
+                    BUSINESS OPERATIONS
 
 The ultimate engineering thesis:
 
@@ -3436,19 +3433,19 @@ DO NOT EXPOSE EVERY AGENT TO EVERY MODEL.
 
 DO NOT GIVE AGENTS UNRESTRICTED TOOL ACCESS.
 
-DO NOT BYPASS AXIOM PERMISSIONS, BUDGETS, POLICY, OR AUDIT LOGGING.
+DO NOT BYPASS CORTEX LEDGER AI PERMISSIONS, BUDGETS, POLICY, OR AUDIT LOGGING.
 
 DO NOT FABRICATE TEST RESULTS.
 
 ---
 
-# 111. AXIOM OS — CONVERSATIONAL COMMAND INTERFACE
+# 111. CORTEX LEDGER AI — CONVERSATIONAL COMMAND INTERFACE
 
 ## Purpose
 
-Axiom OS must not be built as a backend-only AI orchestration system.
+Cortex Ledger AI must not be built as a backend-only AI orchestration system.
 
-It must provide a human-facing conversational command interface that allows a user to communicate with Axiom through:
+It must provide a human-facing conversational command interface that allows a user to communicate with Cortex Ledger AI through:
 
 - Text
 - Voice
@@ -3459,7 +3456,7 @@ It must provide a human-facing conversational command interface that allows a us
 - Results
 - Follow-up conversation
 
-The user should be able to communicate with Axiom naturally rather than needing to know:
+The user should be able to communicate with Cortex Ledger AI naturally rather than needing to know:
 
 - which agent to use
 - which model to use
@@ -3470,13 +3467,13 @@ The user should be able to communicate with Axiom naturally rather than needing 
 
 The user communicates with:
 
-# AXIOM
+# CORTEX LEDGER AI
 
-Axiom determines what needs to happen internally.
+Cortex Ledger AI determines what needs to happen internally.
 
 ## Architecture
 
-The conversational interface is a separate layer from the core Axiom infrastructure.
+The conversational interface is a separate layer from the core Cortex Ledger AI infrastructure.
 
 Architecture:
 
@@ -3492,7 +3489,7 @@ Architecture:
               └────────────┬────────────┘
                            │
                            ▼
-                AXIOM COMMAND INTERFACE
+                CORTEX LEDGER AI COMMAND INTERFACE
                            │
                            ▼
                      ORCHESTRATOR
@@ -3532,4 +3529,4 @@ Architecture:
 
 ---
 
-BUILD THE FIRST REAL VERSION OF AXIOM OS.
+BUILD THE FIRST REAL VERSION OF CORTEX LEDGER AI.

@@ -54,16 +54,16 @@ CLI entry points confirmed from the README: `hermes`, `hermes model`,
 ## 4. Delegation / subagents — real, not assumed
 
 `CLAUDE.md` §28 requires "first-class external agent runtime" with real
-delegation semantics before Axiom builds an Agent Gateway around it. Grep
+delegation semantics before Cortex Ledger AI builds an Agent Gateway around it. Grep
 across the source confirms `delegate_task` is a real, implemented concept,
 touched by `toolsets.py`, `run_agent.py`, `cli.py`, `model_tools.py`,
 `hermes_state.py`, and dedicated modules `tools/async_delegation.py` and
 `tools/delegation_live_log.py`. The README independently confirms this at
 the feature level: "Spawn isolated subagents for parallel workstreams.
 Write Python scripts that call tools via RPC, collapsing multi-step
-pipelines into zero-context-cost turns." This is the real hook the Axiom
+pipelines into zero-context-cost turns." This is the real hook the Cortex Ledger AI
 Hermes Adapter (`packages/axiom-hermes/`) should call through — not
-something Axiom needs to build itself.
+something Cortex Ledger AI needs to build itself.
 
 ## 5. Tool access model — maps directly onto CLAUDE.md's Tool Access Control
 
@@ -76,7 +76,7 @@ compose and restrict from — including a documented, deliberate exclusion
 (`desktop_ui` tools are withheld from non-GUI sessions, gated on the actual
 session source rather than an env var, per an inline `NOTE:` in the code).
 This is a real precedent for permission-scoped tool grants, not something
-Axiom has to invent from scratch — the Axiom Tool Registry's
+Cortex Ledger AI has to invent from scratch — the Cortex Ledger AI Tool Registry's
 per-agent/per-backend tool grants (§31–32) can borrow this toolset
 composition model directly.
 
@@ -98,20 +98,20 @@ not just a vulnerability-reporting address:
   isolation" and "whole-process wrapping" as two distinct isolation
   strategies. Hermes explicitly supports seven terminal backends (local,
   Docker, SSH, Singularity, Modal, Daytona, Vercel Sandbox per the README)
-  — Docker/Singularity/Modal/Daytona give Axiom a real sandboxing option to
+  — Docker/Singularity/Modal/Daytona give Cortex Ledger AI a real sandboxing option to
   point at, rather than building container isolation itself.
 - §2.3 **Credential scoping**
 - §2.4 **In-process heuristics**
 - §2.5 **Plugin trust model** — directly relevant since the
-  `agency-agents-router` plugin (and any future Axiom-authored plugin)
+  `agency-agents-router` plugin (and any future Cortex Ledger AI-authored plugin)
   runs inside this exact trust boundary.
 - §2.6 **External surfaces**
 - §3 explicitly scopes what is/isn't covered by Hermes's own security
   posture.
 
-This means Axiom's "Hermes must never receive unrestricted access"
-requirement (`CLAUDE.md` §12, §56) is enforceable on two layers: Axiom's
-own gateway (which is Axiom's responsibility to build), and Hermes's native
+This means Cortex Ledger AI's "Hermes must never receive unrestricted access"
+requirement (`CLAUDE.md` §12, §56) is enforceable on two layers: Cortex Ledger AI's
+own gateway (which is Cortex Ledger AI's responsibility to build), and Hermes's native
 plugin trust model + terminal isolation (which already exists and can be
 configured rather than reimplemented).
 
@@ -122,8 +122,8 @@ Hermes has substantial native state handling: `hermes_state.py` (666KB),
 `hermes_state_schema.py`, `hermes_state_search.py` (115KB, FTS5-backed
 search per the README's "session search" feature). This is Hermes's own
 session/memory persistence — separate from, and not a substitute for,
-Axiom Memory (`CLAUDE.md` §38, §24). The two must stay distinct per the
-doc's own instruction; Axiom should not attempt to read/write Hermes's
+Cortex Ledger AI Memory (`CLAUDE.md` §38, §24). The two must stay distinct per the
+doc's own instruction; Cortex Ledger AI should not attempt to read/write Hermes's
 internal state files directly, only interact with Hermes through its CLI/
 API/plugin surface.
 
@@ -156,7 +156,7 @@ anticipated by the original audit:
    later collided with the second install attempt's own `brew install
    ripgrep` via a stale lock. The installer's own retry logic handled
    that collision gracefully (logged a warning, moved on) — real,
-   working resilience on Hermes's side, not something Axiom had to work
+   working resilience on Hermes's side, not something Cortex Ledger AI had to work
    around.
 2. **`auto` provider detection did not pick Anthropic even with
    `ANTHROPIC_API_KEY` set** — a first live one-shot call
@@ -183,7 +183,7 @@ model, provider, `completed`/`failed`/`failure`) **even on failure**,
 which is how `axiom_hermes` distinguishes a real failure from a
 successful empty response, rather than trusting the exit code alone.
 
-Verified live end-to-end through the full Axiom stack: `POST
+Verified live end-to-end through the full Cortex Ledger AI stack: `POST
 /v1/agent-fabric/agents/marketing/marketing-seo-specialist/delegate`
 with `"backend": "hermes"` returned a real, in-character completion from
 the SEO Specialist agent, routed through Registry → `HermesBackend` →
@@ -194,8 +194,8 @@ calls would hit that cache.
 
 **What Milestone 13 did *not* build**: Hermes's own subagent delegation
 (`delegate_task`, confirmed real in §4) is Hermes deciding internally to
-spawn its own subagents — it is not the same thing as Axiom calling
-Hermes. `HermesBackend` is one full one-shot Hermes run per Axiom
+spawn its own subagents — it is not the same thing as Cortex Ledger AI calling
+Hermes. `HermesBackend` is one full one-shot Hermes run per Cortex Ledger AI
 `Execution` (CLAUDE.md §30's `HermesBackend`); it does not yet reach into
 Hermes's internal delegation, MCP server mode (`mcp_serve.py`), or
 gateway/messaging surfaces — those remain real, unexplored surface for a

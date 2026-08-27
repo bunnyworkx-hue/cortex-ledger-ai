@@ -1,1 +1,1 @@
-"""Axiom API — the Axiom control-plane HTTP surface."""
+"""Cortex Ledger AI API — the Cortex Ledger AI control-plane HTTP surface."""

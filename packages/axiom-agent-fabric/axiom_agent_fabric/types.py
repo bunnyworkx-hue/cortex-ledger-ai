@@ -19,7 +19,7 @@ class AgentStatus(str, Enum):
 
 @dataclass(frozen=True, slots=True)
 class AgentRecord:
-    """A normalized Axiom Agent Fabric record. Two provenances feed this:
+    """A normalized Cortex Ledger AI Agent Fabric record. Two provenances feed this:
 
     - Mechanical (all ~255 agents): agent_id/name/description/category/
       division/instructions/source_path/source_commit/frontmatter_tools —

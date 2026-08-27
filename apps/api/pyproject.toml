@@ -1,7 +1,7 @@
 [project]
 name = "axiom-api"
 version = "0.1.0"
-description = "Axiom OS API — the Axiom control-plane HTTP surface"
+description = "Cortex Ledger AI API — the Cortex Ledger AI control-plane HTTP surface"
 requires-python = ">=3.11"
 dependencies = [
     "axiom-core",

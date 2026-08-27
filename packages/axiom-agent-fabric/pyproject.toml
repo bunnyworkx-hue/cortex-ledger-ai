@@ -1,7 +1,7 @@
 [project]
 name = "axiom-agent-fabric"
 version = "0.1.0"
-description = "Axiom OS Agent Fabric — registry, discovery, and invocation gateway over the agency-agents library"
+description = "Cortex Ledger AI Agent Fabric — registry, discovery, and invocation gateway over the agency-agents library"
 requires-python = ">=3.11"
 dependencies = [
     "axiom-core",

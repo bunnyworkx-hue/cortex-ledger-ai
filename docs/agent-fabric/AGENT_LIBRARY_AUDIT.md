@@ -35,7 +35,7 @@ permission metadata.
 
 **Gap versus `CLAUDE.md` §8's proposed registry schema:** the source
 frontmatter has no `capabilities`, `tools`, `permissions`, `risk_level`,
-`budget`, or `backend` fields. Axiom's normalization pipeline
+`budget`, or `backend` fields. Cortex Ledger AI's normalization pipeline
 (`CLAUDE.md` §67, Milestone 5) will have to *derive* capability tags from
 the `description` field and prose body (or curate them by hand for the
 first cohort), not simply parse them out of existing structured fields.
@@ -78,18 +78,18 @@ generates per-tool bundles and appears to include generated variants
 **Use 255 as the source-of-truth count of real agent definitions; use "270
 generated" only when specifically talking about `agency-agents-router`'s
 output.** Neither number is 237 — the CLAUDE.md's figure is stale and
-should not be hardcoded anywhere in Axiom.
+should not be hardcoded anywhere in Cortex Ledger AI.
 
 ## 4. Categories (source of truth: `divisions.json`)
 
 `divisions.json` is explicitly documented in the repo as the canonical
 division list, enforced by CI (`scripts/check-divisions.sh`) against both
 the actual directories on disk and the `AGENT_DIRS` arrays in
-`scripts/convert.sh`/`scripts/lint-agents.sh`. Axiom's category taxonomy
+`scripts/convert.sh`/`scripts/lint-agents.sh`. Cortex Ledger AI's category taxonomy
 for the Agent Registry should import this file directly rather than
 re-deriving categories by hand — it's already the enforced source of truth
 upstream, including display label, icon, and brand color per division,
-which the Axiom dashboard (§52) can reuse as-is.
+which the Cortex Ledger AI dashboard (§52) can reuse as-is.
 
 ## 5. Existing tool integrations (relevant prior art)
 
@@ -98,14 +98,14 @@ generate and install per-tool bundles for: Claude Code, Cursor, Codex,
 Gemini CLI, GitHub Copilot, OpenCode, Windsurf, Aider, Kimi, Osaurus,
 Antigravity, OpenClaw, Qwen, Hermes, and Mistral Vibe (`integrations/`
 has one subdirectory per tool). The Hermes bundle specifically
-(`integrations/hermes/`) is the most relevant prior art for Axiom's own
+(`integrations/hermes/`) is the most relevant prior art for Cortex Ledger AI's own
 Agent Invocation Gateway: it deliberately avoids preloading all agents as
 static skills, instead exposing four narrow tools —
 `agency_agents_search`, `agency_agents_inspect`, `agency_agents_load`,
 `agency_agents_delegate` — that search/inspect/compose/delegate to one
 specialist at a time. This is a working implementation of exactly the
 "Lazy Agent Discovery" workflow `CLAUDE.md` §9 specifies conceptually
-(search → registry → top candidates → load → execute). The Axiom Agent
+(search → registry → top candidates → load → execute). The Cortex Ledger AI Agent
 Router/Invocation Gateway (Milestones 9–10) should treat this plugin as a
 reference implementation to adapt, not a novel design to invent from
 scratch.
@@ -119,7 +119,7 @@ completeness and division consistency, so gross structural problems (a
 missing `name`/`description`, a division not in `divisions.json`) are
 unlikely to have slipped through on `main`. What has *not* been checked:
 semantic duplicates (two agents with overlapping capability descriptions
-that Axiom's router would have trouble disambiguating between) and how
+that Cortex Ledger AI's router would have trouble disambiguating between) and how
 much each agent's prose body actually varies. That analysis belongs in the
 normalization pipeline itself (Milestone 5), where each agent gets
 processed anyway.
@@ -128,7 +128,7 @@ processed anyway.
 
 Per `CLAUDE.md` §67 ("preserve original definitions... do not destroy
 source information") and §57, the normalization pipeline must treat these
-255 files as read-only source-of-truth and write *derived* Axiom registry
+255 files as read-only source-of-truth and write *derived* Cortex Ledger AI registry
 records elsewhere (e.g. `agents/registry/` in this repo, per the layout in
 §53) rather than editing or forking the upstream `agency-agents` files in
 place. That also means picking up upstream updates (new agents, edited
@@ -144,7 +144,7 @@ Ran for real against the actual repo (commit `ebe9c99a`), not simulated:
   unquoted `description:` containing a bare `": "` ("...with great DX:
   intuitive command design...") — invalid plain-scalar YAML under strict
   parsing (`yaml.safe_load`). This is a genuine quirk in the real source
-  file, not a parsing bug on Axiom's side; the fix was resilience, not a
+  file, not a parsing bug on Cortex Ledger AI's side; the fix was resilience, not a
   workaround — `axiom_agent_fabric.normalize` skips and logs a single
   malformed file rather than failing the whole registry load (one bad
   file in 255 must not take down the whole Agent Fabric). Division

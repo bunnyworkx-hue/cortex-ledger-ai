@@ -137,7 +137,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     logger.info("axiom.shutdown")
 
 
-app = FastAPI(title="Axiom OS API", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title="Cortex Ledger AI API", version="0.1.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     # Milestone 18 (Dashboard): the dashboard is a separate Next.js dev

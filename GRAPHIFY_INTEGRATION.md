@@ -14,9 +14,9 @@ backend if configured. Every edge is tagged `EXTRACTED` (read directly
 from source) or `INFERRED` (resolved by Graphify's own logic) —
 explainable relationships, not opaque embeddings.
 
-## How Axiom talks to it
+## How Cortex Ledger AI talks to it
 
-Axiom's Knowledge Gateway (`packages/axiom-graphify`) is a real MCP
+Cortex Ledger AI's Knowledge Gateway (`packages/axiom-graphify`) is a real MCP
 client against a running `graphify-mcp --transport http` server — one
 session per call, verified against a live server, not simulated.
 
@@ -33,7 +33,7 @@ graphify extract <path> --backend claude --out var   # build the graph — costs
 a live test — confirmed by direct inspection, not assumed. The text is
 formatted for LLM context insertion (`NODE X [src=... community=N]` /
 `EDGE A --relation [EXTRACTED]--> B`), which is right for feeding an
-agent's context but meant Axiom's original, speculative
+agent's context but meant Cortex Ledger AI's original, speculative
 `KnowledgeNode`/`Subgraph`/`PathResult` design had to be corrected to a
 single `KnowledgeAnswer(text, raw)` shape once this was verified live
 (`axiom_core/knowledge/types.py`) — a real course-correction driven by
@@ -60,7 +60,7 @@ All 10 tools the live server advertises
 (`query_graph`, `get_node`, `get_neighbors`, `get_community`,
 `god_nodes`, `graph_stats`, `shortest_path`, `list_prs`, `get_pr_impact`,
 `triage_prs`) are read-only by name — there is no write/mutate tool.
-Axiom's own adapter (`axiom_graphify/adapter.py`) independently exposes
+Cortex Ledger AI's own adapter (`axiom_graphify/adapter.py`) independently exposes
 only 4 read methods. Verified live in
 `tests/integration/test_graphify_access_security.py`.
 
@@ -68,7 +68,7 @@ only 4 read methods. Verified live in
 
 1/19 semantic chunks failed mid-extraction on a real Anthropic billing
 state (insufficient credit at the time), leaving 17/323 source files with
-no nodes. Not a Graphify or Axiom defect — re-running `graphify extract`
+no nodes. Not a Graphify or Cortex Ledger AI defect — re-running `graphify extract`
 retries only the missing pieces (completed chunks are cached). Doesn't
 block Knowledge Gateway functionality: querying the graph over MCP is
 local and free, no LLM calls at query time.

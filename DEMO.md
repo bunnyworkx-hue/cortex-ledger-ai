@@ -34,7 +34,7 @@ and a real, in-character completion from the second, routed through
 ## Demo 2 — Hermes delegation (CLAUDE.md §60)
 
 The same delegate endpoint, routed through the real `hermes` CLI instead
-of Axiom's native backend:
+of Cortex Ledger AI's native backend:
 
 ```bash
 curl -s -X POST http://127.0.0.1:8000/v1/agent-fabric/agents/sales/sales-deal-strategist/delegate \

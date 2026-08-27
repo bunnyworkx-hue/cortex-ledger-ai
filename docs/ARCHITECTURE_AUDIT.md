@@ -4,22 +4,22 @@ Status: complete. No application code has been written yet.
 
 ## 1. What exists today
 
-Axiom OS does not exist yet. This audit inventories the real, pre-existing
-pieces on this machine that Axiom OS is meant to wrap, per `CLAUDE.md`.
+Cortex Ledger AI does not exist yet. This audit inventories the real, pre-existing
+pieces on this machine that Cortex Ledger AI is meant to wrap, per `CLAUDE.md`.
 
 | Component | Location | State |
 |---|---|---|
-| Axiom OS itself | `~/Desktop/axiom-os` (this repo) | Freshly initialized, empty except docs |
+| Cortex Ledger AI itself | `~/Desktop/axiom-os` (this repo) | Freshly initialized, empty except docs |
 | Candidate 237-agent library | `~/Desktop/agency-agents` | Real, git-tracked clone of `github.com/msitarzewski/agency-agents` |
 | Graphify (Knowledge Fabric candidate) | `github.com/Graphify-Labs/graphify` (cloned for inspection, not vendored) | Real, active, Apache-2.0 |
 | Hermes (Execution Engine candidate) | `github.com/NousResearch/hermes-agent` (cloned for inspection, not vendored) | Real, active, MIT |
-| ORVYN | `~/Desktop/ORVYN-V3` | Real, early-stage Next.js + Supabase app (auth + shift-claim MVP) |
+| Business Operations | `~/Desktop/ORVYN-V3` | Real, early-stage Next.js + Supabase app (auth + shift-claim MVP) |
 
 Two unrelated projects also live on this Desktop and were checked and ruled
 out during discovery: `workx-ai-label-sim` (an AI record-label game
 simulator with its own unrelated "Agent Architecture" doc) and `OpenMontage`
 (a video-montage tool with its own unrelated `AGENTS.md`). Neither is part
-of Axiom OS.
+of Cortex Ledger AI.
 
 ## 2. Environment
 
@@ -31,10 +31,10 @@ of Axiom OS.
   core.
 - Package managers in play: `uv` (both Graphify and Hermes Agent use
   `uv.lock`), `npm` (Hermes Agent's JS side).
-- Database: nothing provisioned yet for Axiom OS. ORVYN-V3 already runs on
+- Database: nothing provisioned yet for Cortex Ledger AI. ORVYN-V3 already runs on
   Supabase (Postgres) — see `~/Desktop/ORVYN-V3/supabase/schema.sql`.
 - Git: `agency-agents`, Graphify, and Hermes Agent are each independent git
-  repos with their own remotes. Axiom OS is a new, separate repo — it does
+  repos with their own remotes. Cortex Ledger AI is a new, separate repo — it does
   not vendor or submodule the other three; it will integrate with them as
   external dependencies/adapters per `CLAUDE.md` §20/§29.
 
@@ -49,7 +49,7 @@ inspection actually found that differs from the doc's working assumptions:
    the exact breakdown), and its own tooling reports **270** when it
    generates per-tool integration bundles (that number includes generated
    variants, not just source files). Treat "237" as stale; use the live
-   count from the source repo, not a hardcoded constant, anywhere Axiom
+   count from the source repo, not a hardcoded constant, anywhere Cortex Ledger AI
    reports agent totals.
 2. **Graphify's citation was broken.** The version of `CLAUDE.md` handed to
    Claude Code had `:contentReference[oaicite:1]{index=1}` placeholders
@@ -67,14 +67,14 @@ inspection actually found that differs from the doc's working assumptions:
    `hermes` CLI, same plugin directory convention) — so the two findings
    are consistent, not competing. Full findings in
    `docs/hermes/HERMES_INTEGRATION.md`.
-4. **ORVYN already exists.** `CLAUDE.md` §99 frames ORVYN as something to
-   build *after* Axiom OS is stable, on top of it. In reality `ORVYN-V3`
+4. **Business Operations already exists.** `CLAUDE.md` §99 frames Business Operations as something to
+   build *after* Cortex Ledger AI is stable, on top of it. In reality `ORVYN-V3`
    already exists as a working (if early) prototype with its own auth,
    Supabase schema, and realtime shift-claim logic, built independently of
-   Axiom. This audit does not change the roadmap ordering (Axiom OS first,
-   per explicit user instruction), but the eventual ORVYN integration will
-   be "retrofit an existing app onto Axiom," not "build ORVYN fresh on top
-   of Axiom" — worth remembering when Project 2 starts.
+   Cortex Ledger AI. This audit does not change the roadmap ordering (Cortex Ledger AI first,
+   per explicit user instruction), but the eventual Business Operations integration will
+   be "retrofit an existing app onto Cortex Ledger AI," not "build Business Operations fresh on top
+   of Cortex Ledger AI" — worth remembering when Project 2 starts.
 
 ## 4. Scope of this audit
 

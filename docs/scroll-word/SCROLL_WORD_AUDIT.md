@@ -80,7 +80,7 @@ kinds of software.
 ## 3. What scroll-world is genuinely good for here
 
 Its actual sweet spot matches §4 (World Entry) closely: a cinematic,
-non-interactive "flying into the Axiom facility" opening sequence with
+non-interactive "flying into the Cortex Ledger AI facility" opening sequence with
 the wordmark and tagline, built once, that plays the same way every
 time. That's exactly an Apple-product-page-style intro — real value, and
 the one place in the spec where "fixed pre-rendered narrative" is
@@ -96,7 +96,7 @@ answer:
   transitions as non-interactive backdrop; build the actual operational
   surface — agent discovery, live execution graph, talk-back chat, human
   approval — with a genuinely interactive 3D stack (react-three-fiber /
-  Three.js) wired to the real Axiom API, matching every one of §37's
+  Three.js) wired to the real Cortex Ledger AI API, matching every one of §37's
   acceptance criteria for real. This means most of the spec (§5-23,
   §26, §34-35) is built *without* scroll-world, contrary to "use the
   existing Scroll-Word architecture wherever appropriate" — because

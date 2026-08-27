@@ -9,13 +9,13 @@ and fixed, not a clean-room writeup) is `docs/hermes/HERMES_INTEGRATION.md`.
 Research, MIT) is a real, large, actively developed self-hosted
 general-purpose AI agent — not a thin wrapper. It has its own CLI/TUI,
 messaging gateway, plugin system, session state/search, and provider-
-agnostic model routing. Axiom treats it as one of two real `AgentBackend`
-implementations (`packages/axiom-hermes`), alongside Axiom's own native
+agnostic model routing. Cortex Ledger AI treats it as one of two real `AgentBackend`
+implementations (`packages/axiom-hermes`), alongside Cortex Ledger AI's own native
 Anthropic-backed path (`AxiomNativeBackend`).
 
-## How Axiom talks to it
+## How Cortex Ledger AI talks to it
 
-One full one-shot Hermes run per Axiom `Execution` — a real subprocess
+One full one-shot Hermes run per Cortex Ledger AI `Execution` — a real subprocess
 call, never a shell:
 
 ```bash
@@ -25,7 +25,7 @@ hermes -z "<prompt>" -m anthropic/claude-sonnet-5 --provider anthropic --usage-f
 `-z`/`--oneshot` prints only the final response text — no banner, no
 spinner — exactly the clean, scriptable surface `axiom_hermes.client.run_oneshot`
 needs. `--usage-file` writes a real JSON report (cost, tokens, model,
-`completed`/`failed`) even on failure, which is how Axiom distinguishes a
+`completed`/`failed`) even on failure, which is how Cortex Ledger AI distinguishes a
 real failure from a successful-but-empty response, rather than trusting
 the exit code alone.
 
@@ -63,7 +63,7 @@ write).
 **Not built**: Hermes's own internal subagent delegation
 (`delegate_task` — Hermes deciding to spawn its own subagents) is a real,
 separate feature this integration does not reach into. `HermesBackend` is
-one full run per Axiom `Execution`; Hermes's MCP server mode
+one full run per Cortex Ledger AI `Execution`; Hermes's MCP server mode
 (`mcp_serve.py`) and gateway/messaging surfaces are real, unexplored
 surface for a future milestone — not fabricated capabilities being
 claimed here.

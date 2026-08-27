@@ -1,7 +1,7 @@
 [project]
 name = "axiom-hermes"
 version = "0.1.0"
-description = "Axiom OS Agent Fabric backend for Hermes Agent (github.com/NousResearch/hermes-agent) — CLAUDE.md's HermesBackend"
+description = "Cortex Ledger AI Agent Fabric backend for Hermes Agent (github.com/NousResearch/hermes-agent) — CLAUDE.md's HermesBackend"
 requires-python = ">=3.11"
 dependencies = [
     "axiom-core",

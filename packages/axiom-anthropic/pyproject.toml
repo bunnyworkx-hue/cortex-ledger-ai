@@ -1,7 +1,7 @@
 [project]
 name = "axiom-anthropic"
 version = "0.1.0"
-description = "Axiom OS Model Gateway adapter for Anthropic (Claude)"
+description = "Cortex Ledger AI Model Gateway adapter for Anthropic (Claude)"
 requires-python = ">=3.11"
 dependencies = [
     "axiom-core",

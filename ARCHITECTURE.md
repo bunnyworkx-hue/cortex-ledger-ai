@@ -1,6 +1,6 @@
-# Axiom OS — Architecture
+# Cortex Ledger AI — Architecture
 
-Axiom OS is a control plane for agentic AI: a real FastAPI service that
+Cortex Ledger AI is a control plane for agentic AI: a real FastAPI service that
 routes work to real model/agent/knowledge backends through a small set of
 provider-neutral abstractions, gates risky actions behind a real human
 approval workflow, and records what actually happened. This document
@@ -148,7 +148,7 @@ nothing else in the workspace.
   what" was a stated aspiration, not built. What *is* real: flat,
   queryable execution traces (`ExecutionStore`, `/v1/observability/*`,
   the Dashboard's Executions table) and Graphify's own knowledge graph
-  (queried, not visualized, by Axiom). Correlating the two (§43) is not
+  (queried, not visualized, by Cortex Ledger AI). Correlating the two (§43) is not
   implemented.
 - **Docker / deployment infrastructure**: `infrastructure/docker/` exists
   as an empty placeholder directory — no Dockerfile or compose file was

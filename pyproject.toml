@@ -1,7 +1,7 @@
 [project]
 name = "axiom-os"
 version = "0.1.0"
-description = "Axiom OS — agentic AI operating system (Agent Fabric, Knowledge Fabric, Execution Engine)"
+description = "Cortex Ledger AI — agentic AI operating system (Agent Fabric, Knowledge Fabric, Execution Engine)"
 requires-python = ">=3.11"
 dependencies = []
 

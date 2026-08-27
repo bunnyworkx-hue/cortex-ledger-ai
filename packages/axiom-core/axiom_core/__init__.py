@@ -1,1 +1,1 @@
-"""Axiom Core — shared foundation used by every other Axiom package."""
+"""Cortex Ledger AI Core — shared foundation used by every other Cortex Ledger AI package."""

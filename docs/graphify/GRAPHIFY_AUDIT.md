@@ -99,13 +99,13 @@ validate... before relying on MCP"):
 ## 5. Config surface worth knowing before wiring the adapter
 
 - `GRAPHIFY_MAX_CONTEXTS` — max number of non-default project graphs one
-  multi-project MCP server retains (default 8). Relevant if Axiom points
+  multi-project MCP server retains (default 8). Relevant if Cortex Ledger AI points
   many agents/tenants at one shared Graphify MCP server.
 - Query logging: every `query`/`path`/`explain`/`query_graph` call is
   logged to `~/.cache/graphify-queries.log` (JSONL: timestamp, question,
   corpus, node count, duration — **not** full subgraph payloads by
   default). This is a ready-made source for the "knowledge query" traces
-  `CLAUDE.md` §40 asks Axiom to track — Axiom's Knowledge Gateway should
+  `CLAUDE.md` §40 asks Cortex Ledger AI to track — Cortex Ledger AI's Knowledge Gateway should
   tap or mirror this rather than re-implement query logging from scratch.
   Can be disabled (`GRAPHIFY_QUERY_LOG_DISABLE=1`) or redirected.
 
@@ -116,7 +116,7 @@ A `graphify extract` run produces `graphify-out/`:
 - `GRAPH_REPORT.md` — key concepts, notable connections, suggested questions
 - `graph.json` — the full graph, queryable offline without re-reading files
 
-`graph.json` is the artifact the Axiom Graphify Adapter (`CLAUDE.md` §20,
+`graph.json` is the artifact the Cortex Ledger AI Graphify Adapter (`CLAUDE.md` §20,
 `packages/axiom-graphify/`) should treat as the canonical knowledge
 snapshot when not going through the MCP server directly.
 
@@ -124,7 +124,7 @@ snapshot when not going through the MCP server directly.
 
 Graphify has real git-hook-driven incremental rebuild
 (`graphify hook install`), which maps directly onto `CLAUDE.md` §70–72's
-knowledge lifecycle (`INDEXED` / `STALE` / `UPDATING`) — Axiom can drive
+knowledge lifecycle (`INDEXED` / `STALE` / `UPDATING`) — Cortex Ledger AI can drive
 staleness detection off the same git-commit signal Graphify's own hook
 uses, rather than inventing a separate mechanism.
 
@@ -164,7 +164,7 @@ relationships across a large corpus" case Graphify is for.
 **Known gaps in this specific graph, both retryable once resolved:**
 - 1/19 semantic chunks failed mid-run: `Your credit balance is too low to
   access the Anthropic API`. This is an account billing state, not a
-  Graphify or Axiom defect — 17/323 files consequently produced no nodes.
+  Graphify or Cortex Ledger AI defect — 17/323 files consequently produced no nodes.
   Re-running `graphify extract` once credit is available will retry only
   the missing pieces (Graphify caches completed chunks).
 - Community labels are still placeholder `Community N` — `graphify

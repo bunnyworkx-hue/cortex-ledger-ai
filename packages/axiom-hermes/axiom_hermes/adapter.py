@@ -9,7 +9,7 @@ from axiom_hermes.client import HermesCliError, HermesTimeoutError, run_oneshot
 
 class HermesBackend:
     """CLAUDE.md §30's ``HermesBackend`` — a real external agent runtime
-    (github.com/NousResearch/hermes-agent), not Axiom's own execution
+    (github.com/NousResearch/hermes-agent), not Cortex Ledger AI's own execution
     path (that's AxiomNativeBackend). Every call shells out to the real,
     installed ``hermes`` CLI's one-shot mode (``hermes -z``) — verified
     live in Milestone 13, including the real gotcha that Hermes's `auto`

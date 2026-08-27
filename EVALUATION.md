@@ -1,7 +1,7 @@
 # Evaluation
 
 `scripts/evaluation/run_benchmark.py` — a real 20-task benchmark against
-a live, already-running Axiom API. Every task is a genuine HTTP call
+a live, already-running Cortex Ledger AI API. Every task is a genuine HTTP call
 through the same endpoints a real client would use (agent delegation, a
 tool call, or a full propose→approve→execute approval flow). Nothing is
 mocked, nothing imports Python internals directly — a task fails if the

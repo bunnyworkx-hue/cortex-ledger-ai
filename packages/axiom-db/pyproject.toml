@@ -1,7 +1,7 @@
 [project]
 name = "axiom-db"
 version = "0.1.0"
-description = "Axiom OS database layer: async engine, session management, ORM base, migrations"
+description = "Cortex Ledger AI database layer: async engine, session management, ORM base, migrations"
 requires-python = ">=3.11"
 dependencies = [
     "axiom-core",
