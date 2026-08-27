@@ -7,6 +7,7 @@ import { api, ApiError, type AgentFabricStatus } from "@/lib/api";
 
 const WORLD_URL = process.env.NEXT_PUBLIC_WORLD_URL ?? "http://localhost:3001";
 const CONTACT_EMAIL = "thegordontree@gmail.com";
+const RESUME_URL = "/turon-gordon-resume.pdf";
 
 // This is an employer-facing engineering portfolio, not a customer
 // funnel — every claim below is checked against what's actually running
@@ -101,6 +102,14 @@ export default function Landing() {
               className="rounded-md bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:opacity-90"
             >
               Explore My AI Engineering Work
+            </a>
+            <a
+              href={RESUME_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-md border border-zinc-300 px-5 py-2.5 text-sm font-semibold text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+            >
+              View Resume
             </a>
             <a
               href={`mailto:${CONTACT_EMAIL}`}
@@ -248,6 +257,14 @@ export default function Landing() {
             className="rounded-md bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:opacity-90"
           >
             Request a Technical Interview
+          </a>
+          <a
+            href={RESUME_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-md border border-zinc-300 px-5 py-2.5 text-sm font-semibold text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+          >
+            View Resume
           </a>
         </div>
       </section>
