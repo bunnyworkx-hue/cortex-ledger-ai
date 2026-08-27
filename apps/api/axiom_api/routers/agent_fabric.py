@@ -3,15 +3,24 @@ from fastapi import APIRouter, Depends, HTTPException
 from axiom_agent_fabric import AgentInvocationGateway, AgentNotFoundError
 from axiom_core.agents import AgentBackendNotFoundError, AgentBackendRegistry
 from axiom_core.memory import MemoryStore
+from axiom_core.policy import ApprovalRequest, ApprovalStore, PolicyEngine, PolicyStatus
 
 from axiom_api.delegation import run_delegation
 from axiom_api.dependencies import (
     get_agent_backend_gateway,
     get_agent_fabric,
+    get_approval_store,
     get_execution_store,
     get_memory_store,
+    get_policy_engine,
 )
-from axiom_api.schemas import AgentRecordDetailOut, AgentRecordOut, DelegateRequest, ExecutionOut
+from axiom_api.schemas import (
+    AgentRecordDetailOut,
+    AgentRecordOut,
+    DelegateRequest,
+    ExecutionOut,
+    PendingApprovalOut,
+)
 
 router = APIRouter(prefix="/v1/agent-fabric", tags=["agent-fabric"])
 
@@ -65,8 +74,8 @@ async def list_agents(
 ) -> list[AgentRecordOut]:
     """The full real roster (all 254, not just the 12 curated) — unlike
     GET /v1/agent-fabric's aggregate by_division counts, this gives every
-    agent a real, addressable agent_id. Built for Axiom World's 3D view
-    (Milestone: Axiom World) to assign real identity to individual
+    agent a real, addressable agent_id. Built for Cortex Ledger AI World's 3D view
+    (Milestone: Cortex Ledger AI World) to assign real identity to individual
     rendered points instead of anonymous dots, but generically useful
     anywhere a real roster (not just a search-scoped subset) is needed.
     """
@@ -100,7 +109,7 @@ async def inspect(
                                  source_path=record.source_path, source_commit=record.source_commit)
 
 
-@router.post("/agents/{agent_id:path}/delegate", response_model=ExecutionOut)
+@router.post("/agents/{agent_id:path}/delegate", response_model=ExecutionOut | PendingApprovalOut)
 async def delegate(
     agent_id: str,
     body: DelegateRequest,
@@ -108,8 +117,48 @@ async def delegate(
     backend_registry: AgentBackendRegistry = Depends(get_agent_backend_gateway),
     memory_store: MemoryStore | None = Depends(get_memory_store),
     execution_store=Depends(get_execution_store),
-) -> ExecutionOut:
+    policy: PolicyEngine = Depends(get_policy_engine),
+    approvals: ApprovalStore | None = Depends(get_approval_store),
+) -> ExecutionOut | PendingApprovalOut:
     gateway = _require_gateway(gateway)
+
+    # Milestone 22: Agent Authorization — the real gap
+    # docs/security/SECURITY_AUDIT.md §8 named: only tool *execution* was
+    # policy-gated, not agent *invocation* itself. Same real gate tools
+    # already go through, applied here too — CLAUDE.md's own curation
+    # model tops out at "medium" for all 12 curated agents today (the
+    # other 242 have no risk_level at all, treated as "medium" — see
+    # PolicyEngine.evaluate's docstring), so this is a real, structural
+    # control with no agent currently able to trip the REQUIRES_APPROVAL
+    # branch — the same honest category as the delegate_to_agent depth
+    # cap: forward-compatible, not exercised by today's data.
+    try:
+        record = gateway.inspect(agent_id)
+    except AgentNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    decision = policy.evaluate(record.risk_level, action=f"agent:{agent_id}")
+    if decision.status == PolicyStatus.REQUIRES_APPROVAL:
+        if approvals is None:
+            raise HTTPException(
+                status_code=503,
+                detail="This delegation requires approval but no approval store is configured "
+                "(set AXIOM_DATABASE_URL).",
+            )
+        request = ApprovalRequest.new(
+            action=f"agent:{agent_id}",
+            risk_level=record.risk_level,
+            reason=decision.reason,
+            payload={
+                "agent_id": agent_id,
+                "task_input": body.input,
+                "backend": body.backend or "axiom_native",
+                "context": body.context,
+            },
+        )
+        saved = await approvals.create(request)
+        return PendingApprovalOut(approval_id=saved.id, status=saved.status.value, reason=saved.reason)
+
     try:
         execution = await run_delegation(
             gateway,

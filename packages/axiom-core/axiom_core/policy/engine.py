@@ -17,7 +17,12 @@ class PolicyEngine:
     def __init__(self, *, approval_threshold: str = "high") -> None:
         self._approval_threshold = _RISK_ORDER.get(approval_threshold, _RISK_ORDER["high"])
 
-    def evaluate(self, risk_level: str, *, action: str) -> PolicyDecision:
+    def evaluate(self, risk_level: str | None, *, action: str) -> PolicyDecision:
+        # None (an uncurated agent — CLAUDE.md's curation model leaves
+        # risk_level unset until a human reviews it, not "low") falls
+        # back to "medium", same as an unrecognized string — allowed,
+        # not auto-denied, consistent with this engine's "nothing is
+        # auto-denied outright" design (see class docstring).
         level = _RISK_ORDER.get(risk_level, _RISK_ORDER["medium"])
         if level >= self._approval_threshold:
             return PolicyDecision(

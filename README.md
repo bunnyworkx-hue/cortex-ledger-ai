@@ -1,4 +1,4 @@
-# Axiom OS
+# Cortex Ledger AI
 
 Agentic AI operating system — Agent Fabric, Knowledge Fabric, Execution
 Engine. See `CLAUDE.md` for the full architecture and engineering rules,
@@ -17,7 +17,7 @@ decision here.
 | [AGENT_FABRIC.md](AGENT_FABRIC.md) | 255 real agents, corrected count, curation, normalization gaps |
 | [KNOWLEDGE_FABRIC.md](KNOWLEDGE_FABRIC.md) | The Knowledge Gateway abstraction and the `KnowledgeAnswer` design correction |
 | [DEMO.md](DEMO.md) | A literal, copy-pasteable walkthrough — the honest substitute for a demo video/screenshots (no browser tool in this environment) |
-| [AXIOM_WORLD.md](AXIOM_WORLD.md) | The scroll-driven 3D operations view (`apps/world`) — real data throughout, honest about what's not built |
+| [CORTEX_LEDGER_AI_WORLD.md](CORTEX_LEDGER_AI_WORLD.md) | The scroll-driven 3D operations view (`apps/world`) — real data throughout, honest about what's not built |
 | `docs/IMPLEMENTATION_PLAN.md` | Full milestone-by-milestone build history — every real bug, every fix |
 
 ## Status
@@ -29,7 +29,16 @@ Observability, a Next.js Dashboard, Evaluation (20/20 on the last real
 benchmark run), Security (real findings across all 11 of CLAUDE.md §96's
 categories, including real budget enforcement and a bounded
 agent-to-agent delegation tool added after the initial pass), and
-Portfolio Release (this doc set). 104/104 tests passing.
+Portfolio Release (this doc set), and Milestone 22 — a real
+instruction-hierarchy mitigation for Prompt Injection, a real API-key
+auth layer closing Memory/Tenant Isolation, and a real risk-based
+approval gate on agent delegation closing Agent Authorization, all
+live-verified against the running system (see
+`docs/security/SECURITY_AUDIT.md` §5-8). Knowledge Isolation is now the
+only open item of CLAUDE.md §96's eleven security categories. 108 tests
+passing; 2 skip when there's no live Anthropic model credit available
+(`test_observability_endpoint.py`, `test_memory_endpoint.py`),
+not a code fault.
 
 ### Definition of Done (CLAUDE.md §98) — honest status
 
@@ -53,7 +62,7 @@ screen-capture tool exists in this environment.
 ## Layout
 
 ```
-apps/api/                FastAPI app — the Axiom control-plane HTTP surface
+apps/api/                FastAPI app — the Cortex Ledger AI control-plane HTTP surface
 packages/axiom-core/      config, logging, Model/Knowledge/Tool Registry abstractions, Agent Runtime
 packages/axiom-db/        async SQLAlchemy engine, ORM base, Alembic migrations
 packages/axiom-anthropic/ real Anthropic adapter (Model Gateway)
@@ -126,14 +135,14 @@ sidesteps that whole class of problem by construction, rather than
 chasing the exact browser-side cause. The route handler itself replaced
 an even earlier version built on `next.config.ts`'s `rewrites()`, which
 had an undocumented ~30s timeout that cut off genuinely slow real calls
-(found live via Axiom World's real Hermes delegations, which routinely
+(found live via Cortex Ledger AI World's real Hermes delegations, which routinely
 take 10-35s+) — the route handler sets an explicit 130s timeout instead.
 Build/typecheck/lint are verified (`npm run build`, clean TypeScript,
 clean ESLint) and every route was curl-verified to serve 200 through the
 proxy; the rendered UI itself was not visually verified — no browser/
 screenshot tool was available in this environment.
 
-### Axiom World (3D operations view)
+### Cortex Ledger AI World (3D operations view)
 
 ```bash
 cd apps/world && npm install   # first time only
@@ -141,7 +150,7 @@ cd apps/world && npm install   # first time only
 ./scripts/dev/world.sh         # world on the next free port, in another
 ```
 
-See [AXIOM_WORLD.md](AXIOM_WORLD.md) for what's real (live agent/graph/
+See [CORTEX_LEDGER_AI_WORLD.md](CORTEX_LEDGER_AI_WORLD.md) for what's real (live agent/graph/
 backend data throughout, a working Talk-Back chat wired to real search
 and delegation) versus what's honestly not built yet from the original
 39-section spec. Same `/api/*` same-origin proxy pattern as the

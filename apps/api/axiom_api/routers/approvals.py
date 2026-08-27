@@ -1,10 +1,21 @@
 from fastapi import APIRouter, Depends, HTTPException
 
+from axiom_agent_fabric import AgentInvocationGateway, AgentNotFoundError
+from axiom_core.agents import AgentBackendNotFoundError, AgentBackendRegistry
+from axiom_core.memory import MemoryStore
 from axiom_core.policy import ApprovalNotFoundError, ApprovalStatus, ApprovalStore
 from axiom_core.tools import ToolExecutionError, ToolRegistry
 
-from axiom_api.dependencies import get_approval_store, get_tool_registry
-from axiom_api.schemas import ApprovalOut, DecideApprovalRequest, ToolCallResultOut
+from axiom_api.delegation import run_delegation
+from axiom_api.dependencies import (
+    get_agent_backend_gateway,
+    get_agent_fabric,
+    get_approval_store,
+    get_execution_store,
+    get_memory_store,
+    get_tool_registry,
+)
+from axiom_api.schemas import ApprovalOut, DecideApprovalRequest, ExecutionOut, ToolCallResultOut
 
 router = APIRouter(prefix="/v1/approvals", tags=["approvals"])
 
@@ -63,17 +74,25 @@ async def reject(
     return _to_out(decided)
 
 
-@router.post("/{approval_id}/approve", response_model=ToolCallResultOut)
+@router.post("/{approval_id}/approve", response_model=ToolCallResultOut | ExecutionOut)
 async def approve(
     approval_id: str,
     body: DecideApprovalRequest,
     store: ApprovalStore | None = Depends(get_approval_store),
     registry: ToolRegistry = Depends(get_tool_registry),
-) -> ToolCallResultOut:
+    gateway: AgentInvocationGateway | None = Depends(get_agent_fabric),
+    backend_registry: AgentBackendRegistry = Depends(get_agent_backend_gateway),
+    memory_store: MemoryStore | None = Depends(get_memory_store),
+    execution_store=Depends(get_execution_store),
+) -> ToolCallResultOut | ExecutionOut:
     """Approving doesn't just flip a status flag — it actually executes
     the originally-proposed action for real (CLAUDE.md §37: Approve ->
-    Execute -> Verify -> Audit), through the same ToolRegistry.execute()
-    audit-logging path any other tool call takes.
+    Execute -> Verify -> Audit). Two real action shapes now share this
+    endpoint: ``tool:{name}`` (through the same ``ToolRegistry.execute()``
+    audit-logging path any other tool call takes) and, since Milestone
+    22, ``agent:{agent_id}`` (through the same ``run_delegation`` a
+    direct ``/delegate`` call uses) — the same real gate, applied
+    consistently rather than tools getting approval and agents not.
     """
     store = _require_store(store)
     try:
@@ -85,6 +104,34 @@ async def approve(
         raise HTTPException(status_code=409, detail=f"Approval {approval_id!r} already {request.status.value}")
 
     await store.decide(approval_id, approved=True, decided_by=body.decided_by)
+
+    if request.action.startswith("agent:"):
+        if gateway is None:
+            raise HTTPException(status_code=503, detail="Agent Fabric is not configured.")
+        try:
+            execution = await run_delegation(
+                gateway,
+                backend_registry,
+                memory_store,
+                execution_store,
+                agent_id=request.payload["agent_id"],
+                task_input=request.payload["task_input"],
+                backend_name=request.payload.get("backend") or "axiom_native",
+                context=request.payload.get("context"),
+            )
+        except AgentBackendNotFoundError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+        except AgentNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        if execution.status.value == "failed":
+            raise HTTPException(status_code=502, detail=execution.error)
+        return ExecutionOut(
+            execution_id=execution.execution_id,
+            agent_id=execution.agent_id,
+            backend_name=execution.backend_name,
+            status=execution.status.value,
+            content=execution.result.content if execution.result else None,
+        )
 
     try:
         result = await registry.execute(request.payload["tool_name"], request.payload["arguments"])

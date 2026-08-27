@@ -8,7 +8,7 @@ is meant to be reviewed before Milestone 6 (Foundation) starts.
 ## 1. How the three pillars map onto real systems
 
 ```
-                         AXIOM OS (this repo)
+                         CORTEX LEDGER AI (this repo)
                             │
        ┌────────────────────┼────────────────────┐
        ▼                    ▼                    ▼
@@ -22,7 +22,7 @@ is meant to be reviewed before Milestone 6 (Foundation) starts.
        │                    │                    │
        └────────────────────┼────────────────────┘
                             │
-                           ORVYN
+                    BUSINESS OPERATIONS
               (ORVYN-V3 already exists — retrofit
                later, per CLAUDE.md's own sequencing)
 ```
@@ -71,7 +71,7 @@ Knowledge Gateway operations map onto Graphify's **real** MCP tools,
 verified live in Milestone 8 (`GRAPHIFY_AUDIT.md` §4/§9) against a real
 graph built from `agency-agents` (1,121 nodes, 1,594 edges):
 
-| Axiom Knowledge Gateway op | Backed by |
+| Cortex Ledger AI Knowledge Gateway op | Backed by |
 |---|---|
 | `search` | `query_graph` |
 | `get_node` | `get_node` |
@@ -108,9 +108,9 @@ needs it.
 `delegate_task` mechanism (confirmed in `HERMES_INTEGRATION.md` §4) rather
 than reimplementing subagent orchestration. Tool exposure to a Hermes
 session is scoped using Hermes's own `toolsets.py` composition model
-(§5 of that audit) — Axiom grants a named toolset, not a raw tool list.
+(§5 of that audit) — Cortex Ledger AI grants a named toolset, not a raw tool list.
 Sandboxing (`CLAUDE.md` §47) uses Hermes's existing Docker/Singularity/
-Modal/Daytona terminal backends rather than Axiom building its own
+Modal/Daytona terminal backends rather than Cortex Ledger AI building its own
 container isolation layer.
 
 **Backend interface**: `AxiomNativeBackend` (Claude direct) and
@@ -125,7 +125,7 @@ Per `CLAUDE.md` §59, adjusted to real tool calls:
 
 ```
 User: "Research this repository and explain how authentication works."
-  → Axiom creates an execution record
+  → Cortex Ledger AI creates an execution record
   → Task classified (research/knowledge)
   → Knowledge Gateway: query_graph("authentication") against a Graphify
     server already running over the target repo
@@ -170,9 +170,9 @@ external integrations landing simultaneously.
    alongside `AxiomNativeBackend`, both selectable per-call via
    `/v1/agent-fabric/agents/{id}/delegate`'s `backend` field. Uses
    Hermes's real `-z`/`--oneshot` mode over a subprocess — one full
-   Hermes run per Axiom `Execution`, not Hermes's own internal
+   Hermes run per Cortex Ledger AI `Execution`, not Hermes's own internal
    `delegate_task`/subagent spawning (which is Hermes deciding to
-   delegate internally, a different thing from Axiom calling Hermes).
+   delegate internally, a different thing from Cortex Ledger AI calling Hermes).
    Live-verified: a real in-character completion from the SEO Specialist
    agent, routed Registry → `HermesBackend` → real `hermes` subprocess →
    real Anthropic call → `Execution`.
@@ -180,7 +180,7 @@ external integrations landing simultaneously.
    first real migration. Real findings along the way: autogenerate's raw
    output would have **dropped the pre-existing shared-core tables**
    (`organizations`/`profiles`/`subscriptions`/`org_product_access`) since
-   they're not declared in Axiom's own models — hand-edited the migration
+   they're not declared in Cortex Ledger AI's own models — hand-edited the migration
    to touch only `memories` before ever running it. Supabase's own
    advisor flagged RLS as disabled on the new table; not auto-fixed
    (enabling RLS with no policies would lock out all access) — surfaced
@@ -349,7 +349,7 @@ and honest remaining limits in `docs/security/SECURITY_AUDIT.md` §9/§11.
 
 ## 6b. Dashboard: cross-origin fetch failing in the browser only (2026-08-26)
 
-A real user testing the dashboard hit "Failed to reach the Axiom API" on
+A real user testing the dashboard hit "Failed to reach the Cortex Ledger AI API" on
 every page — but every server-side check came back clean: `/health` and
 every `/v1/*` route the Overview page calls returned 200 with valid
 JSON, a simulated browser request with the real `Origin: http://localhost:3000`
@@ -384,7 +384,7 @@ after the fix: clean `tsc --noEmit`, clean `next build`, clean `eslint`,
 and `curl http://localhost:3000/api/v1/tools` returning the real 12-tool
 list through the new proxy path.
 
-## 6c. Axiom World — the 3D operations view (2026-08-26)
+## 6c. Cortex Ledger AI World — the 3D operations view (2026-08-26)
 
 The user handed over a large (39-section) build prompt for a cinematic
 scroll-driven 3D interface, explicitly built on a tool named
@@ -450,21 +450,21 @@ introduced here; fixed by rewriting the onboarding hint to a verified-
 working query (`"security"`, `"frontend"`) instead of promising something
 the real search can't do.
 
-**Not built**, named honestly in `AXIOM_WORLD.md` rather than silently
+**Not built**, named honestly in `CORTEX_LEDGER_AI_WORLD.md` rather than silently
 assumed: a dedicated Hermes gateway visualization (§8-9 — Hermes appears
 as one real backend node in Execution Engine, not its own zone), live
 visual highlighting of the agent cloud in response to search (§7 — the
 chat surfaces real matches today, the 3D cloud doesn't yet react),
 animated execution-graph playback (§20), voice I/O (§22 — explicitly
 deferred by the prompt's own text), and dedicated Policy/Approval/Tool
-Registry/MCP/ORVYN zones (§16-19, §31). Verified: clean `tsc --noEmit`,
+Registry/MCP/Business Operations zones (§16-19, §31). Verified: clean `tsc --noEmit`,
 clean `next build`, clean ESLint (one known App-Router false-positive
 warning about `<link>`-based font loading, harmless), and every real
 endpoint the app calls curl-verified through the new proxy including a
 live `delegate` call returning a real Anthropic completion. Not visually
 verified in a browser — same environment limitation as the dashboard.
 
-## 6d. Axiom World — operate the system, don't just view it (2026-08-26)
+## 6d. Cortex Ledger AI World — operate the system, don't just view it (2026-08-26)
 
 The user's follow-up: "I want it to function like an agentic OS system"
 — matching CLAUDE.md §39's own "I am operating an AI organization, not
@@ -499,9 +499,9 @@ agent is actually working right now visibly lights up gold and grows in
 the point cloud — the first real link between the chat and the 3D scene,
 closing half of §7's original Agent Discovery ask (highlighting the
 selected agent; dimming the non-matching rest is still not built, named
-honestly in `AXIOM_WORLD.md` rather than claimed).
+honestly in `CORTEX_LEDGER_AI_WORLD.md` rather than claimed).
 
-## 6e. Axiom World — fade-back and a real execution pulse (2026-08-26)
+## 6e. Cortex Ledger AI World — fade-back and a real execution pulse (2026-08-26)
 
 Immediate follow-up: closed the other half of §7 and added an honest
 stand-in for §20. `AgentFabricZone` now takes a real `matchedAgentIds`
@@ -520,7 +520,7 @@ real, correctly-timed visualization of the one hop that does exist.
 Clean `tsc`/`build`/`lint`; 106/106 backend tests unaffected (no backend
 changes this pass).
 
-## 6f. Axiom World — a real Human Approval station (2026-08-26)
+## 6f. Cortex Ledger AI World — a real Human Approval station (2026-08-26)
 
 Continuing the build after the user's "proceed with the next step":
 picked the highest-value remaining real gap — §19's Human Approval
@@ -559,7 +559,7 @@ record returned — the exact same calls the component makes. Clean
 `tsc`/`build`/`lint`; 106/106 backend tests unaffected (no backend
 changes this pass).
 
-## 6g. Axiom World — a real, schema-driven Tool Registry panel (2026-08-26)
+## 6g. Cortex Ledger AI World — a real, schema-driven Tool Registry panel (2026-08-26)
 
 Next real gap on "next": §16's Tool Registry. Built `ToolRegistryPanel.tsx`
 to be genuinely schema-driven rather than a hardcoded per-tool UI —
@@ -586,7 +586,7 @@ the high-risk call (`modify_business_record` → a real pending
 the Approval panel polls). Clean `tsc`/`build`/`lint`; 106/106 backend
 tests unaffected (no backend changes this pass).
 
-## 6h. Axiom World — a real crash, finally diagnosed and fixed (2026-08-26)
+## 6h. Cortex Ledger AI World — a real crash, finally diagnosed and fixed (2026-08-26)
 
 For the first time in this whole debugging saga, the user sent real
 screenshots of the actual browser errors instead of "still the error
@@ -594,7 +594,7 @@ message" — and they showed two genuinely different, previously
 undiagnosable bugs, not the CORS/extension mystery assumed from the
 dashboard's earlier symptom.
 
-**Axiom World (localhost:3001)**: a real, unambiguous React crash —
+**Cortex Ledger AI World (localhost:3001)**: a real, unambiguous React crash —
 Next.js's own dev error overlay, not a network failure: `"You are
 calling ReactDOMClient.createRoot() on a container that has already
 been passed to createRoot() before"`, thrown from `ZoneOverlay.tsx`'s
@@ -632,7 +632,7 @@ Verified after the World fix: clean `tsc`/`build`/`lint`, confirmed
 across multiple real page loads. Backend suite unaffected: 106/106
 passing.
 
-## 6i. Axiom World — Tool Registry: a real UX gap, not a broken app (2026-08-26)
+## 6i. Cortex Ledger AI World — Tool Registry: a real UX gap, not a broken app (2026-08-26)
 
 More real screenshots — this time of the Tool Registry panel showing
 "multiple errors." Investigated each one rather than assuming a repeat
@@ -665,7 +665,7 @@ backend changes — both real underlying issues, the JS empty-string
 coercion and Graphify's unpacking crash, are now prevented from being
 reachable rather than patched after the fact).
 
-## 6j. Axiom World — real Hermes routing, and a real proxy timeout bug (2026-08-26)
+## 6j. Cortex Ledger AI World — real Hermes routing, and a real proxy timeout bug (2026-08-26)
 
 Closed §8-9's Hermes gap with real functionality, not just a visual:
 Talk-Back had always routed through `AxiomNativeBackend` only, even
@@ -677,7 +677,7 @@ in the world. Added a real "Run via Hermes" checkbox that threads
 `DelegateRequest.backend` was already optional server-side). Hermes
 also got a real distinct visual in `ExecutionZone` — a thin ring around
 its node — matching CLAUDE.md §8-9's own explicit framing ("Hermes
-should never visually appear to own the Axiom environment. Axiom
+should never visually appear to own the Cortex Ledger AI environment. Cortex Ledger AI
 controls access.").
 
 **Real bug found live while verifying it**: the first real Hermes call
@@ -709,7 +709,7 @@ real completion, `backend_name: "hermes"`), a fast call still works
 normally, and the dashboard's `/v1/tools` still returns the real
 12-tool list through its new route handler.
 
-## 6k. Axiom World — a third real crash, from the new Hermes toggle (2026-08-26)
+## 6k. Cortex Ledger AI World — a third real crash, from the new Hermes toggle (2026-08-26)
 
 Another real screenshot, another genuine React error, immediately after
 the Hermes work landed: `"Cannot update a component (World) while
@@ -748,7 +748,7 @@ all, so neither was at risk; confirmed by grep, not assumed. Clean
 `tsc`/`build`/`lint`; real data flow re-verified live through the proxy.
 Backend suite unaffected (frontend-only change).
 
-## 6l. Axiom World — a real Policy Engine panel (2026-08-26)
+## 6l. Cortex Ledger AI World — a real Policy Engine panel (2026-08-26)
 
 Next real gap: §17's Policy Engine room. Built `PolicyEnginePanel.tsx`
 entirely from data already being fetched elsewhere — no new backend
@@ -769,7 +769,7 @@ Verified: clean `tsc`/`build`/`lint`, the live tier counts confirmed to
 match a fresh `curl` of the real tool registry. 106/106 backend tests
 unaffected (no backend changes this pass).
 
-## 6m. Axiom World — a real MCP interoperability panel (2026-08-26)
+## 6m. Cortex Ledger AI World — a real MCP interoperability panel (2026-08-26)
 
 Next real gap: §18's MCP area. `McpAreaPanel.tsx` is deliberately
 distinct content from Tool Registry (which shows what each tool does)
@@ -780,7 +780,7 @@ same `GET /v1/tools` every other panel already fetches, by reading each
 tool's real `source` field (`"mcp:graphify"` → server `graphify`) rather
 than a new endpoint — verified live: `{"native": 2, "mcp:graphify": 10}`,
 matching the panel's own derivation exactly. Renders as the
-`AXIOM → MCP → [servers]` diagram CLAUDE.md §18 itself describes, with
+`CORTEX LEDGER AI → MCP → [servers]` diagram CLAUDE.md §18 itself describes, with
 real branch nodes per connected server and their real tool counts — a
 single real branch (`graphify`, 10 tools) today, and an honest empty
 state ("No MCP server reachable right now") if none are, rather than
@@ -792,7 +792,7 @@ Talk-Back (bottom-center). Clean `tsc`/`build`/`lint`, live data
 re-verified through the proxy. 106/106 backend tests unaffected (no
 backend changes this pass).
 
-## 6n. Axiom World — real pointer interactivity, not just scroll (2026-08-26)
+## 6n. Cortex Ledger AI World — real pointer interactivity, not just scroll (2026-08-26)
 
 Direct user feedback: "its not reactive or interactive." Real and fair
 — every control surface built so far was an HTML overlay panel; the
@@ -829,7 +829,7 @@ new pointer handlers). 106/106 backend tests unaffected (no backend
 changes this pass). Graphify/Execution zone interactivity is the
 obvious next extension of the same pattern, not yet built.
 
-## 6o. Axiom World — real interactivity extended to the knowledge graph (2026-08-26)
+## 6o. Cortex Ledger AI World — real interactivity extended to the knowledge graph (2026-08-26)
 
 Continuing "next" — extended the same real pointer-interactivity pattern
 from Milestone 6n to `GraphifyZone`. `lib/graphData.server.ts`'s
@@ -863,8 +863,8 @@ un-extended target.
 
 ## 7. Decisions (confirmed with user, 2026-08-25)
 
-1. **Database**: new, independent Supabase project for Axiom OS — not
-   shared with ORVYN-V3. Revisit when Project 2 (ORVYN-on-Axiom) actually
+1. **Database**: new, independent Supabase project for Cortex Ledger AI — not
+   shared with ORVYN-V3. Revisit when Project 2 (Business-Operations-on-Cortex-Ledger-AI) actually
    starts.
 2. **Graphify target repo for the first real test**: `agency-agents` —
    already on disk, real size, and it's the same repo Agent Fabric

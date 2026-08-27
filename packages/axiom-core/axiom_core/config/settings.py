@@ -52,6 +52,12 @@ class AxiomSettings(BaseSettings):
     hermes_bin: str = "hermes"
     hermes_default_model: str = "anthropic/claude-sonnet-5"
 
+    # Milestone 22 (Security — Memory/Tenant Isolation). Comma-separated
+    # "key:owner_id" or "key:owner_id:tenant_id" entries — see
+    # apps/api/axiom_api/auth.py. None means /v1/memory has no
+    # configured caller identities and returns 503, not an open door.
+    api_keys: str | None = None
+
     def model_post_init(self, __context: object) -> None:
         # Prod should never fall back to human-readable console logging.
         if self.environment == "prod" and self.log_format == "console":

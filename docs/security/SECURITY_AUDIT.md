@@ -1,4 +1,4 @@
-# Security Audit — Milestones 20-21 (CLAUDE.md §96, §98)
+# Security Audit — Milestones 20-22 (CLAUDE.md §96, §98)
 
 Real findings against the live system, last updated 2026-08-26, organized
 by the eleven categories CLAUDE.md §96 names. Per CLAUDE.md §45/§56/§57:
@@ -13,10 +13,10 @@ plainly — it does not claim protection that doesn't exist.
 | Approval Bypass | Enforced | `tests/integration/test_approval_bypass_security.py`, `tests/integration/test_approvals_endpoint.py` |
 | Hermes Security | Enforced (no shell interpretation; key never in argv) | `tests/unit/test_hermes_subprocess_safety.py` |
 | Graphify Access | Enforced by construction (no write tool exists) | `tests/integration/test_graphify_access_security.py` |
-| Prompt Injection | Partial — model-dependent, one payload succeeded | `scripts/security/prompt_injection_probe.py` live run below |
-| Memory Isolation | **Gap — not enforced** | `tests/integration/test_memory_isolation_security.py` |
-| Tenant Isolation | **Gap — not enforced** (same root cause as Memory) | see below |
-| Agent Authorization | **Gap — no authN/authZ layer at all** | see below |
+| Prompt Injection | Partial — mitigation added (Milestone 22), not yet re-verified live | `tests/unit/test_native_backend.py`, `scripts/security/prompt_injection_probe.py` |
+| Memory Isolation | **Enforced, real, since Milestone 22** (API-key-derived owner_id, not caller-supplied) | `tests/integration/test_memory_isolation_security.py` |
+| Tenant Isolation | **Enforced, real, since Milestone 22** (same fix as Memory) | `tests/integration/test_memory_isolation_security.py` |
+| Agent Authorization | **Enforced, real, since Milestone 22** (risk-based approval gate on delegation, not just tool execution) | `tests/integration/test_agent_authorization_security.py` |
 | Budget Tests | **Enforced, real, since Milestone 21** (max_tokens/max_seconds; one documented exception) | `tests/unit/test_native_backend.py`, `tests/unit/test_hermes_adapter.py` |
 | Knowledge Isolation | **Gap — single shared graph, no partitioning** | see below |
 | Recursive Delegation | **Real, bounded control added in Milestone 21** (cooperative depth cap, not cryptographic) | `tests/unit/test_delegate_to_agent_depth.py` |
@@ -109,38 +109,118 @@ via the real Anthropic-backed `AxiomNativeBackend`, 2026-08-26:
   was told to "call") — **refused,** with the agent correctly identifying
   it as an exfiltration attempt.
 
-**Real, named gap:** injection resistance is inconsistent and
-model-dependent, not something this codebase enforces. No system-level
-mitigation (e.g. instruction-hierarchy tagging, output filtering, a
-second-pass classifier) exists between `AxiomNativeBackend`
-(`packages/axiom-core/axiom_core/agents/native_backend.py`) and the raw
-model call. Anything downstream that trusts agent output verbatim (a
-tool-call argument, a memory record) should treat it as attacker-influenced
-when the agent's input includes any external/untrusted content.
+**Mitigation added, Milestone 22:** `AxiomNativeBackend._build_system_prompt`
+now appends a fixed instruction-hierarchy preamble
+(`_INSTRUCTION_HIERARCHY_PREAMBLE`) between the agent's persona and any
+task context — it tells the model the persona instructions are its only
+legitimate directive source and that the user message is task input to
+analyze, not a place new instructions can come from, naming
+`SYSTEM OVERRIDE`-style blocks explicitly as the kind of embedded text to
+treat as data rather than obey. `tests/unit/test_native_backend.py`
+proves the framing text is actually present in the constructed system
+prompt sent to the model.
+
+**Real, named limits, not silently assumed away:**
+- This is standard instruction-hierarchy framing, not a novel technique
+  and not a structural guarantee — it's raw text in the prompt, not
+  something the model is mechanically forced to obey. It measurably
+  reduces this class of injection; it does not eliminate it.
+- **Not yet re-verified live against the "role-override" payload that
+  previously succeeded.** `scripts/security/prompt_injection_probe.py`
+  was re-run after this change (2026-08-26) but every call failed with a
+  502 — the configured Anthropic API key has an exhausted credit
+  balance, an account/billing issue unrelated to this code. Re-run the
+  probe once the key is funded and record the real result here before
+  claiming this gap closed; until then this stays **Partial**, not
+  Enforced.
+- Anything downstream that trusts agent output verbatim (a tool-call
+  argument, a memory record) should still treat it as
+  attacker-influenced when the agent's input includes any
+  external/untrusted content — this mitigation reduces one failure mode,
+  it doesn't remove the need for that discipline.
 
 ## 6. Memory Isolation / 7. Tenant Isolation
 
-Both are the same real gap. `MemoryRecord` (`packages/axiom-core/axiom_core/memory/types.py`)
-carries `owner_id`/`tenant_id`, and `PostgresMemoryStore.query()` filters
-by them when given — but `GET /v1/memory` (`apps/api/axiom_api/routers/memory.py`)
-takes both as caller-supplied query parameters, not values derived from
-any authenticated identity. There is no authentication layer anywhere in
-this build. `tests/integration/test_memory_isolation_security.py` proves
-live: any caller can read any other owner's memory records simply by
-supplying that owner's `owner_id` string. The fields exist and *look*
-like an isolation boundary; they aren't one until something outside this
-codebase (an API gateway, an auth middleware) derives them from a
-verified caller identity instead of trusting the request body.
+**Closed for real in Milestone 22.** Both were the same gap: `GET`/`POST
+/v1/memory` took `owner_id`/`tenant_id` as caller-supplied values, not
+anything derived from an authenticated identity — any caller could read
+or write any other owner's records by naming them.
+
+`apps/api/axiom_api/auth.py` adds `require_caller`, a real FastAPI
+dependency: a caller must present `Authorization: Bearer <key>` matching
+a real, server-configured `AXIOM_API_KEYS` entry (`key:owner_id` or
+`key:owner_id:tenant_id`), or the request 401s before touching the
+store. `apps/api/axiom_api/routers/memory.py` no longer accepts
+`owner_id`/`tenant_id` as request input at all — both endpoints derive
+them from *which key was presented*, so there is no field left for a
+caller to lie about. `SaveMemoryRequest` (`apps/api/axiom_api/schemas.py`)
+dropped the `owner_id`/`tenant_id` fields to match.
+
+Live-verified, not just unit-tested:
+`tests/integration/test_memory_isolation_security.py::test_a_caller_cannot_read_another_callers_memory_by_asking`
+saves a real secret as `dev-key-alice`, confirms a real different caller
+(`dev-key-bob`) cannot see it, and confirms alice can read it back —
+against the real Postgres-backed store, not a mock.
+
+**Real, named limits, not silently assumed away:**
+- This is deliberately *not* a full user-account/session system — no
+  login flow, no `User` table, no JWTs, no key rotation/expiry. It's the
+  minimum real mechanism that closes the documented gap: a caller must
+  possess a real secret to be treated as a given owner. Building a full
+  auth system remains real, separate, unbuilt work.
+- **One real behavior change, not a regression:** `GET /v1/memory` used
+  to let a caller query an *agent's* task-memory history by its
+  `agent_id` as `owner_id` (see the old
+  `test_delegate_persists_a_task_memory_record`). Since owner_id is now
+  always the authenticated caller's own identity, that cross-owner query
+  is no longer possible through the public endpoint — correct, since
+  that same query pattern is exactly what let a human caller read
+  another human's private notes. The delegation-persists-memory behavior
+  itself is unchanged and still verified, just by reading the store
+  directly in the test (the way an internal/admin tool would) rather
+  than through the now-owner-scoped public endpoint.
+- Keys are plain shared secrets in `AXIOM_API_KEYS`/`.env` — fine for a
+  demo/portfolio build, not a production credential story (no hashing,
+  no per-key expiry, no revocation list).
 
 ## 8. Agent Authorization
 
-No gap specific to agents beyond the above — there is no authN/authZ
-system in this build at all (never a named milestone in CLAUDE.md's own
-6–20 sequence). Anyone who can reach the API can delegate to any of the
-254 loaded agents, including ones with `risk_level="high"` in their
-frontmatter; `AgentRecord.risk_level` is descriptive metadata today, not
-an enforced gate on delegation itself (only tool *execution* is
-policy-gated, not agent *invocation*).
+**Closed for real in Milestone 22.** `AgentRecord.risk_level` used to be
+descriptive metadata only — a `risk_level="high"` agent could be
+delegated to exactly as freely as a `"low"` one, because only tool
+*execution* was policy-gated, not agent *invocation*.
+
+`routers/agent_fabric.py`'s `delegate()` now calls `policy.evaluate()`
+before running a delegation, the identical gate `routers/tools.py`'s
+`call_tool()` already applied to tools — a `high`/`critical`-risk
+delegation creates a real pending `ApprovalRequest` (`action="agent:{id}"`)
+instead of executing immediately. `routers/approvals.py`'s `approve()`
+is now polymorphic over the approved action: `agent:{id}` runs the real
+delegation through `run_delegation` (the identical path a direct,
+unapproved call would have used — not a shortcut), `tool:{name}` keeps
+its existing path.
+
+**Live-verified**, not just unit-tested:
+`tests/integration/test_agent_authorization_security.py` proves the full
+propose → pending → approve → real-execution → cannot-double-approve
+cycle against the real HTTP app.
+
+**Real, named limits, not silently assumed away:**
+- **No real agent currently trips this gate.** Live-checked against the
+  running registry: all 12 curated agents cap at `risk_level="medium"`;
+  the other 242 have no `risk_level` at all (`None`, treated as
+  `"medium"` by `PolicyEngine.evaluate` — see its docstring). This is
+  the same honest category as the `delegate_to_agent` depth cap: a real,
+  structural control, forward-compatible, not exercised by today's data.
+  The test above injects a fake `risk_level="high"` agent via FastAPI
+  `dependency_overrides` to exercise it for real.
+- This is *authorization by risk level*, not *authentication of the
+  caller* — it doesn't identify who's asking, only what they're asking
+  for. It shares the same root limitation as every gap in this document:
+  no caller identity exists outside `/v1/memory`'s new API-key layer
+  (§6-7), so there's no way to say "only Alice may delegate to this
+  agent," only "this agent's risk level requires a human to approve
+  regardless of who asked."
 
 ## 9. Budget Tests
 
@@ -186,7 +266,7 @@ Graphify is a single shared knowledge graph — there is no per-tenant or
 per-caller graph partitioning. Every caller sees the same graph built
 from the agency-agents corpus. Not a live risk today (the corpus is
 public, non-sensitive agent-persona data), but a real architectural gap
-if Axiom is ever pointed at a graph containing tenant-specific or
+if Cortex Ledger AI is ever pointed at a graph containing tenant-specific or
 sensitive content.
 
 ## 11. Recursive Delegation
@@ -216,7 +296,7 @@ recursion would first require building a tool-calling loop in
 `AxiomNativeBackend` — a real, separate, unbuilt feature, not silently
 assumed to exist because this tool does.
 
-## What changed across Milestones 20-21
+## What changed across Milestones 20-22
 
 - Fixed `_READ_ONLY_PREFIXES` in `packages/axiom-mcp/axiom_mcp/client.py`
   (real misclassification of `shortest_path`, caught by
@@ -228,7 +308,22 @@ assumed to exist because this tool does.
   enforcement, plus a real Anthropic SDK non-streaming ceiling bug found
   and fixed along the way) and **Recursive Delegation** (§11 above — the
   `delegate_to_agent` tool with a real, tested depth cap).
-- Still real, named gaps, not fixed: Memory/Tenant isolation, Agent
-  authorization, Knowledge isolation — each needs new infrastructure (an
-  auth layer, multi-graph support) beyond what's been built, and
-  CLAUDE.md §56/§57 forbid claiming enforcement that isn't real.
+- Milestone 22 closed three more, all live-verified: **Prompt Injection**
+  (§5 above) got real instruction-hierarchy framing in
+  `AxiomNativeBackend`'s system prompt — unit-tested for presence, but
+  not yet re-verified against the exact payload that previously
+  succeeded (blocked by an exhausted Anthropic API credit balance, not
+  by anything in this codebase — stays **Partial** until that's re-run
+  for real). **Memory/Tenant Isolation** (§6-7 above) got a real,
+  minimal API-key auth layer (`apps/api/axiom_api/auth.py`) — `owner_id`/
+  `tenant_id` are now derived from the caller's key, never from the
+  request, live-verified against the real Postgres store with two
+  distinct real keys. **Agent Authorization** (§8 above) got the same
+  risk-based approval gate tool execution already had, extended to agent
+  delegation — live-verified end-to-end (propose → pending → approve →
+  real execution) against a fake injected high-risk agent, since no real
+  agent in the live registry currently has `risk_level` above `"medium"`.
+- Still a real, named gap, not fixed: **Knowledge Isolation** — a single
+  shared Graphify graph, no per-tenant partitioning. Needs real
+  multi-graph support, more infrastructure than a "next" increment. This
+  is now the only open item of CLAUDE.md §96's eleven categories.

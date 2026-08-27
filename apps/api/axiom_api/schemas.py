@@ -116,11 +116,12 @@ class DecideApprovalRequest(BaseModel):
 
 
 class SaveMemoryRequest(BaseModel):
+    # owner_id/tenant_id are deliberately NOT fields here — Milestone 22
+    # derives them from the authenticated caller (apps/api/axiom_api/auth.py),
+    # never from the request body. See docs/security/SECURITY_AUDIT.md §6-7.
     scope: str = Field(pattern="^(task|working|long_term|business_knowledge)$")
-    owner_id: str
     content: str
     source: str
-    tenant_id: str | None = None
     permissions: list[str] = []
     retention_days: int | None = None
 
