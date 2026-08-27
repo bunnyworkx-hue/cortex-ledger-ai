@@ -8,6 +8,7 @@ import { api, ApiError, type AgentFabricStatus } from "@/lib/api";
 const WORLD_URL = process.env.NEXT_PUBLIC_WORLD_URL ?? "http://localhost:3001";
 const CONTACT_EMAIL = "thegordontree@gmail.com";
 const RESUME_URL = "/turon-gordon-resume.pdf";
+const GITHUB_URL = "https://github.com/bunnyworkx-hue/cortex-ledger-ai";
 
 // This is an employer-facing engineering portfolio, not a customer
 // funnel — every claim below is checked against what's actually running
@@ -240,6 +241,15 @@ export default function Landing() {
               <span className="text-xs text-zinc-500 dark:text-zinc-400">{item.detail}</span>
             </Link>
           ))}
+          <a
+            href={GITHUB_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex flex-col rounded-md border border-accent/40 px-4 py-3 text-sm transition-colors hover:border-accent hover:bg-zinc-100 dark:hover:bg-zinc-800"
+          >
+            <span className="font-semibold text-accent">View the source on GitHub</span>
+            <span className="text-xs text-zinc-500 dark:text-zinc-400">the real commit history, not just the live app</span>
+          </a>
         </div>
       </section>
 
