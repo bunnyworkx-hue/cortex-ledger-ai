@@ -21,7 +21,7 @@ export default function Executions() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Execution Trace</h1>
         <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          Every Task → Backend → Result run recorded by Axiom, success or failure.
+          Every Task → Backend → Result run recorded by Cortex Ledger AI, success or failure.
         </p>
       </div>
 

@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 // The browser calls this server's own same-origin /api/* path, which
-// app/api/[...path]/route.ts proxies server-side to the real Axiom API
+// app/api/[...path]/route.ts proxies server-side to the real Cortex Ledger AI API
 // (AXIOM_API_ORIGIN) — same-origin to avoid a real cross-origin fetch
 // failure hit live (see that route handler's comment for the full
 // story, and for why it's a real route handler rather than

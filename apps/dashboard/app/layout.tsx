@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Axiom OS",
-  description: "Axiom OS operations dashboard",
+  title: "Cortex Ledger AI",
+  description: "Cortex Ledger AI operations dashboard",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -24,9 +24,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50">
+      <body className="min-h-full flex flex-col font-sans">
         <Nav />
         <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-8">{children}</main>
+        <footer className="border-t border-zinc-200 px-6 py-6 text-center text-xs text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
+          Created by Turon Gordon
+        </footer>
       </body>
     </html>
   );

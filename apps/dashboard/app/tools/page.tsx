@@ -20,7 +20,7 @@ export default function Tools() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Tool Registry</h1>
         <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          Every tool Axiom has discovered or registered — auto-discovered MCP servers and native
+          Every tool Cortex Ledger AI has discovered or registered — auto-discovered MCP servers and native
           tools alike.
         </p>
       </div>
