@@ -1,21 +1,16 @@
 "use client";
 
 import { Instance, Instances, Text } from "@react-three/drei";
-import { useMemo, useState } from "react";
+import { useMemo, useRef } from "react";
+import { useFrame } from "@react-three/fiber";
 import type { ThreeEvent } from "@react-three/fiber";
-import { agentPositions } from "@/lib/layout";
+import type { Dispatch, SetStateAction } from "react";
+import type { Group } from "three";
+import { agentPositions, divisionColorMap } from "@/lib/layout";
 import { ZONES } from "@/lib/zones";
 import type { AgentRecord } from "@/lib/api";
 
 const CENTER = ZONES[1].center;
-
-// A restrained, division-distinct palette (not a rainbow) — enough hue
-// separation to read as "different divisions" without turning the
-// cluster into noise.
-const DIVISION_COLOR = [
-  "#7C86EA", "#6FC7C2", "#E0A860", "#D287A6", "#8FBF6E", "#8DA3D6",
-  "#C98F6B", "#6FB0D8", "#B491DD", "#8FC79A", "#D6A5D0", "#7FA8B8",
-];
 
 const ACTIVE_COLOR = "#F5C24B";
 const HOVER_COLOR = "#FFFFFF";
@@ -25,25 +20,29 @@ export function AgentFabricZone({
   agents,
   activeAgentIds,
   matchedAgentIds,
+  hoveredAgentId,
+  onHoverAgent,
   onSelectAgent,
 }: {
   agents: AgentRecord[];
   activeAgentIds: Set<string>;
   matchedAgentIds: Set<string>;
+  hoveredAgentId: string | null;
+  onHoverAgent: Dispatch<SetStateAction<string | null>>;
   onSelectAgent: (agent: AgentRecord) => void;
 }) {
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const hoveredId = hoveredAgentId;
+  const cluster = useRef<Group>(null);
+  useFrame((_, delta) => {
+    if (cluster.current) cluster.current.rotation.y += delta * 0.06;
+  });
 
   const divisions = useMemo(() => {
     const counts = new Map<string, number>();
     for (const agent of agents) counts.set(agent.division, (counts.get(agent.division) ?? 0) + 1);
     return [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([d]) => d);
   }, [agents]);
-  const divisionColor = useMemo(() => {
-    const map = new Map<string, string>();
-    divisions.forEach((d, i) => map.set(d, DIVISION_COLOR[i % DIVISION_COLOR.length]));
-    return map;
-  }, [divisions]);
+  const divisionColor = useMemo(() => divisionColorMap(agents), [agents]);
   const positions = useMemo(() => agentPositions(agents), [agents]);
   const byId = useMemo(() => new Map(agents.map((a) => [a.agent_id, a])), [agents]);
 
@@ -76,6 +75,7 @@ export function AgentFabricZone({
           : "loading live registry…"}
       </Text>
 
+      <group ref={cluster}>
       <Instances limit={Math.max(agents.length, 1)}>
         <sphereGeometry args={[0.032, 8, 8]} />
         <meshStandardMaterial roughness={0.4} />
@@ -113,12 +113,12 @@ export function AgentFabricZone({
               scale={scale}
               onPointerOver={(e: ThreeEvent<PointerEvent>) => {
                 e.stopPropagation();
-                setHoveredId(agent.agent_id);
+                onHoverAgent(agent.agent_id);
                 document.body.style.cursor = "pointer";
               }}
               onPointerOut={(e: ThreeEvent<PointerEvent>) => {
                 e.stopPropagation();
-                setHoveredId((prev) => (prev === agent.agent_id ? null : prev));
+                onHoverAgent((prev) => (prev === agent.agent_id ? null : prev));
                 document.body.style.cursor = "auto";
               }}
               onClick={(e: ThreeEvent<MouseEvent>) => {
@@ -151,6 +151,7 @@ export function AgentFabricZone({
           </Text>
         );
       })}
+      </group>
     </group>
   );
 }

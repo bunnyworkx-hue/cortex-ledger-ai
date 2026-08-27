@@ -25,7 +25,7 @@ export function SelectedNodeCard({ node, onClose }: { node: GraphNode; onClose: 
         setResult({ text: text.slice(0, 500), isError: response.is_error });
       }
     } catch (err) {
-      setResult({ text: err instanceof ApiError ? err.message : "Could not reach the Axiom API", isError: true });
+      setResult({ text: err instanceof ApiError ? err.message : "Could not reach the Cortex Ledger AI API", isError: true });
     } finally {
       setBusy(false);
     }

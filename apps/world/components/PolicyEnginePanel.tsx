@@ -32,7 +32,7 @@ export function PolicyEnginePanel() {
         if (!cancelled) setTools(list);
       })
       .catch((err) => {
-        if (!cancelled) setError(err instanceof ApiError ? err.message : "Could not reach the Axiom API");
+        if (!cancelled) setError(err instanceof ApiError ? err.message : "Could not reach the Cortex Ledger AI API");
       });
     return () => {
       cancelled = true;

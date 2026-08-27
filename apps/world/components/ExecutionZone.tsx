@@ -1,8 +1,8 @@
 "use client";
 
 import { Text } from "@react-three/drei";
-import { useFrame } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { useFrame, type ThreeEvent } from "@react-three/fiber";
+import { useMemo, useRef, useState } from "react";
 import type { Mesh } from "three";
 import { ZONES } from "@/lib/zones";
 
@@ -10,19 +10,25 @@ const CENTER = ZONES[3].center;
 
 type BackendGroup = { label: string; backends: Record<string, string>; color: string; radius: number };
 
+export type SelectedBackend = { name: string; group: string; status: string; isHermes: boolean };
+
 export function ExecutionZone({
   modelBackends,
   agentBackends,
   knowledgeBackends,
+  onSelectBackend,
 }: {
   modelBackends: Record<string, string>;
   agentBackends: Record<string, string>;
   knowledgeBackends: Record<string, string>;
+  onSelectBackend: (backend: SelectedBackend) => void;
 }) {
   const core = useRef<Mesh>(null);
   useFrame((_, delta) => {
     if (core.current) core.current.rotation.y += delta * 0.15;
   });
+
+  const [hoveredKey, setHoveredKey] = useState<string | null>(null);
 
   const groups: BackendGroup[] = useMemo(
     () => [
@@ -33,13 +39,32 @@ export function ExecutionZone({
     [modelBackends, agentBackends, knowledgeBackends]
   );
 
+  const allBackends = useMemo(
+    () =>
+      groups.flatMap((group) =>
+        Object.entries(group.backends).map(([name, status]) => ({
+          key: `${group.label}-${name}`,
+          name,
+          status,
+          group: group.label,
+        }))
+      ),
+    [groups]
+  );
+  const hoveredBackend = useMemo(
+    () => allBackends.find((b) => b.key === hoveredKey) ?? null,
+    [allBackends, hoveredKey]
+  );
+
   return (
     <group position={CENTER}>
       <Text position={[0, 3, 0]} fontSize={0.34} color="#eef0fb" anchorX="center" letterSpacing={0.03}>
         EXECUTION ENGINE
       </Text>
       <Text position={[0, 2.5, 0]} fontSize={0.13} color="#8f95bd" anchorX="center">
-        real registered backends, read live from /v1/models, /v1/agents, /v1/knowledge
+        {hoveredBackend
+          ? `${hoveredBackend.name} · ${hoveredBackend.group} · ${hoveredBackend.status} — click to inspect`
+          : "real registered backends, read live from /v1/models, /v1/agents, /v1/knowledge"}
       </Text>
 
       <mesh ref={core}>
@@ -56,25 +81,43 @@ export function ExecutionZone({
           const configured = status === "configured";
           // Hermes is a real, distinct external agent runtime
           // (packages/axiom-hermes, a subprocess CLI call — not part of
-          // Axiom's own execution path). CLAUDE.md §8-9's own framing:
-          // "Hermes should never visually appear to own the Axiom
-          // environment. Axiom controls access." — the gate ring is that
+          // Cortex Ledger AI's own execution path). CLAUDE.md §8-9's own framing:
+          // "Hermes should never visually appear to own the Cortex Ledger AI
+          // environment. Cortex Ledger AI controls access." — the gate ring is that
           // boundary made visible, not decoration.
           const isHermes = name === "hermes";
+          const key = `${group.label}-${name}`;
+          const hovered = hoveredKey === key;
           return (
-            <group key={`${group.label}-${name}`} position={[x, 0, z]}>
+            <group key={key} position={[x, 0, z]}>
               {isHermes && (
                 <mesh rotation={[Math.PI / 2, 0, 0]}>
                   <torusGeometry args={[0.27, 0.008, 8, 48]} />
                   <meshBasicMaterial color="#E0A860" transparent opacity={configured ? 0.6 : 0.2} />
                 </mesh>
               )}
-              <mesh>
+              <mesh
+                scale={hovered ? 1.35 : 1}
+                onPointerOver={(e: ThreeEvent<PointerEvent>) => {
+                  e.stopPropagation();
+                  setHoveredKey(key);
+                  document.body.style.cursor = "pointer";
+                }}
+                onPointerOut={(e: ThreeEvent<PointerEvent>) => {
+                  e.stopPropagation();
+                  setHoveredKey((prev) => (prev === key ? null : prev));
+                  document.body.style.cursor = "auto";
+                }}
+                onClick={(e: ThreeEvent<MouseEvent>) => {
+                  e.stopPropagation();
+                  onSelectBackend({ name, group: group.label, status, isHermes });
+                }}
+              >
                 <sphereGeometry args={[0.16, 16, 16]} />
                 <meshStandardMaterial
-                  color={group.color}
+                  color={hovered ? "#FFFFFF" : group.color}
                   emissive={configured ? group.color : "#3a3d4d"}
-                  emissiveIntensity={configured ? 0.55 : 0.15}
+                  emissiveIntensity={hovered ? 0.9 : configured ? 0.55 : 0.15}
                   roughness={0.35}
                 />
               </mesh>

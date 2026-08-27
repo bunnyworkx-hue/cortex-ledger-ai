@@ -28,7 +28,7 @@ export function ToolRegistryPanel() {
         if (!cancelled) setTools(list);
       })
       .catch((err) => {
-        if (!cancelled) setError(err instanceof ApiError ? err.message : "Could not reach the Axiom API");
+        if (!cancelled) setError(err instanceof ApiError ? err.message : "Could not reach the Cortex Ledger AI API");
       });
     return () => {
       cancelled = true;
@@ -101,7 +101,7 @@ export function ToolRegistryPanel() {
     } catch (err) {
       setResults((prev) => ({
         ...prev,
-        [tool.name]: { text: err instanceof ApiError ? err.message : "Could not reach the Axiom API", isError: true, pending: false },
+        [tool.name]: { text: err instanceof ApiError ? err.message : "Could not reach the Cortex Ledger AI API", isError: true, pending: false },
       }));
     } finally {
       setBusy((prev) => {

@@ -27,8 +27,8 @@ const centerZ = (index: number) => -index * SPACING;
 export const ZONES: Zone[] = [
   {
     id: "entry",
-    label: "AXIOM OS",
-    eyebrow: "AUTONOMOUS EXECUTION — BUILT FOR BUSINESS OPERATIONS",
+    label: "CORTEX LEDGER AI",
+    eyebrow: "EVERY DECISION TRACED. EVERY AGENT ACCOUNTABLE.",
     start: 0,
     end: 0.16,
     center: [0, 0, centerZ(0)],

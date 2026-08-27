@@ -117,7 +117,7 @@ export const api = {
       body: JSON.stringify({ decided_by: decidedBy }),
     }),
   // Proposes a real high-risk action (the same demo mutating tool the
-  // rest of Axiom OS uses to prove the approval gate — see
+  // rest of Cortex Ledger AI uses to prove the approval gate — see
   // apps/api/axiom_api/native_tools.py) so the world can demonstrate the
   // full real propose -> approve -> execute loop, not just review
   // approvals that happened to already exist.

@@ -24,7 +24,7 @@ export function McpAreaPanel() {
         if (!cancelled) setTools(list);
       })
       .catch((err) => {
-        if (!cancelled) setError(err instanceof ApiError ? err.message : "Could not reach the Axiom API");
+        if (!cancelled) setError(err instanceof ApiError ? err.message : "Could not reach the Cortex Ledger AI API");
       });
     return () => {
       cancelled = true;
@@ -51,7 +51,7 @@ export function McpAreaPanel() {
       {open && (
         <div className="mcp-area-panel">
           <div className="mcp-area-head">
-            Axiom → MCP → external servers. Real connected servers and how
+            Cortex Ledger AI → MCP → external servers. Real connected servers and how
             many real tools each contributed on discovery.
           </div>
           {error && <div className="mcp-area-error">{error}</div>}
@@ -60,7 +60,7 @@ export function McpAreaPanel() {
           {tools && (
             <>
               <div className="mcp-diagram">
-                <div className="mcp-node mcp-node-axiom">AXIOM</div>
+                <div className="mcp-node mcp-node-axiom">CORTEX LEDGER AI</div>
                 <div className="mcp-arrow">↓</div>
                 <div className="mcp-node mcp-node-mcp">MCP</div>
                 <div className="mcp-branches">
@@ -79,7 +79,7 @@ export function McpAreaPanel() {
                 <div className="mcp-area-empty">No MCP server reachable right now — start one via `./scripts/dev/graphify-serve.sh`.</div>
               )}
               <div className="mcp-area-native">
-                {nativeCount} native tool{nativeCount === 1 ? "" : "s"} bypass MCP entirely (built directly into Axiom).
+                {nativeCount} native tool{nativeCount === 1 ? "" : "s"} bypass MCP entirely (built directly into Cortex Ledger AI).
               </div>
             </>
           )}

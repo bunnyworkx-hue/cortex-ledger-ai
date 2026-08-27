@@ -1,9 +1,11 @@
 "use client";
 
 import { Instance, Instances, Text } from "@react-three/drei";
-import { useMemo, useState } from "react";
+import { useMemo, useRef } from "react";
+import { useFrame } from "@react-three/fiber";
 import type { ThreeEvent } from "@react-three/fiber";
-import { BufferAttribute, BufferGeometry, Color } from "three";
+import type { Dispatch, SetStateAction } from "react";
+import { BufferAttribute, BufferGeometry, Color, type Group } from "three";
 import { graphNodePositions } from "@/lib/layout";
 import { ZONES } from "@/lib/zones";
 import type { GraphNode, GraphSnapshot } from "@/lib/graphData.server";
@@ -16,12 +18,20 @@ const HOVER_COLOR = "#FFFFFF";
 
 export function GraphifyZone({
   graph,
+  hoveredNodeId,
+  onHoverNode,
   onSelectNode,
 }: {
   graph: GraphSnapshot;
+  hoveredNodeId: string | null;
+  onHoverNode: Dispatch<SetStateAction<string | null>>;
   onSelectNode: (node: GraphNode) => void;
 }) {
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const hoveredId = hoveredNodeId;
+  const cluster = useRef<Group>(null);
+  useFrame((_, delta) => {
+    if (cluster.current) cluster.current.rotation.y += delta * 0.06;
+  });
   const positions = useMemo(() => graphNodePositions(graph.nodes), [graph.nodes]);
   const byId = useMemo(() => new Map(graph.nodes.map((n) => [n.id, n])), [graph.nodes]);
   const hoveredNode = hoveredId ? byId.get(hoveredId) : null;
@@ -58,6 +68,7 @@ export function GraphifyZone({
 
       {graph.available && (
         <>
+          <group ref={cluster}>
           <lineSegments geometry={edgeGeometry}>
             <lineBasicMaterial vertexColors transparent opacity={0.35} />
           </lineSegments>
@@ -75,12 +86,12 @@ export function GraphifyZone({
                   scale={hovered ? 2.2 : 1}
                   onPointerOver={(e: ThreeEvent<PointerEvent>) => {
                     e.stopPropagation();
-                    setHoveredId(node.id);
+                    onHoverNode(node.id);
                     document.body.style.cursor = "pointer";
                   }}
                   onPointerOut={(e: ThreeEvent<PointerEvent>) => {
                     e.stopPropagation();
-                    setHoveredId((prev) => (prev === node.id ? null : prev));
+                    onHoverNode((prev) => (prev === node.id ? null : prev));
                     document.body.style.cursor = "auto";
                   }}
                   onClick={(e: ThreeEvent<MouseEvent>) => {
@@ -91,6 +102,7 @@ export function GraphifyZone({
               );
             })}
           </Instances>
+          </group>
 
           <Text position={[-2.4, -2.9, 0]} fontSize={0.09} color={"#6FC7C2"} anchorX="left">
             ── EXTRACTED (from source)

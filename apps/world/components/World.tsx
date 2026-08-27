@@ -11,8 +11,11 @@ import { ZoneOverlay } from "./ZoneOverlay";
 import { ZoneOverlaySync } from "./ZoneOverlaySync";
 import { EntryZone } from "./EntryZone";
 import { AgentFabricZone } from "./AgentFabricZone";
+import { AgentListPanel } from "./AgentListPanel";
 import { GraphifyZone } from "./GraphifyZone";
-import { ExecutionZone } from "./ExecutionZone";
+import { GraphNodeListPanel } from "./GraphNodeListPanel";
+import { ExecutionZone, type SelectedBackend } from "./ExecutionZone";
+import { SelectedBackendCard } from "./SelectedBackendCard";
 import { ExecutionPulse } from "./ExecutionPulse";
 import { TalkBack } from "./TalkBack";
 import { ApprovalStation } from "./ApprovalStation";
@@ -32,20 +35,36 @@ export function World({ graph }: { graph: GraphSnapshot }) {
   const [liveError, setLiveError] = useState<string | null>(null);
   const [activeAgentIds, setActiveAgentIds] = useState<Set<string>>(new Set());
   const [matchedAgentIds, setMatchedAgentIds] = useState<Set<string>>(new Set());
+  const [hoveredAgentId, setHoveredAgentId] = useState<string | null>(null);
+  const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
   const [executing, setExecuting] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState<AgentRecord | null>(null);
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
+  const [selectedBackend, setSelectedBackend] = useState<SelectedBackend | null>(null);
 
   // One inspection target at a time — selecting a node while an agent
   // card is open (or vice versa) would otherwise render both in the
   // same right-center screen position simultaneously.
   function selectAgent(agent: AgentRecord | null) {
     setSelectedAgent(agent);
-    if (agent) setSelectedNode(null);
+    if (agent) {
+      setSelectedNode(null);
+      setSelectedBackend(null);
+    }
   }
   function selectNode(node: GraphNode | null) {
     setSelectedNode(node);
-    if (node) setSelectedAgent(null);
+    if (node) {
+      setSelectedAgent(null);
+      setSelectedBackend(null);
+    }
+  }
+  function selectBackend(backend: SelectedBackend | null) {
+    setSelectedBackend(backend);
+    if (backend) {
+      setSelectedAgent(null);
+      setSelectedNode(null);
+    }
   }
 
   useEffect(() => {
@@ -59,7 +78,7 @@ export function World({ graph }: { graph: GraphSnapshot }) {
         setKnowledge(k);
       })
       .catch((err) => {
-        if (!cancelled) setLiveError(err instanceof Error ? err.message : "Failed to reach the Axiom API");
+        if (!cancelled) setLiveError(err instanceof Error ? err.message : "Failed to reach the Cortex Ledger AI API");
       });
     return () => {
       cancelled = true;
@@ -92,13 +111,21 @@ export function World({ graph }: { graph: GraphSnapshot }) {
               agents={roster}
               activeAgentIds={activeAgentIds}
               matchedAgentIds={matchedAgentIds}
+              hoveredAgentId={hoveredAgentId}
+              onHoverAgent={setHoveredAgentId}
               onSelectAgent={selectAgent}
             />
-            <GraphifyZone graph={graph} onSelectNode={selectNode} />
+            <GraphifyZone
+              graph={graph}
+              hoveredNodeId={hoveredNodeId}
+              onHoverNode={setHoveredNodeId}
+              onSelectNode={selectNode}
+            />
             <ExecutionZone
               modelBackends={models?.backends ?? {}}
               agentBackends={agentBackends?.backends ?? {}}
               knowledgeBackends={knowledge?.backends ?? {}}
+              onSelectBackend={selectBackend}
             />
             <ExecutionPulse active={executing} />
           </Suspense>
@@ -106,6 +133,21 @@ export function World({ graph }: { graph: GraphSnapshot }) {
       </Canvas>
 
       <ZoneOverlay />
+      <AgentListPanel
+        agents={roster}
+        activeAgentIds={activeAgentIds}
+        matchedAgentIds={matchedAgentIds}
+        hoveredAgentId={hoveredAgentId}
+        onHoverAgent={setHoveredAgentId}
+        onSelectAgent={selectAgent}
+      />
+      <GraphNodeListPanel
+        nodes={graph.nodes}
+        available={graph.available}
+        hoveredNodeId={hoveredNodeId}
+        onHoverNode={setHoveredNodeId}
+        onSelectNode={selectNode}
+      />
       <TalkBack
         onActiveAgentsChange={setActiveAgentIds}
         onMatchedAgentsChange={setMatchedAgentIds}
@@ -117,6 +159,7 @@ export function World({ graph }: { graph: GraphSnapshot }) {
       <McpAreaPanel />
       {selectedAgent && <SelectedAgentCard agent={selectedAgent} onClose={() => setSelectedAgent(null)} />}
       {selectedNode && <SelectedNodeCard node={selectedNode} onClose={() => setSelectedNode(null)} />}
+      {selectedBackend && <SelectedBackendCard backend={selectedBackend} onClose={() => setSelectedBackend(null)} />}
     </div>
   );
 }

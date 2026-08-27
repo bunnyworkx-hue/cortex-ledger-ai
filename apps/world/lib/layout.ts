@@ -55,6 +55,24 @@ export function agentPositions(
   return positions;
 }
 
+// Same restrained, division-distinct palette used everywhere a division
+// needs a color — the 3D point cloud and the side roster list both call
+// divisionColorMap so a division always reads as the same color in both
+// places, rather than two independent color assignments drifting apart.
+export const DIVISION_COLOR = [
+  "#7C86EA", "#6FC7C2", "#E0A860", "#D287A6", "#8FBF6E", "#8DA3D6",
+  "#C98F6B", "#6FB0D8", "#B491DD", "#8FC79A", "#D6A5D0", "#7FA8B8",
+];
+
+export function divisionColorMap(agents: { division: string }[]): Map<string, string> {
+  const counts = new Map<string, number>();
+  for (const agent of agents) counts.set(agent.division, (counts.get(agent.division) ?? 0) + 1);
+  const divisions = [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([d]) => d);
+  const map = new Map<string, string>();
+  divisions.forEach((d, i) => map.set(d, DIVISION_COLOR[i % DIVISION_COLOR.length]));
+  return map;
+}
+
 /**
  * Places graph nodes by real community id: each community gets its own
  * cluster center arranged in a ring, with member nodes jittered around

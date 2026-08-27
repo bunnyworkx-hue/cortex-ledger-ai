@@ -1,11 +1,11 @@
-# Axiom World
+# Cortex Ledger AI World
 
-`apps/world` — a real, scroll-driven 3D operations view of Axiom OS,
+`apps/world` — a real, scroll-driven 3D operations view of Cortex Ledger AI,
 live-wired to the running API. Not a mockup and not built on scroll-world
 (see `docs/scroll-word/SCROLL_WORD_AUDIT.md` for why that tool turned out
 to be the wrong fit — it's a pre-rendered video generator, not an
 interactive engine, and this spec needs live interactivity throughout).
-Built directly with react-three-fiber + drei on top of the real Axiom
+Built directly with react-three-fiber + drei on top of the real Cortex Ledger AI
 API instead.
 
 ## Run it
@@ -87,7 +87,7 @@ explicit 130s timeout instead, past `HermesBackend`'s own 120s default.
 - **Human Approval station** (§19, CLAUDE.md §64's Sixth Demo) —
   `ApprovalStation` is a real, working panel, not a mockup: "Propose test
   action" calls the real `POST /v1/tools/modify_business_record/call`
-  (the same demo high-risk tool the rest of Axiom OS uses), which the
+  (the same demo high-risk tool the rest of Cortex Ledger AI uses), which the
   real Policy Engine genuinely refuses to run, returning a real pending
   `approval_id`. The panel polls `GET /v1/approvals` every 6s and lists
   every real pending approval (21 in the live system as of this build —
@@ -108,12 +108,12 @@ explicit 130s timeout instead, past `HermesBackend`'s own 120s default.
 - **Real Hermes routing** (§8-9) — Talk-Back's "Run via Hermes" checkbox
   threads `backend: "hermes"` through the same real `delegate()` call,
   which reaches the real `HermesBackend` (a genuine subprocess `hermes`
-  CLI call, ~10-35s real overhead, not Axiom's native path). Verified
+  CLI call, ~10-35s real overhead, not Cortex Ledger AI's native path). Verified
   live: `sales/sales-deal-strategist` via Hermes returned a real
   completion with `backend_name: "hermes"`. Hermes's node in the
   Execution Engine zone renders with a distinct ring, marking it as an
   external, gated runtime per CLAUDE.md §8-9's own framing ("Hermes
-  should never visually appear to own the Axiom environment").
+  should never visually appear to own the Cortex Ledger AI environment").
 - **Policy Engine panel** (§17) — `PolicyEnginePanel` states the one
   real rule every approval's own `reason` text already spells out in
   words (risk at or above the real configured threshold, `"high"`,
@@ -123,7 +123,7 @@ explicit 130s timeout instead, past `HermesBackend`'s own 120s default.
   backend endpoint needed, since every number it shows was already being
   fetched by Tool Registry.
 - **MCP interoperability panel** (§18) — `McpAreaPanel` renders the real
-  `AXIOM → MCP → [servers]` diagram CLAUDE.md §18 itself describes, with
+  `CORTEX LEDGER AI → MCP → [servers]` diagram CLAUDE.md §18 itself describes, with
   a real branch node per connected MCP server and how many real tools it
   contributed on discovery (derived from `GET /v1/tools`'s `source`
   field, e.g. `"mcp:graphify"` → server `graphify`, 10 tools — verified
@@ -150,8 +150,18 @@ explicit 130s timeout instead, past `HermesBackend`'s own 120s default.
   the real graph, through the same generic tool-caller Tool Registry
   uses. Verified live: querying neighbors of the real `RecordingContext`
   node returned its real callers/callees with real
-  `source_file:source_location`. Execution zone interactivity is the one
-  remaining un-extended target.
+  `source_file:source_location`.
+
+  Extended to the Execution Engine zone last, closing the pattern: hovering
+  a real backend sphere (Model Gateway / Agent Backends / Knowledge
+  Gateway) brightens it and updates the zone's subtitle with its real
+  name/group/status; clicking opens `SelectedBackendCard`. Deliberately
+  informational only, not another action button — unlike agents
+  (`delegate()`) and graph nodes (`get_neighbors`), there's no
+  per-backend endpoint to call; `/v1/models`, `/v1/agents`, and
+  `/v1/knowledge` only ever return the aggregate name→status map this
+  card is already built from, so it doesn't invent an action that
+  doesn't exist.
 
 ## What's honestly not built
 
@@ -165,7 +175,7 @@ not silently assumed:
   itself is now real and working, not just present: Talk-Back's "Run via
   Hermes" checkbox actually routes a real `delegate()` call through the
   real `HermesBackend` (a real subprocess `hermes` CLI call, not
-  Axiom's native path), and its node in the Execution Engine zone gets a
+  Cortex Ledger AI's native path), and its node in the Execution Engine zone gets a
   distinct visual ring marking it as an external, gated runtime. What's
   still not built is the dedicated multi-step gateway *sequence*
   animation (request → authorization → budget → risk → approval →
@@ -181,18 +191,30 @@ not silently assumed:
   itself ("do not implement voice unless the existing architecture
   supports it cleanly... text talk-back is mandatory for MVP"). Text
   only.
-- **ORVYN destination** (§31) — Human Approval (§19), Tool Registry
+- **Business Operations destination** (§31) — Human Approval (§19), Tool Registry
   (§16), Policy Engine (§17), and MCP (§18) are all now real and working
-  (see above). ORVYN itself isn't a real project yet — see
+  (see above). Business Operations itself isn't a real project yet — see
   `docs/IMPLEMENTATION_PLAN.md` §7's decision to defer it entirely —
   so there's nothing real to build a destination toward.
-- **Execution zone pointer interactivity** — Agent Fabric and Knowledge
-  Fabric zones both have real hover/click (see above); the Execution
-  zone's backend spheres are still purely visual, not yet wired to the
-  same real pointer-event pattern.
-- **Mobile fallback, LOD/instancing tuning beyond drei's `Instances`
-  defaults, formal security testing pass** (§27-28, Phase 14-15) — not
-  done.
+- **LOD/instancing tuning beyond drei's `Instances` defaults, formal
+  security testing pass** (§27-28, Phase 14-15) — not done.
+
+One real mobile bug is fixed, not the full §27 scope: `AgentListPanel`
+and `GraphNodeListPanel` both default *open* on desktop (deliberately —
+they exist to compensate for their 3D clusters spinning continuously),
+but at a real phone width there isn't room for two persistent side
+panels plus Talk-Back without them overlapping. `lib/useOpenByDefault.ts`
+now defaults them closed under a `767px` media query instead, via
+`useSyncExternalStore` rather than a `useEffect`+`setState` mount check —
+the latter is a real anti-pattern (an unconditional `setState` in an
+effect forces an extra synchronous render, and the React Compiler's own
+`react-hooks/set-state-in-effect` lint rule caught it), and a naive
+`useState(() => window.innerWidth < N)` initializer would read `window`
+during the server render and mismatch the client's first hydration pass.
+Every panel's width was already responsive (`min(Npx, Nvw)` throughout,
+predating this pass) — the overlap was the one real gap. Touch-gesture
+tuning, viewport-driven LOD, and a genuine phone-in-hand verification
+pass are not done.
 
 ## A real, honest UX finding from building this
 

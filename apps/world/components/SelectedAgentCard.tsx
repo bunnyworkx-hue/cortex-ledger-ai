@@ -27,7 +27,7 @@ export function SelectedAgentCard({ agent, onClose }: { agent: AgentRecord; onCl
         isError: false,
       });
     } catch (err) {
-      setResult({ text: err instanceof ApiError ? err.message : "Could not reach the Axiom API", isError: true });
+      setResult({ text: err instanceof ApiError ? err.message : "Could not reach the Cortex Ledger AI API", isError: true });
     } finally {
       setBusy(false);
     }

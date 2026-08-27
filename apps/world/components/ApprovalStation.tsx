@@ -7,7 +7,7 @@ import { api, ApiError, type Approval } from "@/lib/api";
 // actions genuinely stop and wait for a human here — nothing in this
 // panel is simulated. "Propose test action" hits the real
 // modify_business_record tool (the same demo mutating tool the rest of
-// Axiom OS uses to prove the gate), which the Policy Engine really does
+// Cortex Ledger AI uses to prove the gate), which the Policy Engine really does
 // refuse to run until Approve is clicked below, which really does call
 // POST /v1/approvals/{id}/approve and only then executes it.
 export function ApprovalStation() {
@@ -24,7 +24,7 @@ export function ApprovalStation() {
       setApprovals(list);
       setError(null);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Could not reach the Axiom API");
+      setError(err instanceof ApiError ? err.message : "Could not reach the Cortex Ledger AI API");
     }
   }
 
@@ -40,7 +40,7 @@ export function ApprovalStation() {
           setError(null);
         }
       } catch (err) {
-        if (!cancelled) setError(err instanceof ApiError ? err.message : "Could not reach the Axiom API");
+        if (!cancelled) setError(err instanceof ApiError ? err.message : "Could not reach the Cortex Ledger AI API");
       }
     }
 
@@ -67,7 +67,7 @@ export function ApprovalStation() {
         setLastAction(`Executed immediately: ${JSON.stringify(result.content)}`);
       }
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Could not reach the Axiom API");
+      setError(err instanceof ApiError ? err.message : "Could not reach the Cortex Ledger AI API");
     } finally {
       setProposing(false);
     }
@@ -85,7 +85,7 @@ export function ApprovalStation() {
       }
       await refresh();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Could not reach the Axiom API");
+      setError(err instanceof ApiError ? err.message : "Could not reach the Cortex Ledger AI API");
     } finally {
       setBusyIds((prev) => {
         const next = new Set(prev);

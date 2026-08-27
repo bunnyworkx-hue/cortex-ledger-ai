@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Axiom World",
-  description: "A real, scroll-driven 3D operations view of Axiom OS, wired to the live API.",
+  title: "Cortex Ledger AI World",
+  description: "A real, scroll-driven 3D operations view of Cortex Ledger AI, wired to the live API.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

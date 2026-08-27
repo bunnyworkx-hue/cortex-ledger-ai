@@ -23,7 +23,7 @@ export function TalkBack({
   const [value, setValue] = useState("");
   const [busy, setBusy] = useState(false);
   const [running, setRunning] = useState<Set<string>>(new Set());
-  // Real, not cosmetic: Axiom's native path (AxiomNativeBackend) has
+  // Real, not cosmetic: Cortex Ledger AI's native path (AxiomNativeBackend) has
   // always been the only one Talk-Back could reach, even though the
   // real Hermes CLI backend (packages/axiom-hermes) has been fully
   // built and tested since Milestone 13 — this toggle is what actually
@@ -125,7 +125,7 @@ export function TalkBack({
       await runAgent(lead, query);
     } catch (err) {
       onMatchedAgentsChange(new Set());
-      setLog((l) => [...l, { role: "error", text: err instanceof ApiError ? err.message : "Could not reach the Axiom API." }]);
+      setLog((l) => [...l, { role: "error", text: err instanceof ApiError ? err.message : "Could not reach the Cortex Ledger AI API." }]);
     } finally {
       setBusy(false);
     }
@@ -134,7 +134,7 @@ export function TalkBack({
   return (
     <div className="talkback">
       <button className="talkback-toggle" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
-        {open ? "Hide console" : "Ask Axiom"}
+        {open ? "Hide console" : "Ask Cortex Ledger AI"}
       </button>
 
       {open && (
@@ -169,7 +169,7 @@ export function TalkBack({
           </div>
           <label className="talkback-hermes-toggle">
             <input type="checkbox" checked={useHermes} onChange={(e) => setUseHermes(e.target.checked)} />
-            Run via Hermes (real external CLI runtime, not Axiom&apos;s native path)
+            Run via Hermes (real external CLI runtime, not Cortex Ledger AI&apos;s native path)
           </label>
           <form
             className="talkback-form"
@@ -181,9 +181,9 @@ export function TalkBack({
             <input
               value={value}
               onChange={(e) => setValue(e.target.value)}
-              placeholder="Tell Axiom what you need done…"
+              placeholder="Tell Cortex Ledger AI what you need done…"
               disabled={busy}
-              aria-label="Command Axiom"
+              aria-label="Command Cortex Ledger AI"
             />
             <button type="submit" disabled={busy || !value.trim()}>
               {busy ? "…" : "Run"}

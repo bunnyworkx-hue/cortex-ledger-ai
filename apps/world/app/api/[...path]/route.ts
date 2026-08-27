@@ -40,8 +40,8 @@ async function proxy(req: NextRequest, path: string[]): Promise<NextResponse> {
     return NextResponse.json(
       {
         detail: timedOut
-          ? `Axiom API did not respond within ${PROXY_TIMEOUT_MS / 1000}s`
-          : `Could not reach the Axiom API at ${AXIOM_API_ORIGIN}`,
+          ? `Cortex Ledger AI API did not respond within ${PROXY_TIMEOUT_MS / 1000}s`
+          : `Could not reach the Cortex Ledger AI API at ${AXIOM_API_ORIGIN}`,
       },
       { status: 502 }
     );

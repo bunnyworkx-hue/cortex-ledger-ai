@@ -12,7 +12,7 @@ export function EntryZone() {
   const ring = useRef<Group>(null);
 
   useFrame((_, delta) => {
-    if (ring.current) ring.current.rotation.y += delta * 0.05;
+    if (ring.current) ring.current.rotation.y += delta * 0.12;
   });
 
   return (
@@ -33,7 +33,7 @@ export function EntryZone() {
         anchorX="center"
         anchorY="middle"
       >
-        AXIOM OS
+        CORTEX LEDGER AI
       </Text>
       <Text
         position={[0, -0.05, 0]}
@@ -43,7 +43,7 @@ export function EntryZone() {
         anchorX="center"
         anchorY="middle"
       >
-        AUTONOMOUS EXECUTION — BUILT FOR BUSINESS OPERATIONS
+        EVERY DECISION TRACED. EVERY AGENT ACCOUNTABLE.
       </Text>
       <Text
         position={[0, -0.75, 0]}
